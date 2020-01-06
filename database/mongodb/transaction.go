@@ -37,7 +37,7 @@ func (t *Transaction) Run(fn func(sctx mongo.SessionContext) error) error {
 	defer cancel()
 
 	opts := options.Session().SetDefaultReadPreference(readpref.Primary())
-	session, err := client.StartSession(opts)
+	session, err := t.client.StartSession(opts)
 	if err != nil {
 		return err
 	}
