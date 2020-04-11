@@ -1,7 +1,7 @@
 
 [MongoDB]
 # 连接 uri
-URI = "mongodb://test:12345@127.0.0.1:28001,127.0.0.1:28002/?replicaSet=replicaSet"
+URI = "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet"
 
 # 超时时间-单位秒
 Timeout = 10

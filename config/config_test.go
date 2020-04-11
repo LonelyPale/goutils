@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const configPath = "../database/mongodb/conf/mongodb.conf.toml"
+const configPath = "../database/mongodb/config/mongodb.conf.toml"
 
 type mongodbConfig struct {
 	URI     string
