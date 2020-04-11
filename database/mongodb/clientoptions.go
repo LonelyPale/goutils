@@ -42,8 +42,8 @@ func NewClientOptions(uri string) *ClientOptions {
 	clientOptions := &ClientOptions{
 		URI:                uri,
 		Timeout:            10 * time.Second, //单位秒
-		MaxPoolSize:        100,              //最大连接池
-		MinPoolSize:        10,               //最小连接池
+		MaxPoolSize:        10,               //最大连接池
+		MinPoolSize:        3,                //最小连接池
 		mongoClientOptions: options.Client(),
 	}
 	clientOptions.Apply()
