@@ -20,34 +20,38 @@ type ClientOptions struct {
 	mongoClientOptions *options.ClientOptions
 }
 
-func NewClientOptionsFromConfig(path string) *ClientOptions {
-	conf := config.ReadConfig(path)
+func NewClientOptions(uri string) *ClientOptions {
+	clientOptions := &ClientOptions{
+		URI:                uri,
+		MaxPoolSize:        10,               //最大连接池
+		MinPoolSize:        3,                //最小连接池
+		Timeout:            10 * time.Second, //单位秒
+		mongoClientOptions: options.Client(),
+	}
+	clientOptions.Apply()
+	return clientOptions
+}
+
+func NewClientOptionsFromConfig(conf *config.MongodbConfig) *ClientOptions {
 	clientOptions := NewClientOptions(conf.URI)
 
-	if conf.Timeout > 0 {
-		clientOptions.Timeout = time.Duration(conf.Timeout) * time.Second
-	}
 	if conf.MaxPoolSize > 0 {
 		clientOptions.MaxPoolSize = uint64(conf.MaxPoolSize)
 	}
 	if conf.MinPoolSize > 0 {
 		clientOptions.MinPoolSize = uint64(conf.MinPoolSize)
 	}
+	if conf.Timeout > 0 {
+		clientOptions.Timeout = time.Duration(conf.Timeout) * time.Second
+	}
 
 	clientOptions.Apply()
 	return clientOptions
 }
 
-func NewClientOptions(uri string) *ClientOptions {
-	clientOptions := &ClientOptions{
-		URI:                uri,
-		Timeout:            10 * time.Second, //单位秒
-		MaxPoolSize:        10,               //最大连接池
-		MinPoolSize:        3,                //最小连接池
-		mongoClientOptions: options.Client(),
-	}
-	clientOptions.Apply()
-	return clientOptions
+func NewClientOptionsFromFile(files ...string) *ClientOptions {
+	conf := config.ReadConfigFile(files...)
+	return NewClientOptionsFromConfig(conf.Mongodb)
 }
 
 func (c *ClientOptions) Apply() {

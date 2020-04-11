@@ -6,33 +6,34 @@ import (
 	"testing"
 )
 
-const configPath = "../database/mongodb/config/mongodb.conf.toml"
+const configFile = "test.conf.toml"
 
-type mongodbConfig struct {
-	URI     string
-	Timeout int
-	DBName  string
+type ServerConfig struct {
+	Name string
+	Host string
+	Port int
 }
 
-type configFile struct {
-	MongoDB *mongodbConfig
+type Config struct {
+	Server *ServerConfig
 }
 
-func TestReadConfig(t *testing.T) {
-	conf := configFile{}
-	err := ReadConfig(configPath, &conf)
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(conf.MongoDB)
-}
-
-func TestReadConfigMap(t *testing.T) {
-	conf := make(map[string]interface{})
-	err := ReadConfig(configPath, &conf)
+func TestReadConfigFile(t *testing.T) {
+	conf := &Config{}
+	err := ReadConfigFile(configFile, conf)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(conf)
-	t.Log(conf["mongodb"])
+	t.Log(conf.Server)
+}
+
+func TestReadConfigFile2Map(t *testing.T) {
+	conf := make(map[string]interface{})
+	err := ReadConfigFile(configFile, &conf)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(conf)
+	t.Log(conf["Server"])
 }

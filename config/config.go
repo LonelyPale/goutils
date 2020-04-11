@@ -9,20 +9,20 @@ import (
 )
 
 // conf 必须是非空的结构体指针
-func ReadConfig(path string, conf interface{}) error {
-	if path == "" {
-		return errors.New("ReadConfig: path cannot be empty")
+func ReadConfigFile(file string, conf interface{}) error {
+	if file == "" {
+		return errors.New("ReadConfigFile: file path cannot be empty")
 	}
 	if conf == nil {
-		return errors.New("ReadConfig: conf 必须是非空的结构体指针")
+		return errors.New("ReadConfigFile: conf 必须是非空的结构体指针")
 	}
 
-	filePath, err := filepath.Abs(path)
+	abspath, err := filepath.Abs(file)
 	if err != nil {
 		return err
 	}
 
-	if _, err := toml.DecodeFile(filePath, conf); err != nil {
+	if _, err := toml.DecodeFile(abspath, conf); err != nil {
 		return err
 	}
 

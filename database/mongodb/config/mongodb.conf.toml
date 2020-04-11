@@ -1,10 +1,6 @@
-
-[MongoDB]
+[Mongodb]
 # 连接 uri
 URI = "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet"
-
-# 超时时间-单位秒
-Timeout = 10
 
 # 最大连接池
 MaxPoolSize = 10
@@ -12,5 +8,5 @@ MaxPoolSize = 10
 # 最小连接池
 MinPoolSize = 3
 
-# 数据库名称
-DBName = "TestDB"
+# 超时时间: 单位秒
+Timeout = 10

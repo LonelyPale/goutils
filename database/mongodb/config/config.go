@@ -6,43 +6,47 @@ import (
 	"github.com/LonelyPale/goutils/config"
 	"log"
 	"os"
-	"sync"
 )
 
-type mongodbConfig struct {
+type MongodbConfig struct {
 	URI         string
-	Timeout     int
 	MaxPoolSize int
 	MinPoolSize int
-	DBName      string
+	Timeout     int //单位秒
 }
 
-type configFile struct {
-	MongoDB *mongodbConfig
+func DefaultMongodbConfig() *MongodbConfig {
+	return &MongodbConfig{
+		URI:         "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet",
+		MaxPoolSize: 10,
+		MinPoolSize: 3,
+		Timeout:     10,
+	}
+}
+
+type Config struct {
+	Mongodb *MongodbConfig
 }
 
 var (
-	conf configFile
-	once sync.Once
+	CommonConfig = &Config{Mongodb: DefaultMongodbConfig()}
 )
 
-const DefaultConfigFileName = "mongodb.conf.toml"
+const DefaultConfigFile = "mongodb.conf.toml"
 
-func ReadConfig(paths ...string) *mongodbConfig {
-	once.Do(func() {
-		var configPath string
-		if len(paths) == 0 || paths[0] == "" {
-			configPath = "." + string(os.PathSeparator) + DefaultConfigFileName
-		} else {
-			configPath = paths[0]
-		}
-		log.Printf("config file path: %s\n", configPath)
+func ReadConfigFile(files ...string) *Config {
+	var configFile string
+	if len(files) == 0 || files[0] == "" {
+		configFile = "." + string(os.PathSeparator) + DefaultConfigFile
+	} else {
+		configFile = files[0]
+	}
+	log.Printf("read config file: %s\n", configFile)
 
-		err := config.ReadConfig(configPath, &conf)
-		if err != nil {
-			log.Fatal(err)
-		}
-	})
+	err := config.ReadConfigFile(configFile, CommonConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	return conf.MongoDB
+	return CommonConfig
 }

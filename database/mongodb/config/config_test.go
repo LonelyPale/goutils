@@ -4,9 +4,10 @@ package config
 
 import "testing"
 
-const configPath = "./mongodb.conf.toml"
+const configFile = "mongodb.conf.toml"
 
-func TestReadConfig(t *testing.T) {
-	conf := ReadConfig(configPath)
+func TestReadConfigFile(t *testing.T) {
+	conf := ReadConfigFile(configFile)
 	t.Log(conf)
+	t.Log(conf.Mongodb)
 }
