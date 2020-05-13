@@ -1,4 +1,4 @@
-package sys
+package goutils
 
 import (
 	"fmt"
@@ -7,12 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 )
-
-// exit app
-func Exit(s string) {
-	fmt.Printf(s + "\n")
-	os.Exit(1)
-}
 
 // file and folder
 func IsFileExist(path string) bool {

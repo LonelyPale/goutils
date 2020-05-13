@@ -10,8 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/LonelyPale/goutils/sys"
 )
 
 // 深拷贝
@@ -49,6 +47,6 @@ func WriteFile(filePath string, contents []byte, mode os.FileMode) error {
 func MustWriteFile(filePath string, contents []byte, mode os.FileMode) {
 	err := WriteFile(filePath, contents, mode)
 	if err != nil {
-		sys.Exit(Fmt("MustWriteFile failed: %v", err))
+		Exit(Fmt("MustWriteFile failed: %v", err))
 	}
 }
