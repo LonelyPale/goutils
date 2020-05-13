@@ -2,7 +2,8 @@
 
 Go Utils
 
-
+常用功能放在goutils包
+大的模块功能放在子包内
 
 ```shell
 go mod tidy
