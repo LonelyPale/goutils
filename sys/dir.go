@@ -7,6 +7,14 @@ import (
 	"runtime"
 )
 
+// helper function to make dir creation independent of root dir
+func Rootify(path, root string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	return filepath.Join(root, path)
+}
+
 func IsFolderNotExist(path string) bool {
 	_, err := os.Stat(path)
 	return os.IsNotExist(err)
