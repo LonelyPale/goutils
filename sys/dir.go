@@ -1,11 +1,40 @@
 package sys
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
 )
+
+// exit app
+func Exit(s string) {
+	fmt.Printf(s + "\n")
+	os.Exit(1)
+}
+
+// file and folder
+func IsFileExist(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
+// file and folder
+func IsFileNotExist(path string) bool {
+	_, err := os.Stat(path)
+	return os.IsNotExist(err)
+}
+
+func EnsureDir(dir string, mode os.FileMode) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, mode)
+		if err != nil {
+			return fmt.Errorf("could not create directory %v. %v", dir, err)
+		}
+	}
+	return nil
+}
 
 // helper function to make dir creation independent of root dir
 func Rootify(path, root string) string {
@@ -13,11 +42,6 @@ func Rootify(path, root string) string {
 		return path
 	}
 	return filepath.Join(root, path)
-}
-
-func IsFolderNotExist(path string) bool {
-	_, err := os.Stat(path)
-	return os.IsNotExist(err)
 }
 
 // DefaultDataDir is the default data directory
