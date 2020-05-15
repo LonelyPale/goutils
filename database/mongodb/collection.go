@@ -49,6 +49,20 @@ func (coll *Collection) Name() string {
 	return coll.name
 }
 
+func (coll *Collection) Clone(opts ...*options.CollectionOptions) (*Collection, error) {
+	mongoCollection, err := coll.mongoCollection.Clone(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Collection{
+		client:          coll.client,
+		db:              coll.db,
+		name:            coll.name,
+		mongoCollection: mongoCollection,
+	}, nil
+}
+
 // 查找一条记录，如果不存在，则插入一条记录
 func (coll *Collection) Save(ctx context.Context, filter interface{}, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {

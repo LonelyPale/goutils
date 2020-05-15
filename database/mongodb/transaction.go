@@ -4,10 +4,11 @@ package mongodb
 
 import (
 	"errors"
+	"runtime/debug"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"runtime/debug"
 )
 
 type Transaction struct {

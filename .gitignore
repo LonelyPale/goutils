@@ -24,3 +24,5 @@
 *.ipr
 *.iws
 
+### goutils ###
+mongodb.conf.test.toml

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const configPath = "./config/mongodb.conf.toml"
+const configPath = "/Users/wyb/project/github/goutils/mongodb.conf.test.toml"
 
 var client *Client
 
@@ -38,7 +38,7 @@ func TestFindOne(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	clientOptions := NewClientOptionsFromConfig(configPath)
+	clientOptions := NewClientOptionsFromFile(configPath)
 
 	var err error
 	client, err = Connect(clientOptions)
