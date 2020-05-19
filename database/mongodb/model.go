@@ -31,7 +31,7 @@ func (m Model) Put(ctxs ...context.Context) error {
 	// 把创建的 ObjectID 写入 doc 中
 	vDoc := reflect.ValueOf(m.doc) // 参数必须为指针地址
 	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName("ID")
+	vid := eDoc.FieldByName(IDField)
 	if vid.CanSet() {
 		for i, n := range id {
 			v := vid.Index(i)
@@ -50,12 +50,12 @@ func (m Model) Set(update interface{}, ctxs ...context.Context) error {
 
 	vDoc := reflect.ValueOf(m.doc)
 	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName("ID")
+	vid := eDoc.FieldByName(IDField)
 	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{"_id": vid.Interface()}
+	filter := map[string]interface{}{IDKey: vid.Interface()}
 
 	if _, err := m.coll.UpdateOne(ctx, filter, update); err != nil {
 		return err
@@ -72,12 +72,12 @@ func (m Model) Get(ctxs ...context.Context) error {
 
 	vDoc := reflect.ValueOf(m.doc)
 	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName("ID")
+	vid := eDoc.FieldByName(IDField)
 	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{"_id": vid.Interface()}
+	filter := map[string]interface{}{IDKey: vid.Interface()}
 
 	if err := m.coll.FindOne(ctx, m.doc, filter); err != nil {
 		return err
@@ -94,12 +94,12 @@ func (m Model) Delete(ctxs ...context.Context) error {
 
 	vDoc := reflect.ValueOf(m.doc)
 	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName("ID")
+	vid := eDoc.FieldByName(IDField)
 	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{"_id": vid.Interface()}
+	filter := map[string]interface{}{IDKey: vid.Interface()}
 
 	if _, err := m.coll.DeleteOne(ctx, filter); err != nil {
 		return err
@@ -121,7 +121,7 @@ func (m Model) Save(filter interface{}, ctxs ...context.Context) error {
 
 	vDoc := reflect.ValueOf(m.doc)
 	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName("ID")
+	vid := eDoc.FieldByName(IDField)
 	if vid.CanSet() {
 		for i, n := range id {
 			v := vid.Index(i)
