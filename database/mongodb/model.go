@@ -55,7 +55,7 @@ func (m Model) Set(update interface{}, ctxs ...context.Context) error {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{IDKey: vid.Interface()}
+	filter := NewFilter().ID(vid.Interface())
 
 	if _, err := m.coll.UpdateOne(ctx, filter, update); err != nil {
 		return err
@@ -77,7 +77,7 @@ func (m Model) Get(ctxs ...context.Context) error {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{IDKey: vid.Interface()}
+	filter := NewFilter().ID(vid.Interface())
 
 	if err := m.coll.FindOne(ctx, m.doc, filter); err != nil {
 		return err
@@ -99,7 +99,7 @@ func (m Model) Delete(ctxs ...context.Context) error {
 		return ErrNilObjectID
 	}
 
-	filter := map[string]interface{}{IDKey: vid.Interface()}
+	filter := NewFilter().ID(vid.Interface())
 
 	if _, err := m.coll.DeleteOne(ctx, filter); err != nil {
 		return err

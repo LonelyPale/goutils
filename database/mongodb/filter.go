@@ -2,9 +2,10 @@
 
 package mongodb
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
-type Filter map[string]interface{}
+import (
+	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 const (
 	OrKey         = "$or"
@@ -33,6 +34,8 @@ const (
 	CreateTimeField = "CreateTime"
 	ModifyTimeField = "ModifyTime"
 )
+
+type Filter map[string]interface{}
 
 func NewFilter() Filter {
 	return make(Filter)
@@ -64,14 +67,14 @@ func (f Filter) Delete(key string) {
 func (f Filter) Or(key string, value interface{}) Filter {
 	or, ok := f[OrKey]
 	if ok {
-		orFilter, ok := or.(Filter)
+		orArray, ok := or.(types.A)
 		if ok {
-			orFilter[key] = value
+			orArray = append(orArray, types.M{key: value})
 		} else {
-			panic("type error: Not valid OrFilter")
+			panic("type error: Not valid types.A")
 		}
 	} else {
-		f[OrKey] = Filter{key: value}
+		f[OrKey] = types.A{types.M{key: value}}
 	}
 	return f
 }
@@ -138,7 +141,7 @@ func (f Filter) Regex(key string, value primitive.Regex) Filter {
 	return f
 }
 
-func (f Filter) ID(value string) Filter {
+func (f Filter) ID(value interface{}) Filter {
 	f[IDKey] = value
 	return f
 }
