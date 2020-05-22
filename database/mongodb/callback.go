@@ -10,11 +10,11 @@ import (
 )
 
 type BeforeInserter interface {
-	BeforeInsert(ctx context.Context, document interface{}, opts interface{}) error
+	BeforeInsert(ctx context.Context, documents []interface{}, opts interface{}) error
 }
 
 type AfterInserter interface {
-	AfterInsert(ctx context.Context, document interface{}, opts interface{}, ids []types.ObjectID) error
+	AfterInsert(ctx context.Context, documents []interface{}, opts interface{}, ids []types.ObjectID) error
 }
 
 type BeforeUpdater interface {

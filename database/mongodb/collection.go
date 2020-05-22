@@ -11,15 +11,7 @@ import (
 
 	"github.com/LonelyPale/goutils"
 	"github.com/LonelyPale/goutils/database/mongodb/types"
-	"github.com/LonelyPale/goutils/errors"
 )
-
-var ErrNilObjectID = errors.New("ObjectID is nil")
-var ErrNilFilter = errors.New("mongodb: filter cannot be nil")
-var ErrNilResult = errors.New("mongodb: the result point cannot be nil")
-var ErrNilCollection = errors.New("mongodb: Collection nil")
-var ErrResultSlice = errors.New("mongodb: result slice type conversion failure")
-var ErrDocumentExists = errors.New("mongodb: document already exists")
 
 type Collection struct {
 	client          *Client
@@ -641,6 +633,10 @@ func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*
 }
 
 func isSessionContext(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+
 	vctx := reflect.ValueOf(ctx)
 	ectx := vctx.Elem()
 	if ectx.Kind() == reflect.Struct {
