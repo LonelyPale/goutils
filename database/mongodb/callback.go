@@ -2,36 +2,41 @@ package mongodb
 
 import (
 	"context"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
 type BeforeInserter interface {
-	BeforeInsert(ctx context.Context, documents []interface{}) error
+	BeforeInsert(ctx context.Context, document interface{}, opts interface{}) error
 }
 
 type AfterInserter interface {
-	AfterInsert(ctx context.Context, documents []interface{}) error
+	AfterInsert(ctx context.Context, document interface{}, opts interface{}, ids []types.ObjectID) error
 }
 
 type BeforeUpdater interface {
-	BeforeUpdate(ctx context.Context, filter interface{}, update interface{}) error
+	BeforeUpdate(ctx context.Context, filter interface{}, updater interface{}, opts []*options.UpdateOptions) error
 }
 
 type AfterUpdater interface {
-	AfterUpdate(ctx context.Context, filter interface{}, update interface{}) error
+	AfterUpdate(ctx context.Context, filter interface{}, updater interface{}, opts []*options.UpdateOptions, result *mongo.UpdateResult) error
 }
 
 type BeforeDeleter interface {
-	BeforeDelete(ctx context.Context, filter interface{}) error
+	BeforeDelete(ctx context.Context, filter interface{}, opts []*options.DeleteOptions) error
 }
 
 type AfterDeleter interface {
-	AfterDelete(ctx context.Context, filter interface{}) error
+	AfterDelete(ctx context.Context, filter interface{}, opts []*options.DeleteOptions, count int) error
 }
 
 type BeforeFinder interface {
-	BeforeFind(ctx context.Context, result interface{}, filter interface{}) error
+	BeforeFind(ctx context.Context, result interface{}, filter interface{}, opts interface{}) error
 }
 
 type AfterFinder interface {
-	AfterFind(ctx context.Context, result interface{}, filter interface{}) error
+	AfterFind(ctx context.Context, result interface{}, filter interface{}, opts interface{}) error
 }

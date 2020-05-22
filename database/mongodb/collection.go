@@ -139,16 +139,16 @@ func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opt
 	return ids, nil
 }
 
-func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	var result *mongo.UpdateResult
 
 	if isSessionContext(ctx) {
-		return coll.updateOne(ctx, filter, update, opts...)
+		return coll.updateOne(ctx, filter, updater, opts...)
 	} else {
 		transaction := NewTransaction(coll.client)
 		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
 			var e error
-			result, e = coll.updateOne(sctx, filter, update, opts...)
+			result, e = coll.updateOne(sctx, filter, updater, opts...)
 			return e
 		})
 		if err != nil {
@@ -159,16 +159,16 @@ func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updat
 	return result, nil
 }
 
-func (coll *Collection) Update(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) Update(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	var result *mongo.UpdateResult
 
 	if isSessionContext(ctx) {
-		return coll.update(ctx, filter, update, opts...)
+		return coll.update(ctx, filter, updater, opts...)
 	} else {
 		transaction := NewTransaction(coll.client)
 		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
 			var e error
-			result, e = coll.update(sctx, filter, update, opts...)
+			result, e = coll.update(sctx, filter, updater, opts...)
 			return e
 		})
 		if err != nil {
@@ -247,10 +247,10 @@ func (coll *Collection) insertOne(ctx context.Context, document interface{}, opt
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, InsertOneOptionsKey, opts)
+	//ctx = context.WithValue(ctx, InsertOneOptionsKey, opts)
 	before, ok := model.(BeforeInserter)
 	if ok {
-		if err := before.BeforeInsert(ctx, []interface{}{document}); err != nil {
+		if err := before.BeforeInsert(ctx, []interface{}{document}, opts); err != nil {
 			return types.NilObjectID, err
 		}
 	}
@@ -263,10 +263,10 @@ func (coll *Collection) insertOne(ctx context.Context, document interface{}, opt
 	id := result.InsertedID.(types.ObjectID)
 
 	// callback after
-	ctx = context.WithValue(ctx, InsertOneResultKey, result)
+	//ctx = context.WithValue(ctx, InsertOneResultKey, result)
 	after, ok := model.(AfterInserter)
 	if ok {
-		if err := after.AfterInsert(ctx, []interface{}{document}); err != nil {
+		if err := after.AfterInsert(ctx, []interface{}{document}, opts, []types.ObjectID{id}); err != nil {
 			return types.NilObjectID, err
 		}
 	}
@@ -289,10 +289,10 @@ func (coll *Collection) insert(ctx context.Context, documents []interface{}, opt
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, InsertManyOptionsKey, opts)
+	//ctx = context.WithValue(ctx, InsertManyOptionsKey, opts)
 	before, ok := model.(BeforeInserter)
 	if ok {
-		if err := before.BeforeInsert(ctx, documents); err != nil {
+		if err := before.BeforeInsert(ctx, documents, opts); err != nil {
 			return nil, err
 		}
 	}
@@ -308,10 +308,10 @@ func (coll *Collection) insert(ctx context.Context, documents []interface{}, opt
 	}
 
 	// callback after
-	ctx = context.WithValue(ctx, InsertManyResultKey, result)
+	//ctx = context.WithValue(ctx, InsertManyResultKey, result)
 	after, ok := model.(AfterInserter)
 	if ok {
-		if err := after.AfterInsert(ctx, documents); err != nil {
+		if err := after.AfterInsert(ctx, documents, opts, ids); err != nil {
 			return nil, err
 		}
 	}
@@ -320,7 +320,7 @@ func (coll *Collection) insert(ctx context.Context, documents []interface{}, opt
 }
 
 // 修改匹配的第一条记录, 返回修改信息
-func (coll *Collection) updateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) updateOne(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	if coll == nil {
 		return nil, ErrNilCollection
 	}
@@ -334,24 +334,24 @@ func (coll *Collection) updateOne(ctx context.Context, filter interface{}, updat
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
+	//ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
 	before, ok := model.(BeforeUpdater)
 	if ok {
-		if err := before.BeforeUpdate(ctx, filter, update); err != nil {
+		if err := before.BeforeUpdate(ctx, filter, updater, opts); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := coll.mongoCollection.UpdateOne(ctx, filter, update, opts...)
+	result, err := coll.mongoCollection.UpdateOne(ctx, filter, updater, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	// callback after
-	ctx = context.WithValue(ctx, UpdateResultKey, result)
+	//ctx = context.WithValue(ctx, UpdateResultKey, result)
 	after, ok := model.(AfterUpdater)
 	if ok {
-		if err := after.AfterUpdate(ctx, filter, update); err != nil {
+		if err := after.AfterUpdate(ctx, filter, updater, opts, result); err != nil {
 			return nil, err
 		}
 	}
@@ -361,7 +361,7 @@ func (coll *Collection) updateOne(ctx context.Context, filter interface{}, updat
 }
 
 // 修改匹配的所有记录, 返回修改信息
-func (coll *Collection) update(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) update(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	if coll == nil {
 		return nil, ErrNilCollection
 	}
@@ -375,24 +375,24 @@ func (coll *Collection) update(ctx context.Context, filter interface{}, update i
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
+	//ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
 	before, ok := model.(BeforeUpdater)
 	if ok {
-		if err := before.BeforeUpdate(ctx, filter, update); err != nil {
+		if err := before.BeforeUpdate(ctx, filter, updater, opts); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := coll.mongoCollection.UpdateMany(ctx, filter, update, opts...)
+	result, err := coll.mongoCollection.UpdateMany(ctx, filter, updater, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	// callback after
-	ctx = context.WithValue(ctx, UpdateResultKey, result)
+	//ctx = context.WithValue(ctx, UpdateResultKey, result)
 	after, ok := model.(AfterUpdater)
 	if ok {
-		if err := after.AfterUpdate(ctx, filter, update); err != nil {
+		if err := after.AfterUpdate(ctx, filter, updater, opts, result); err != nil {
 			return nil, err
 		}
 	}
@@ -416,10 +416,10 @@ func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts 
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
+	//ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
 	before, ok := model.(BeforeDeleter)
 	if ok {
-		if err := before.BeforeDelete(ctx, filter); err != nil {
+		if err := before.BeforeDelete(ctx, filter, opts); err != nil {
 			return 0, err
 		}
 	}
@@ -432,10 +432,10 @@ func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts 
 	count := int(result.DeletedCount)
 
 	// callback after
-	ctx = context.WithValue(ctx, DeleteResultKey, result)
+	//ctx = context.WithValue(ctx, DeleteResultKey, result)
 	after, ok := model.(AfterDeleter)
 	if ok {
-		if err := after.AfterDelete(ctx, filter); err != nil {
+		if err := after.AfterDelete(ctx, filter, opts, count); err != nil {
 			return 0, err
 		}
 	}
@@ -458,10 +458,10 @@ func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
+	//ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
 	before, ok := model.(BeforeDeleter)
 	if ok {
-		if err := before.BeforeDelete(ctx, filter); err != nil {
+		if err := before.BeforeDelete(ctx, filter, opts); err != nil {
 			return 0, err
 		}
 	}
@@ -474,10 +474,10 @@ func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...
 	count := int(result.DeletedCount)
 
 	// callback after
-	ctx = context.WithValue(ctx, DeleteResultKey, result)
+	//ctx = context.WithValue(ctx, DeleteResultKey, result)
 	after, ok := model.(AfterDeleter)
 	if ok {
-		if err := after.AfterDelete(ctx, filter); err != nil {
+		if err := after.AfterDelete(ctx, filter, opts, count); err != nil {
 			return 0, err
 		}
 	}
@@ -504,10 +504,10 @@ func (coll *Collection) findOne(ctx context.Context, result interface{}, filter 
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, FindOneOptionsKey, opts)
+	//ctx = context.WithValue(ctx, FindOneOptionsKey, opts)
 	before, ok := model.(BeforeFinder)
 	if ok {
-		if err := before.BeforeFind(ctx, result, filter); err != nil {
+		if err := before.BeforeFind(ctx, result, filter, opts); err != nil {
 			return err
 		}
 	}
@@ -518,10 +518,10 @@ func (coll *Collection) findOne(ctx context.Context, result interface{}, filter 
 	}
 
 	// callback after
-	ctx = context.WithValue(ctx, SingleResultKey, result)
+	//ctx = context.WithValue(ctx, SingleResultKey, result)
 	after, ok := model.(AfterFinder)
 	if ok {
-		if err := after.AfterFind(ctx, result, filter); err != nil {
+		if err := after.AfterFind(ctx, result, filter, opts); err != nil {
 			return err
 		}
 	}
@@ -552,10 +552,10 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 	model := MakeInstance(coll.name)
 
 	// callback before
-	ctx = context.WithValue(ctx, FindOptionsKey, opts)
+	//ctx = context.WithValue(ctx, FindOptionsKey, opts)
 	before, ok := model.(BeforeFinder)
 	if ok {
-		if err := before.BeforeFind(ctx, result, filter); err != nil {
+		if err := before.BeforeFind(ctx, result, filter, opts); err != nil {
 			return err
 		}
 	}
@@ -609,10 +609,10 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 	//fmt.Println("run elapsed: ", elapsed)
 
 	// callback after
-	ctx = context.WithValue(ctx, ResultKey, result)
+	//ctx = context.WithValue(ctx, ResultKey, result)
 	after, ok := model.(AfterFinder)
 	if ok {
-		if err := after.AfterFind(ctx, result, filter); err != nil {
+		if err := after.AfterFind(ctx, result, filter, opts); err != nil {
 			return err
 		}
 	}
