@@ -2,11 +2,8 @@ package mongodb
 
 import (
 	"context"
-	"errors"
 	"reflect"
 )
-
-var ErrNilObjectID = errors.New("ObjectID is nil")
 
 type Model struct {
 	doc  interface{}
@@ -17,26 +14,23 @@ func NewModel(doc interface{}, coll *Collection) Model {
 	return Model{doc, coll}
 }
 
+func (m Model) Collection() *Collection {
+	return m.coll
+}
+
 func (m Model) Put(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
+	} else {
+		var cancel context.CancelFunc
+		ctx, cancel = m.coll.GetContext()
+		defer cancel()
 	}
 
-	id, err := m.coll.InsertOne(ctx, m.doc)
+	_, err := m.coll.InsertOne(ctx, m.doc)
 	if err != nil {
 		return err
-	}
-
-	// 把创建的 ObjectID 写入 doc 中
-	vDoc := reflect.ValueOf(m.doc) // 参数必须为指针地址
-	eDoc := vDoc.Elem()
-	vid := eDoc.FieldByName(IDField)
-	if vid.CanSet() {
-		for i, n := range id {
-			v := vid.Index(i)
-			v.SetUint(uint64(n))
-		}
 	}
 
 	return nil

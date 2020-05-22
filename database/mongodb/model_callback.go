@@ -29,7 +29,6 @@ func (m Model) BeforeInsert(ctx context.Context, documents []interface{}, opts i
 }
 
 func (m Model) AfterInsert(ctx context.Context, documents []interface{}, opts interface{}, ids []types.ObjectID) error {
-	panic("123")
 	for i, doc := range documents {
 		vDoc := reflect.ValueOf(doc)
 		if vDoc.Kind() != reflect.Ptr {

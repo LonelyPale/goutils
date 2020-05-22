@@ -637,6 +637,10 @@ func isSessionContext(ctx context.Context) bool {
 		return false
 	}
 
+	if _, ok := ctx.(mongo.SessionContext); ok {
+		return true
+	}
+
 	vctx := reflect.ValueOf(ctx)
 	ectx := vctx.Elem()
 	if ectx.Kind() == reflect.Struct {
@@ -648,10 +652,6 @@ func isSessionContext(ctx context.Context) bool {
 		case reflect.Interface:
 			if vContext.CanInterface() {
 				iContext := vContext.Interface()
-				if _, ok := iContext.(mongo.SessionContext); ok {
-					return true
-				}
-
 				if c, ok := iContext.(context.Context); ok {
 					return isSessionContext(c)
 				}
@@ -661,6 +661,7 @@ func isSessionContext(ctx context.Context) bool {
 			return false
 		}
 	}
+
 	return false
 }
 
