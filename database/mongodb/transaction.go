@@ -3,19 +3,19 @@
 package mongodb
 
 import (
-	"errors"
-	"runtime/debug"
+	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	"github.com/LonelyPale/goutils/errors"
 )
 
 type Transaction struct {
 	client         *Client
 	session        mongo.Session
 	sessionContext mongo.SessionContext
-	err            error
 }
 
 func NewTransaction(client *Client) *Transaction {
@@ -32,47 +32,47 @@ func (t *Transaction) Rollback() error {
 	return t.session.AbortTransaction(t.sessionContext)
 }
 
-// 自动执行事务，简化过程
-func (t *Transaction) Run(fn func(sctx mongo.SessionContext) error) error {
-	ctx, cancel := t.client.getContext()
-	defer cancel()
+// 自动执行事务，简化使用过程。
+func (t *Transaction) Run(ctx context.Context, fn func(sctx mongo.SessionContext) error) error {
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = t.client.GetContext()
+		defer cancel()
+	}
 
 	opts := options.Session().SetDefaultReadPreference(readpref.Primary())
 	session, err := t.client.StartSession(opts)
 	if err != nil {
 		return err
 	}
+
 	t.session = session
 	defer session.EndSession(ctx)
 
 	err = mongo.WithSession(ctx, session, func(sessionContext mongo.SessionContext) (e error) {
 		t.sessionContext = sessionContext
+
 		defer func() {
-			if p := recover(); p != nil {
-				str, ok := p.(string)
-				if ok {
-					e = errors.New(str)
-				} else {
-					e = errors.New("Transaction: panic recover! ")
-				}
-				e = t.Rollback()
-				debug.PrintStack()
+			if r := recover(); r != nil || e != nil {
+				txerr := t.Rollback()
+				e = errors.Errors(e, errors.UnknownError(r), txerr)
+				//debug.PrintStack()
 			}
 		}()
 
-		e = session.StartTransaction()
-		if e != nil {
+		if e = session.StartTransaction(); e != nil {
 			return e
 		}
 
-		e = fn(sessionContext)
-		if e != nil {
-			t.err = t.Rollback()
+		if e = fn(sessionContext); e != nil {
 			return e
-		} else {
-			t.err = t.Commit()
-			return t.err
 		}
+
+		if e = t.Commit(); e != nil {
+			return e
+		}
+
+		return nil
 	})
 
 	return err

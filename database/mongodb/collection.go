@@ -1,20 +1,24 @@
 // Created by LonelyPale at 2019-12-06
-
 package mongodb
 
 import (
 	"context"
-	"errors"
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"fmt"
+	"reflect"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"reflect"
+
+	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/errors"
 )
 
-var ErrResultNil = errors.New("mongodb: the result point cannot be nil")
+var ErrNilObjectID = errors.New("ObjectID is nil")
+var ErrNilFilter = errors.New("mongodb: filter cannot be nil")
+var ErrNilResult = errors.New("mongodb: the result point cannot be nil")
+var ErrNilCollection = errors.New("mongodb: Collection nil")
 var ErrResultSlice = errors.New("mongodb: result slice type conversion failure")
-var ErrFilterNil = errors.New("mongodb: filter cannot be nil")
 var ErrDocumentExists = errors.New("mongodb: document already exists")
 
 type Collection struct {
@@ -63,16 +67,20 @@ func (coll *Collection) Clone(opts ...*options.CollectionOptions) (*Collection, 
 	}, nil
 }
 
+func (coll *Collection) GetContext() (context.Context, context.CancelFunc) {
+	return coll.client.GetContext()
+}
+
 // 查找一条记录，如果不存在，则插入一条记录
 func (coll *Collection) Save(ctx context.Context, filter interface{}, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
 	if filter == nil {
-		return types.NilObjectID, ErrFilterNil
+		return types.NilObjectID, ErrNilFilter
 	}
 
 	count, err := coll.Count(ctx, filter)
@@ -91,151 +99,465 @@ func (coll *Collection) Save(ctx context.Context, filter interface{}, document i
 	return id, nil
 }
 
-// 插入一条记录, 返回 ObjectID
 func (coll *Collection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
-	mongoCollection := coll.mongoCollection
+	var id types.ObjectID
+
+	if isSessionContext(ctx) {
+		return coll.insertOne(ctx, document, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			id, e = coll.insertOne(sctx, document, opts...)
+			return e
+		})
+		if err != nil {
+			return types.NilObjectID, err
+		}
+	}
+
+	return id, nil
+}
+
+func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) ([]types.ObjectID, error) {
+	var ids []types.ObjectID
+
+	if isSessionContext(ctx) {
+		return coll.insert(ctx, documents, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			ids, e = coll.insert(sctx, documents, opts...)
+			return e
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return ids, nil
+}
+
+func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	var result *mongo.UpdateResult
+
+	if isSessionContext(ctx) {
+		return coll.updateOne(ctx, filter, update, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			result, e = coll.updateOne(sctx, filter, update, opts...)
+			return e
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+func (coll *Collection) Update(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	var result *mongo.UpdateResult
+
+	if isSessionContext(ctx) {
+		return coll.update(ctx, filter, update, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			result, e = coll.update(sctx, filter, update, opts...)
+			return e
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+	var count int
+
+	if isSessionContext(ctx) {
+		return coll.deleteOne(ctx, filter, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			count, e = coll.deleteOne(sctx, filter, opts...)
+			return e
+		})
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return count, nil
+}
+
+func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+	var count int
+
+	if isSessionContext(ctx) {
+		return coll.delete(ctx, filter, opts...)
+	} else {
+		transaction := NewTransaction(coll.client)
+		err := transaction.Run(ctx, func(sctx mongo.SessionContext) error {
+			var e error
+			count, e = coll.delete(sctx, filter, opts...)
+			return e
+		})
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return count, nil
+}
+
+func (coll *Collection) FindOne(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOneOptions) error {
+	return coll.findOne(ctx, result, filter, opts...)
+}
+
+func (coll *Collection) Find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
+	return coll.find(ctx, result, filter, opts...)
+}
+
+func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
+	return coll.count(ctx, filter, opts...)
+}
+
+// 插入一条记录, 返回 ObjectID
+func (coll *Collection) insertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+	if coll == nil {
+		return types.NilObjectID, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.InsertOne(ctx, document, opts...)
+	// 根据集合名称找到已注册的模型反射实例
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, InsertOneOptionsKey, opts)
+	before, ok := model.(BeforeInserter)
+	if ok {
+		if err := before.BeforeInsert(ctx, []interface{}{document}); err != nil {
+			return types.NilObjectID, err
+		}
+	}
+
+	result, err := coll.mongoCollection.InsertOne(ctx, document, opts...)
 	if err != nil {
 		return types.NilObjectID, err
 	}
 
-	id := res.InsertedID.(types.ObjectID)
+	id := result.InsertedID.(types.ObjectID)
+
+	// callback after
+	ctx = context.WithValue(ctx, InsertOneResultKey, result)
+	after, ok := model.(AfterInserter)
+	if ok {
+		if err := after.AfterInsert(ctx, []interface{}{document}); err != nil {
+			return types.NilObjectID, err
+		}
+	}
+
 	return id, nil
 }
 
 // 插入多条记录，返回 []ObjectID
-func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) ([]types.ObjectID, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) insert(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) ([]types.ObjectID, error) {
+	if coll == nil {
+		return nil, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.InsertMany(ctx, documents, opts...)
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, InsertManyOptionsKey, opts)
+	before, ok := model.(BeforeInserter)
+	if ok {
+		if err := before.BeforeInsert(ctx, documents); err != nil {
+			return nil, err
+		}
+	}
+
+	result, err := coll.mongoCollection.InsertMany(ctx, documents, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	var ids []types.ObjectID
-	for _, value := range res.InsertedIDs {
+	for _, value := range result.InsertedIDs {
 		ids = append(ids, value.(types.ObjectID))
 	}
+
+	// callback after
+	ctx = context.WithValue(ctx, InsertManyResultKey, result)
+	after, ok := model.(AfterInserter)
+	if ok {
+		if err := after.AfterInsert(ctx, documents); err != nil {
+			return nil, err
+		}
+	}
+
 	return ids, nil
 }
 
 // 修改匹配的第一条记录, 返回修改信息
-func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) updateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	if coll == nil {
+		return nil, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.UpdateOne(ctx, filter, update, opts...)
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
+	before, ok := model.(BeforeUpdater)
+	if ok {
+		if err := before.BeforeUpdate(ctx, filter, update); err != nil {
+			return nil, err
+		}
+	}
+
+	result, err := coll.mongoCollection.UpdateOne(ctx, filter, update, opts...)
 	if err != nil {
 		return nil, err
 	}
 
+	// callback after
+	ctx = context.WithValue(ctx, UpdateResultKey, result)
+	after, ok := model.(AfterUpdater)
+	if ok {
+		if err := after.AfterUpdate(ctx, filter, update); err != nil {
+			return nil, err
+		}
+	}
+
 	//count := int(res.ModifiedCount) //修改记录的数量
-	return res, nil
+	return result, nil
 }
 
 // 修改匹配的所有记录, 返回修改信息
-func (coll *Collection) Update(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) update(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	if coll == nil {
+		return nil, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.UpdateMany(ctx, filter, update, opts...)
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, UpdateOptionsKey, opts)
+	before, ok := model.(BeforeUpdater)
+	if ok {
+		if err := before.BeforeUpdate(ctx, filter, update); err != nil {
+			return nil, err
+		}
+	}
+
+	result, err := coll.mongoCollection.UpdateMany(ctx, filter, update, opts...)
 	if err != nil {
 		return nil, err
 	}
 
+	// callback after
+	ctx = context.WithValue(ctx, UpdateResultKey, result)
+	after, ok := model.(AfterUpdater)
+	if ok {
+		if err := after.AfterUpdate(ctx, filter, update); err != nil {
+			return nil, err
+		}
+	}
+
 	//count := int(res.ModifiedCount) //修改记录的数量
-	return res, nil
+	return result, nil
 }
 
 // 删除匹配的第一条记录, 返回删除数量
-func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+	if coll == nil {
+		return 0, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.DeleteOne(ctx, filter, opts...)
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
+	before, ok := model.(BeforeDeleter)
+	if ok {
+		if err := before.BeforeDelete(ctx, filter); err != nil {
+			return 0, err
+		}
+	}
+
+	result, err := coll.mongoCollection.DeleteOne(ctx, filter, opts...)
 	if err != nil {
 		return 0, err
 	}
 
-	count := int(res.DeletedCount)
+	count := int(result.DeletedCount)
+
+	// callback after
+	ctx = context.WithValue(ctx, DeleteResultKey, result)
+	after, ok := model.(AfterDeleter)
+	if ok {
+		if err := after.AfterDelete(ctx, filter); err != nil {
+			return 0, err
+		}
+	}
+
 	return count, nil
 }
 
 // 删除所有匹配的记录, 返回删除数量
-func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+	if coll == nil {
+		return 0, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	res, err := mongoCollection.DeleteMany(ctx, filter, opts...)
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, DeleteOptionsKey, opts)
+	before, ok := model.(BeforeDeleter)
+	if ok {
+		if err := before.BeforeDelete(ctx, filter); err != nil {
+			return 0, err
+		}
+	}
+
+	result, err := coll.mongoCollection.DeleteMany(ctx, filter, opts...)
 	if err != nil {
 		return 0, err
 	}
 
-	count := int(res.DeletedCount)
+	count := int(result.DeletedCount)
+
+	// callback after
+	ctx = context.WithValue(ctx, DeleteResultKey, result)
+	after, ok := model.(AfterDeleter)
+	if ok {
+		if err := after.AfterDelete(ctx, filter); err != nil {
+			return 0, err
+		}
+	}
+
 	return count, nil
 }
 
 // 查找匹配的第一条记录, result 为存储结果的对象指针
-func (coll *Collection) FindOne(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOneOptions) error {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) findOne(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOneOptions) error {
+	if coll == nil {
+		return ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
 	if result == nil {
-		return ErrResultNil
+		return ErrNilResult
 	}
 
-	err := mongoCollection.FindOne(ctx, filter, opts...).Decode(result)
+	model := MakeInstance(coll.name)
 
-	return err
+	// callback before
+	ctx = context.WithValue(ctx, FindOneOptionsKey, opts)
+	before, ok := model.(BeforeFinder)
+	if ok {
+		if err := before.BeforeFind(ctx, result, filter); err != nil {
+			return err
+		}
+	}
+
+	err := coll.mongoCollection.FindOne(ctx, filter, opts...).Decode(result)
+	if err != nil {
+		return err
+	}
+
+	// callback after
+	ctx = context.WithValue(ctx, SingleResultKey, result)
+	after, ok := model.(AfterFinder)
+	if ok {
+		if err := after.AfterFind(ctx, result, filter); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // 查找匹配的所有记录, result 为存储结果的对象指针
 // var users []*model.User 或 users := make([]*model.User, 0) 或 users := []*model.User{}
 // 然后 err := Find(&users, collUser, nil)
 // users := make([]interface{}, 0) 错误，不能是interface{}万能类型，必须是确定的类型
-func (coll *Collection) Find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
+func (coll *Collection) find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
 	//start := time.Now()
+	if coll == nil {
+		return ErrNilCollection
+	}
 
-	mongoCollection := coll.mongoCollection
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
 	if result == nil {
-		return ErrResultNil
+		return ErrNilResult
+	}
+
+	model := MakeInstance(coll.name)
+
+	// callback before
+	ctx = context.WithValue(ctx, FindOptionsKey, opts)
+	before, ok := model.(BeforeFinder)
+	if ok {
+		if err := before.BeforeFind(ctx, result, filter); err != nil {
+			return err
+		}
 	}
 
 	val := reflect.Indirect(reflect.ValueOf(result))
@@ -245,7 +567,7 @@ func (coll *Collection) Find(ctx context.Context, result interface{}, filter int
 		return ErrResultSlice
 	}
 
-	cur, err := mongoCollection.Find(ctx, filter, opts...)
+	cur, err := coll.mongoCollection.Find(ctx, filter, opts...)
 	defer func() {
 		if cur != nil {
 			err = cur.Close(ctx)
@@ -275,7 +597,10 @@ func (coll *Collection) Find(ctx context.Context, result interface{}, filter int
 	//fmt.Printf("val: %v\n", val)
 	//fmt.Println(val.Interface().([]*model.User)[0])
 
-	err = goutils.DeepCopy(result, val.Interface()) //深拷贝到源对象
+	//深拷贝到源对象
+	if err := goutils.DeepCopy(result, val.Interface()); err != nil {
+		return err
+	}
 
 	//log.Println(reflect.TypeOf(result).Elem().Elem().Kind().String())
 	//log.Printf("addr of osa:%p,\taddr:%p \t content:%v\n", arr, *arr, *arr)
@@ -283,19 +608,31 @@ func (coll *Collection) Find(ctx context.Context, result interface{}, filter int
 	//elapsed := time.Since(start)
 	//fmt.Println("run elapsed: ", elapsed)
 
-	return err
+	// callback after
+	ctx = context.WithValue(ctx, ResultKey, result)
+	after, ok := model.(AfterFinder)
+	if ok {
+		if err := after.AfterFind(ctx, result, filter); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // 统计匹配的记录数量
-func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
-	mongoCollection := coll.mongoCollection
+func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
+	if coll == nil {
+		return 0, ErrNilCollection
+	}
+
 	if ctx == nil {
 		var cancel context.CancelFunc
-		ctx, cancel = coll.getContext()
+		ctx, cancel = coll.GetContext()
 		defer cancel()
 	}
 
-	count, err := mongoCollection.CountDocuments(ctx, filter, opts...)
+	count, err := coll.mongoCollection.CountDocuments(ctx, filter, opts...)
 	if err != nil {
 		return 0, err
 	}
@@ -303,6 +640,38 @@ func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*
 	return int(count), nil
 }
 
-func (coll *Collection) getContext() (context.Context, context.CancelFunc) {
-	return coll.client.getContext()
+func isSessionContext(ctx context.Context) bool {
+	vctx := reflect.ValueOf(ctx)
+	ectx := vctx.Elem()
+	if ectx.Kind() == reflect.Struct {
+		vContext := ectx.FieldByName("Context")
+
+		switch vContext.Kind() {
+		case reflect.Invalid:
+			return false
+		case reflect.Interface:
+			if vContext.CanInterface() {
+				iContext := vContext.Interface()
+				if _, ok := iContext.(mongo.SessionContext); ok {
+					return true
+				}
+
+				if c, ok := iContext.(context.Context); ok {
+					return isSessionContext(c)
+				}
+			}
+			return false
+		default:
+			return false
+		}
+	}
+	return false
+}
+
+func debugPrintInfo(v reflect.Value) {
+	fmt.Println("Kind ->", v.Kind())
+	fmt.Println("Name ->", v.Type().Name())
+	fmt.Println("String ->", v.Type().String())
+	fmt.Println("PkgPath ->", v.Type().PkgPath())
+	fmt.Println()
 }

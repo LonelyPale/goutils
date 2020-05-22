@@ -4,6 +4,7 @@ package mongodb
 
 import (
 	"context"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,7 +20,7 @@ func Connect(opts *ClientOptions) (*Client, error) {
 		return nil, err
 	}
 
-	ctx, cancel := client.getContext()
+	ctx, cancel := client.GetContext()
 	defer cancel()
 
 	err = client.Connect(ctx)
@@ -70,6 +71,6 @@ func (c *Client) StartSession(opts ...*options.SessionOptions) (mongo.Session, e
 	return c.mongoClient.StartSession(opts...)
 }
 
-func (c *Client) getContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), c.opts.Timeout)
+func (c *Client) GetContext() (context.Context, context.CancelFunc) {
+	return TimeoutContext(c.opts.Timeout)
 }
