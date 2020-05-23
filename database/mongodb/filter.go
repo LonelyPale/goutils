@@ -3,8 +3,9 @@
 package mongodb
 
 import (
-	"github.com/LonelyPale/goutils/database/mongodb/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
 const (

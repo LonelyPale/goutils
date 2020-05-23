@@ -21,7 +21,7 @@ type User struct {
 	Temp       *[]int
 	Name       string
 	NameP      *string
-	Age        int   `bson:",omitempty"`
+	Age        int   `bson:"age,omitempty"`
 	AgeP       *int  `bson:",omitempty"`
 	Is         bool  `bson:",omitempty"`
 	IsP        *bool `bson:",omitempty"`
@@ -98,12 +98,12 @@ func TestModel_Put2(t *testing.T) {
 func TestModel_Set(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("5ec815d1b732edbfd90159f6")
+	id, err := types.ObjectIDFromHex("5ec81672973997c00c8ba6c8")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	user := &User{ID: id}
+	user := &User{ID: id, Name: "Jerry"}
 	user.Model = NewModel(user, coll)
 
 	startTime := time.Now()
@@ -112,7 +112,11 @@ func TestModel_Set(t *testing.T) {
 	}
 	t.Log("time-get:", time.Since(startTime), user)
 
-	updater := types.M{"$set": types.M{"modifyTime": time.Now()}}
+	user.Name = "Jerry-0"
+	//updater := types.M{"$set": types.M{"modifyTime": time.Now()}, "$unset": types.M{"test": "", "temp": ""}}
+	//updater := types.M{"$set": user}
+	//updater := NewUpdater().Set(user)
+	updater := NewUpdater().Set("name", "Jerry-10", "age", 18)
 	startTime1 := time.Now()
 	if err := user.Set(updater); err != nil {
 		t.Fatal(err)

@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
@@ -46,5 +48,9 @@ func (m Model) AfterInsert(ctx context.Context, documents []interface{}, opts in
 		}
 	}
 
+	return nil
+}
+
+func (m Model) BeforeUpdate(ctx context.Context, filter interface{}, updater interface{}, opts []*options.UpdateOptions) error {
 	return nil
 }
