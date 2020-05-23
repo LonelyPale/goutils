@@ -1,7 +1,10 @@
 package mongodb
 
+import log "github.com/sirupsen/logrus"
+
 const (
-	SetKey = "$set"
+	SetKey   = "$set"
+	UnsetKey = "$unset"
 )
 
 type Updater map[string]interface{}
@@ -10,6 +13,8 @@ func NewUpdater() Updater {
 	return make(Updater)
 }
 
+// { $set: { "details.make": "zzz" } }
+// { $set: { "tags.1": "rain gear", "ratings.0.rating": 2 } }
 func (u Updater) Set(values ...interface{}) Updater {
 	number := len(values)
 
@@ -20,21 +25,35 @@ func (u Updater) Set(values ...interface{}) Updater {
 		return u
 	} else if number == 2 {
 		// 只支持map
-		set, ok := u[SetKey].(Updater)
+		setMap, ok := u[SetKey]
 		if !ok {
-			set = NewUpdater()
-			u[SetKey] = set
+			setMap = NewUpdater()
+			u[SetKey] = setMap
 		}
+
+		set, ok := setMap.(Updater)
+		if !ok {
+			log.Warn("$set object not Updater")
+			return u
+		}
+
 		key := values[0].(string)
 		val := values[1]
 		set[key] = val
 		return u
 	} else {
-		set, ok := u[SetKey].(Updater)
+		setMap, ok := u[SetKey]
 		if !ok {
-			set = NewUpdater()
-			u[SetKey] = set
+			setMap = NewUpdater()
+			u[SetKey] = setMap
 		}
+
+		set, ok := setMap.(Updater)
+		if !ok {
+			log.Warn("$set object not Updater")
+			return u
+		}
+
 		for i, n := 0, number/2; i < n; i++ {
 			key := values[i*2].(string)
 			val := values[i*2+1]
@@ -45,13 +64,31 @@ func (u Updater) Set(values ...interface{}) Updater {
 	return u
 }
 
+// { $unset: { quantity: "", instock: "" } }
+func (u Updater) Unset(keys ...string) Updater {
+	unsetMap, ok := u[UnsetKey]
+	if !ok {
+		unsetMap = NewUpdater()
+		u[UnsetKey] = unsetMap
+	}
+
+	unset, ok := unsetMap.(Updater)
+	if !ok {
+		log.Warn("$unset object not Updater")
+		return u
+	}
+
+	for _, key := range keys {
+		unset[key] = ""
+	}
+
+	return u
+}
+
 func (u Updater) Get(key string) interface{} {
 	return u[key]
 }
 
-func (u Updater) GetSet(key string) interface{} {
-	if set, ok := u[SetKey].(Updater); ok {
-		return set[key]
-	}
-	return nil
+func (u Updater) Delete(key string) {
+	delete(u, key)
 }
