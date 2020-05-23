@@ -6,10 +6,13 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"github.com/LonelyPale/goutils/errors"
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"reflect"
 	"syscall"
+	"unsafe"
 )
 
 // 深拷贝
@@ -19,6 +22,34 @@ func DeepCopy(dst, src interface{}) error {
 		return err
 	}
 	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
+}
+
+// 反射注入(struct 结构体)
+func Inject(obj interface{}, key string, val interface{}) error {
+	value := reflect.ValueOf(obj)
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	} else {
+		return errors.ErrMustPointer
+	}
+
+	field := value.FieldByName(key)
+	if !field.CanSet() {
+		// 设置私有字段(小写字段)
+		field = reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem()
+	}
+	fieldType := field.Type().String()
+
+	v := reflect.ValueOf(val)
+	valType := v.Type().String()
+
+	if fieldType == valType {
+		field.Set(v)
+	} else {
+		return errors.Errorf("type mismatch %v to %v", valType, fieldType)
+	}
+
+	return nil
 }
 
 // Fmt shorthand, XXX DEPRECATED

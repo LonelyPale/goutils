@@ -1,13 +1,12 @@
 package mongodb
 
 import (
-	"context"
-	"fmt"
 	"testing"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
+	"github.com/LonelyPale/goutils"
 	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
@@ -25,16 +24,8 @@ type User struct {
 	AgeP       *int  `bson:",omitempty"`
 	Is         bool  `bson:",omitempty"`
 	IsP        *bool `bson:",omitempty"`
-}
-
-func (User) BeforeUpdate(ctx context.Context, coll *Collection) error {
-	fmt.Println("BeforeUpdate")
-	return nil
-}
-
-func (User) AfterUpdate(ctx context.Context, coll *Collection) error {
-	fmt.Println("AfterUpdate")
-	return nil
+	prv        string
+	prvp       *string
 }
 
 func init() {
@@ -103,23 +94,23 @@ func TestModel_Set(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := &User{ID: id, Name: "Jerry"}
+	user := User{ID: id, Name: "Jerry"}
 	user.Model = NewModel(user, coll)
 
-	startTime := time.Now()
-	if err := user.Get(); err != nil {
-		t.Fatal(err)
-	}
-	t.Log("time-get:", time.Since(startTime), user)
+	//startTime := time.Now()
+	//if err := user.Get(); err != nil {
+	//	t.Fatal(err)
+	//}
+	//t.Log("time-get:", time.Since(startTime), user)
 
-	user.Name = "Jerry-0"
+	user.Name = "Jerry-00"
 	//updater := types.M{"$set": types.M{"modifyTime": time.Now()}, "$unset": types.M{"test": "", "temp": ""}}
 	//updater := types.M{"$set": user}
 	//updater := NewUpdater().Set(user)
 	//updater := NewUpdater().Set("name", "Jerry-10", "age", 18)
-	updater := NewUpdater("name", "Jerry-10", "age", 18)
+	//updater := NewUpdater("name", "Jerry-10", "age", 18).Unset("test","temp","namep")
 	startTime1 := time.Now()
-	if err := user.Set(updater); err != nil {
+	if err := user.Set(); err != nil {
 		t.Fatal(err)
 	}
 	t.Log("time-set:", time.Since(startTime1), user)
@@ -147,5 +138,13 @@ func TestModel_Get(t *testing.T) {
 	}
 	t.Log("time:", time.Since(startTime))
 	t.Log(user.ID)
+	t.Log(user)
+}
+
+func TestTemp(t *testing.T) {
+	user := &User{}
+	if err := goutils.Inject(user, "NameP", types.String("testing...")); err != nil {
+		t.Fatal(err)
+	}
 	t.Log(user)
 }

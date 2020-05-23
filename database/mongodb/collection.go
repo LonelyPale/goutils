@@ -3,7 +3,6 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -663,12 +662,4 @@ func isSessionContext(ctx context.Context) bool {
 	}
 
 	return false
-}
-
-func debugPrintInfo(v reflect.Value) {
-	fmt.Println("Kind ->", v.Kind())
-	fmt.Println("Name ->", v.Type().Name())
-	fmt.Println("String ->", v.Type().String())
-	fmt.Println("PkgPath ->", v.Type().PkgPath())
-	fmt.Println()
 }
