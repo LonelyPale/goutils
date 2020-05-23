@@ -7,34 +7,27 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/errors"
 )
 
+// Query and Projection Operators
 const (
-	OrKey         = "$or"
-	AndKey        = "$and"
-	InKey         = "$in"
-	NinKey        = "$nin"
-	AllKey        = "$all"
-	NotKey        = "$not"
-	NeKey         = "$ne"  // !=
-	GtKey         = "$gt"  // >
-	GteKey        = "$gte" // >=
-	LtKey         = "$lt"  // <
-	LteKey        = "$lte" // <=
-	ModKey        = "$mod" // mod 取模运算
-	ExistsKey     = "$exists"
-	TypeKey       = "$type"
-	SizeKey       = "$size"
-	MatchKey      = "$elemMatch"
-	IDKey         = "_id" // ObjectID Field Name
-	CreateTimeKey = "createTime"
-	ModifyTimeKey = "modifyTime"
-)
-
-const (
-	IDField         = "ID"
-	CreateTimeField = "CreateTime"
-	ModifyTimeField = "ModifyTime"
+	OrKey     = "$or"
+	AndKey    = "$and"
+	InKey     = "$in"
+	NinKey    = "$nin"
+	AllKey    = "$all"
+	NotKey    = "$not"
+	NeKey     = "$ne"  // !=
+	GtKey     = "$gt"  // >
+	GteKey    = "$gte" // >=
+	LtKey     = "$lt"  // <
+	LteKey    = "$lte" // <=
+	ModKey    = "$mod" // mod 取模运算
+	ExistsKey = "$exists"
+	TypeKey   = "$type"
+	SizeKey   = "$size"
+	MatchKey  = "$elemMatch"
 )
 
 type Filter map[string]interface{}
@@ -53,6 +46,40 @@ func And(values ...interface{}) Filter {
 
 func ID(value interface{}) Filter {
 	return Filter{}.ID(value)
+}
+
+func (f Filter) checkout(key string) (Filter, error) {
+	val, ok := f[key]
+	if !ok {
+		val = Filter{}
+		f[key] = val
+	}
+
+	filter, ok := val.(Filter)
+	if !ok {
+		err := errors.Errorf("%v object not Filter", key)
+		log.Warn(err)
+		return filter, err
+	}
+
+	return filter, nil
+}
+
+func (f Filter) checkoutA(key string) (types.A, error) {
+	val, ok := f[key]
+	if !ok {
+		val = types.A{}
+		f[key] = val
+	}
+
+	filter, ok := val.(types.A)
+	if !ok {
+		err := errors.Errorf("%v object not valid types.A", key)
+		log.Warn(err)
+		return filter, err
+	}
+
+	return filter, nil
 }
 
 // { name: "go" }
@@ -93,14 +120,8 @@ func (f Filter) Or(values ...interface{}) Filter {
 	} else if number == 1 {
 		f[OrKey] = values[0]
 	} else {
-		orArr, ok := f[OrKey]
-		if !ok {
-			orArr = types.A{}
-		}
-
-		or, ok := orArr.(types.A)
-		if !ok {
-			log.Warn("$or object not valid types.A")
+		or, err := f.checkoutA(OrKey)
+		if err != nil {
 			return f
 		}
 
@@ -127,14 +148,8 @@ func (f Filter) And(values ...interface{}) Filter {
 	} else if number == 1 {
 		f[AndKey] = values[0]
 	} else {
-		andArr, ok := f[AndKey]
-		if !ok {
-			andArr = types.A{}
-		}
-
-		and, ok := andArr.(types.A)
-		if !ok {
-			log.Warn("$and object not valid types.A")
+		and, err := f.checkoutA(OrKey)
+		if err != nil {
 			return f
 		}
 

@@ -1,7 +1,12 @@
 package mongodb
 
-import log "github.com/sirupsen/logrus"
+import (
+	log "github.com/sirupsen/logrus"
 
+	"github.com/LonelyPale/goutils/errors"
+)
+
+// Field Update Operators
 const (
 	SetKey   = "$set"
 	UnsetKey = "$unset"
@@ -21,6 +26,24 @@ func Unset(keys ...string) Updater {
 	return Updater{}.Unset(keys...)
 }
 
+// 只支持map
+func (u Updater) checkout(key string) (Updater, error) {
+	val, ok := u[key]
+	if !ok {
+		val = Updater{}
+		u[key] = val
+	}
+
+	updater, ok := val.(Updater)
+	if !ok {
+		err := errors.Errorf("%v object not Updater", key)
+		log.Warn(err)
+		return updater, err
+	}
+
+	return updater, nil
+}
+
 // { $set: { "details.make": "zzz" } }
 // { $set: { "tags.1": "rain gear", "ratings.0.rating": 2 } }
 // { $set: { <field1>: <value1>, ... } }
@@ -32,16 +55,8 @@ func (u Updater) Set(values ...interface{}) Updater {
 	} else if number == 1 {
 		u[SetKey] = values[0]
 	} else {
-		// 只支持map
-		setMap, ok := u[SetKey]
-		if !ok {
-			setMap = NewUpdater()
-			u[SetKey] = setMap
-		}
-
-		set, ok := setMap.(Updater)
-		if !ok {
-			log.Warn("$set object not Updater")
+		set, err := u.checkout(SetKey)
+		if err != nil {
 			return u
 		}
 
@@ -58,15 +73,8 @@ func (u Updater) Set(values ...interface{}) Updater {
 // { $unset: { quantity: "", instock: "" } }
 // { $unset: { <field1>: "", ... } }
 func (u Updater) Unset(keys ...string) Updater {
-	unsetMap, ok := u[UnsetKey]
-	if !ok {
-		unsetMap = NewUpdater()
-		u[UnsetKey] = unsetMap
-	}
-
-	unset, ok := unsetMap.(Updater)
-	if !ok {
-		log.Warn("$unset object not Updater")
+	unset, err := u.checkout(UnsetKey)
+	if err != nil {
 		return u
 	}
 
@@ -83,4 +91,14 @@ func (u Updater) Get(key string) interface{} {
 
 func (u Updater) Delete(key string) {
 	delete(u, key)
+}
+
+func (u Updater) ModifyTime(value interface{}) Updater {
+	set, err := u.checkout(SetKey)
+	if err != nil {
+		return u
+	}
+
+	set[ModifyTimeKey] = value
+	return u
 }
