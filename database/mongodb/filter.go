@@ -3,6 +3,7 @@
 package mongodb
 
 import (
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/LonelyPale/goutils/database/mongodb/types"
@@ -38,21 +39,38 @@ const (
 
 type Filter map[string]interface{}
 
-func NewFilter() Filter {
-	return make(Filter)
+func NewFilter(values ...interface{}) Filter {
+	return make(Filter).Set(values...)
 }
 
-func In(value interface{}) Filter {
-	return Filter{InKey: value}
+func Or(values ...interface{}) Filter {
+	return Filter{}.Or(values...)
 }
 
-func Lt(value interface{}) Filter {
-	return Filter{LtKey: value}
+func And(values ...interface{}) Filter {
+	return Filter{}.And(values...)
 }
 
-// { name:"go" }
-func (f Filter) Set(key string, value interface{}) Filter {
-	f[key] = value
+func ID(value interface{}) Filter {
+	return Filter{}.ID(value)
+}
+
+// { name: "go" }
+func (f Filter) Set(values ...interface{}) Filter {
+	number := len(values)
+
+	if number == 0 {
+		return f
+	} else if number == 1 {
+		return f
+	} else {
+		for i, n := 0, number/2; i < n; i++ {
+			key := values[i*2].(string)
+			val := values[i*2+1]
+			f[key] = val
+		}
+	}
+
 	return f
 }
 
@@ -64,25 +82,71 @@ func (f Filter) Delete(key string) {
 	delete(f, key)
 }
 
-// { $or:[ {name:"c"}, {name:"go"} ] }
-func (f Filter) Or(key string, value interface{}) Filter {
-	or, ok := f[OrKey]
-	if ok {
-		orArray, ok := or.(types.A)
-		if ok {
-			orArray = append(orArray, types.M{key: value})
-		} else {
-			panic("type error: Not valid types.A")
-		}
+// { $or: [ {name: "c"}, {name: "go"} ] }
+// { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] }
+// { $or: [ { <expression1> }, { <expression2> }, ... , { <expressionN> } ] }
+func (f Filter) Or(values ...interface{}) Filter {
+	number := len(values)
+
+	if number == 0 {
+		return f
+	} else if number == 1 {
+		f[OrKey] = values[0]
 	} else {
-		f[OrKey] = types.A{types.M{key: value}}
+		orArr, ok := f[OrKey]
+		if !ok {
+			orArr = types.A{}
+		}
+
+		or, ok := orArr.(types.A)
+		if !ok {
+			log.Warn("$or object not valid types.A")
+			return f
+		}
+
+		for i, n := 0, number/2; i < n; i++ {
+			key := values[i*2].(string)
+			val := values[i*2+1]
+			or = append(or, Filter{key: val})
+		}
+
+		f[OrKey] = or
 	}
+
 	return f
 }
 
-// { $and:[ {name:{$ne:"c"}}, {name:{$ne:"go"}} ] }
-func (f Filter) And(key string, value interface{}) Filter {
-	f[key] = Filter{AndKey: value}
+// { $and: [ { name: { $ne: "c"} }, { name: { $ne: "go"} } ] }
+// { $and: [ { price: { $ne: 1.99 } }, { price: { $exists: true } } ] }
+// { $and: [ { <expression1> }, { <expression2> } , ... , { <expressionN> } ] }
+func (f Filter) And(values ...interface{}) Filter {
+	number := len(values)
+
+	if number == 0 {
+		return f
+	} else if number == 1 {
+		f[AndKey] = values[0]
+	} else {
+		andArr, ok := f[AndKey]
+		if !ok {
+			andArr = types.A{}
+		}
+
+		and, ok := andArr.(types.A)
+		if !ok {
+			log.Warn("$and object not valid types.A")
+			return f
+		}
+
+		for i, n := 0, number/2; i < n; i++ {
+			key := values[i*2].(string)
+			val := values[i*2+1]
+			and = append(and, Filter{key: val})
+		}
+
+		f[AndKey] = and
+	}
+
 	return f
 }
 
@@ -136,7 +200,7 @@ func (f Filter) Size(key string, value interface{}) Filter {
 	return f
 }
 
-//todo
+// todo: 待整理
 func (f Filter) Regex(key string, value primitive.Regex) Filter {
 	f[key] = value
 	return f

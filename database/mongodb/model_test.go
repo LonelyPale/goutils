@@ -116,7 +116,8 @@ func TestModel_Set(t *testing.T) {
 	//updater := types.M{"$set": types.M{"modifyTime": time.Now()}, "$unset": types.M{"test": "", "temp": ""}}
 	//updater := types.M{"$set": user}
 	//updater := NewUpdater().Set(user)
-	updater := NewUpdater().Set("name", "Jerry-10", "age", 18)
+	//updater := NewUpdater().Set("name", "Jerry-10", "age", 18)
+	updater := NewUpdater("name", "Jerry-10", "age", 18)
 	startTime1 := time.Now()
 	if err := user.Set(updater); err != nil {
 		t.Fatal(err)
