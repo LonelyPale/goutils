@@ -9,12 +9,21 @@ const (
 
 type Updater map[string]interface{}
 
-func NewUpdater() Updater {
-	return make(Updater)
+func NewUpdater(values ...interface{}) Updater {
+	return make(Updater).Set(values...)
+}
+
+func Set(values ...interface{}) Updater {
+	return Updater{}.Set(values...)
+}
+
+func Unset(keys ...string) Updater {
+	return Updater{}.Unset(keys...)
 }
 
 // { $set: { "details.make": "zzz" } }
 // { $set: { "tags.1": "rain gear", "ratings.0.rating": 2 } }
+// { $set: { <field1>: <value1>, ... } }
 func (u Updater) Set(values ...interface{}) Updater {
 	number := len(values)
 
@@ -22,26 +31,8 @@ func (u Updater) Set(values ...interface{}) Updater {
 		return u
 	} else if number == 1 {
 		u[SetKey] = values[0]
-		return u
-	} else if number == 2 {
-		// 只支持map
-		setMap, ok := u[SetKey]
-		if !ok {
-			setMap = NewUpdater()
-			u[SetKey] = setMap
-		}
-
-		set, ok := setMap.(Updater)
-		if !ok {
-			log.Warn("$set object not Updater")
-			return u
-		}
-
-		key := values[0].(string)
-		val := values[1]
-		set[key] = val
-		return u
 	} else {
+		// 只支持map
 		setMap, ok := u[SetKey]
 		if !ok {
 			setMap = NewUpdater()
@@ -65,6 +56,7 @@ func (u Updater) Set(values ...interface{}) Updater {
 }
 
 // { $unset: { quantity: "", instock: "" } }
+// { $unset: { <field1>: "", ... } }
 func (u Updater) Unset(keys ...string) Updater {
 	unsetMap, ok := u[UnsetKey]
 	if !ok {
