@@ -3,6 +3,8 @@ package mongodb
 import (
 	"context"
 	"reflect"
+
+	"github.com/LonelyPale/goutils"
 )
 
 type Model struct {
@@ -16,6 +18,10 @@ func NewModel(doc interface{}, coll *Collection) Model {
 
 func (m Model) Collection() *Collection {
 	return m.coll
+}
+
+func (m Model) Validate(tags ...string) error {
+	return goutils.Validate(m.doc, tags...)
 }
 
 func (m Model) Put(ctxs ...context.Context) error {

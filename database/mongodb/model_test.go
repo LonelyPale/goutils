@@ -94,7 +94,7 @@ func TestModel_Set(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := User{ID: id, Name: "Jerry"}
+	user := &User{ID: id, Name: "Jerry"}
 	user.Model = NewModel(user, coll)
 
 	//startTime := time.Now()
