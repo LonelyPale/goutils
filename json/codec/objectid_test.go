@@ -10,6 +10,16 @@ import (
 	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
+func TestObjectIDCodec_IsEmpty(t *testing.T) {
+	RegisterObjectIDCodec()
+	objId := types.NilObjectID
+	output, err := jsoniter.Marshal(objId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(output))
+}
+
 func TestObjectIDCodec_Encode(t *testing.T) {
 	RegisterObjectIDCodec()
 	objId := types.NewObjectID()
