@@ -12,7 +12,7 @@ func Validate(obj interface{}, tags ...string) error {
 	}
 
 	for _, tag := range tags {
-		if err := validate(tag); err != nil {
+		if err := validate(obj, tag); err != nil {
 			return err
 		}
 	}
