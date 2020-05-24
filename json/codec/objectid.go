@@ -10,6 +10,9 @@ import (
 	"github.com/LonelyPale/goutils/database/mongodb/types"
 )
 
+// 旧版本的 go.mongodb.org/mongo-driver 不支持完善的 json 序列化和反序列化，所以需要用 jsoniter plugins 自己处理。
+// 新版本的 go.mongodb.org/mongo-driver 已支持完善的 json 序列化和反序列化，不再需要用 jsoniter plugins 自己处理。
+
 const RegisterTypeObjectID = "primitive.ObjectID"
 
 func RegisterObjectIDCodec() {
