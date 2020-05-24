@@ -1,0 +1,41 @@
+// Created by LonelyPale at 2018-12-27
+
+package codec
+
+import (
+	"github.com/json-iterator/go"
+	"lonelypale/freeshop/mgo"
+	"unsafe"
+)
+
+const RegisterTypeDecimal128 = "primitive.Decimal128"
+
+func RegisterDecimal128Codec() {
+	//jsoniter.RegisterTypeEncoder(RegisterTypeDecimal128, &decimal128Codec{})
+	jsoniter.RegisterTypeDecoder(RegisterTypeDecimal128, &decimal128Codec{})
+}
+
+type decimal128Codec struct {
+}
+
+/*
+func (codec *decimal128Codec) IsEmpty(ptr unsafe.Pointer) bool {
+	obj := *((*mgo.Decimal128)(ptr))
+	return obj.IsZero()
+}
+
+func (codec *decimal128Codec) Encode(ptr unsafe.Pointer, stream *jsoniter.Stream) {
+	obj := *((*mgo.ObjectID)(ptr))
+	str := "\"" + obj.Hex() + "\""
+	stream.Write([]byte(str))
+}
+*/
+
+func (codec *decimal128Codec) Decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
+	str := iter.ReadString()
+	dec, err := mgo.ParseDecimal128(str)
+	if err != nil {
+		panic(err)
+	}
+	*((*mgo.Decimal128)(ptr)) = dec
+}
