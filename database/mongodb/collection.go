@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/types"
 )
 
 type Collection struct {
