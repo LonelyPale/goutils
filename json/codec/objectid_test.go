@@ -7,7 +7,7 @@ import (
 
 	"github.com/json-iterator/go"
 
-	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/types"
 )
 
 func TestObjectIDCodec_IsEmpty(t *testing.T) {

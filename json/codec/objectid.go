@@ -7,7 +7,7 @@ import (
 
 	"github.com/json-iterator/go"
 
-	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/types"
 )
 
 // 旧版本的 go.mongodb.org/mongo-driver 不支持完善的 json 序列化和反序列化，所以需要用 jsoniter plugins 自己处理。
