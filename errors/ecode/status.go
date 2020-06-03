@@ -5,6 +5,20 @@ import (
 	"strconv"
 )
 
+const (
+	StatusOK             = 0
+	StatusUndefinedError = -1
+)
+
+var statusText = map[int]string{
+	StatusOK:             "OK",
+	StatusUndefinedError: "Undefined Error",
+}
+
+func StatusText(code int) string {
+	return statusText[code]
+}
+
 // Codes ecode error interface which has a code & message.
 type ErrorCode interface {
 	// sometimes Error return Code in string form
