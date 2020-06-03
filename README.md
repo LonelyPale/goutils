@@ -15,6 +15,7 @@ go list -m -json all
 ```
 
 ```shell
-git tag -a v0.0.2 -m 'goutils-v0.0.2'
+git tag -ln
+git tag -a v0.0.4 -m "goutils-v0.0.4"
 git push origin --tags
 ```
