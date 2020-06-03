@@ -19,10 +19,14 @@ func NewSuccessMessage(text string, datas ...interface{}) *Message {
 	if len(text) == 0 {
 		text = ecode.StatusText(code)
 	}
-	var data []interface{}
-	if len(datas) > 0 {
-		data = append(make([]interface{}, 0), datas...)
+
+	var data interface{}
+	if len(datas) == 1 {
+		data = datas[0]
+	} else if len(datas) > 1 {
+		data = datas
 	}
+
 	return &Message{code, text, data}
 }
 
