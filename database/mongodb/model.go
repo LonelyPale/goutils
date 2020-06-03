@@ -7,6 +7,25 @@ import (
 	"github.com/LonelyPale/goutils"
 )
 
+/*
+type Service interface {
+	Start() (bool, error)
+	OnStart() error
+
+	Stop() bool
+	OnStop()
+
+	Reset() (bool, error)
+	OnReset() error
+
+	IsRunning() bool
+
+	String() string
+
+	SetLogger(log.Logger)
+}
+*/
+// todo: doc可优化为接口类型,如上例
 type Model struct {
 	doc  interface{}
 	coll *Collection
