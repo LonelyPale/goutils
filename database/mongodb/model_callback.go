@@ -7,8 +7,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils/database/mongodb/types"
 	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/types"
 )
 
 func (m Model) BeforeInsert(ctx context.Context, documents []interface{}, opts interface{}) error {

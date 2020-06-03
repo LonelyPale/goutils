@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/LonelyPale/goutils/database/mongodb/types"
 	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/types"
 )
 
 // Query and Projection Operators

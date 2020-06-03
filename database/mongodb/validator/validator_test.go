@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/database/mongodb/types"
+	"github.com/LonelyPale/goutils/types"
 )
 
 type testObjectID struct {
