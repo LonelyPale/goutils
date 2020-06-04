@@ -22,9 +22,35 @@ const (
 	Bits             = 2048
 )
 
+var Base64Encoding *base64.Encoding
+
+func init() {
+	Base64Encoding = base64.RawURLEncoding
+}
+
 type XRsa struct {
 	publicKey  *rsa.PublicKey
 	privateKey *rsa.PrivateKey
+}
+
+func CreateKeysToBase64(keyLengths ...int) (string, string, error) {
+	pubKey := bytes.NewBuffer(make([]byte, 0))
+	priKey := bytes.NewBuffer(make([]byte, 0))
+	if err := CreateKeys(pubKey, priKey, keyLengths...); err != nil {
+		return "", "", err
+	}
+
+	return pubKey.String(), priKey.String(), nil
+}
+
+func CreateKeysToBytes(keyLengths ...int) ([]byte, []byte, error) {
+	pubKey := bytes.NewBuffer(make([]byte, 0))
+	priKey := bytes.NewBuffer(make([]byte, 0))
+	if err := CreateKeys(pubKey, priKey, keyLengths...); err != nil {
+		return nil, nil, err
+	}
+
+	return pubKey.Bytes(), priKey.Bytes(), nil
 }
 
 // 生成密钥对
@@ -100,62 +126,99 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 }
 
 // 公钥加密
-func (r *XRsa) PublicEncrypt(data string) (string, error) {
+func (r *XRsa) Encrypt(data []byte) ([]byte, error) {
 	partLen := r.publicKey.N.BitLen()/8 - 11
-	chunks := split([]byte(data), partLen)
-	buffer := bytes.NewBufferString("")
+	chunks := split(data, partLen)
+	buffer := bytes.NewBuffer([]byte{})
 	for _, chunk := range chunks {
 		encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, r.publicKey, chunk)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		buffer.Write(encrypted)
 	}
-	return base64.RawURLEncoding.EncodeToString(buffer.Bytes()), nil
+	return buffer.Bytes(), nil
 }
 
 // 私钥解密
-func (r *XRsa) PrivateDecrypt(encrypted string) (string, error) {
+func (r *XRsa) Decrypt(encrypted []byte) ([]byte, error) {
 	partLen := r.publicKey.N.BitLen() / 8
-	raw, err := base64.RawURLEncoding.DecodeString(encrypted)
-	chunks := split(raw, partLen)
-	buffer := bytes.NewBufferString("")
+	chunks := split(encrypted, partLen)
+	buffer := bytes.NewBuffer([]byte{})
 	for _, chunk := range chunks {
 		decrypted, err := rsa.DecryptPKCS1v15(rand.Reader, r.privateKey, chunk)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		buffer.Write(decrypted)
 	}
-	return buffer.String(), err
+	return buffer.Bytes(), nil
 }
 
-// 数据加签
-func (r *XRsa) Sign(data string) (string, error) {
+// 私钥签名
+func (r *XRsa) Sign(data []byte) ([]byte, error) {
 	h := AlgorithmSign.New()
-	h.Write([]byte(data))
+	if _, err := h.Write(data); err != nil {
+		return nil, err
+	}
+
 	hashed := h.Sum(nil)
 	sign, err := rsa.SignPKCS1v15(rand.Reader, r.privateKey, AlgorithmSign, hashed)
+	if err != nil {
+		return nil, err
+	}
+
+	return sign, nil
+}
+
+// 公钥验签
+func (r *XRsa) Verify(data []byte, sign []byte) error {
+	h := AlgorithmSign.New()
+	if _, err := h.Write(data); err != nil {
+		return err
+	}
+
+	hashed := h.Sum(nil)
+	return rsa.VerifyPKCS1v15(r.publicKey, AlgorithmSign, hashed, sign)
+}
+
+func (r *XRsa) EncryptToBase64(data []byte) (string, error) {
+	bs, err := r.Encrypt(data)
 	if err != nil {
 		return "", err
 	}
 
-	return base64.RawURLEncoding.EncodeToString(sign), err
+	return Base64Encoding.EncodeToString(bs), nil
 }
 
-// 数据验签
-func (r *XRsa) Verify(data string, sign string) error {
-	h := AlgorithmSign.New()
-	h.Write([]byte(data))
-	hashed := h.Sum(nil)
-	decodedSign, err := base64.RawURLEncoding.DecodeString(sign)
+func (r *XRsa) DecryptFromBase64(encrypted string) ([]byte, error) {
+	raw, err := Base64Encoding.DecodeString(encrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Decrypt(raw)
+}
+
+// 数据签名
+func (r *XRsa) SignToBase64(data []byte) (string, error) {
+	sign, err := r.Sign(data)
+	if err != nil {
+		return "", err
+	}
+
+	return Base64Encoding.EncodeToString(sign), nil
+}
+
+func (r *XRsa) VerifyFromBase64(data []byte, sign string) error {
+	decodedSign, err := Base64Encoding.DecodeString(sign)
 	if err != nil {
 		return err
 	}
 
-	return rsa.VerifyPKCS1v15(r.publicKey, AlgorithmSign, hashed, decodedSign)
+	return r.Verify(data, decodedSign)
 }
 
 func split(buf []byte, lim int) [][]byte {
@@ -171,7 +234,7 @@ func split(buf []byte, lim int) [][]byte {
 	return chunks
 }
 
-func MarshalPKCS8PrivateKey(key *rsa.PrivateKey) []byte {
+func MarshalPKCS8PrivateKey(key *rsa.PrivateKey) ([]byte, error) {
 	info := struct {
 		Version             int
 		PrivateKeyAlgorithm []asn1.ObjectIdentifier
@@ -185,8 +248,8 @@ func MarshalPKCS8PrivateKey(key *rsa.PrivateKey) []byte {
 
 	k, err := asn1.Marshal(info)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return k
+	return k, nil
 }
