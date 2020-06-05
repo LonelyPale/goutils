@@ -6,13 +6,14 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/LonelyPale/goutils/errors"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"reflect"
 	"syscall"
 	"unsafe"
+
+	"github.com/LonelyPale/goutils/errors"
 )
 
 // 深拷贝
