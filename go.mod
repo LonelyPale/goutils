@@ -8,6 +8,6 @@ require (
 	github.com/json-iterator/go v1.1.9
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
-	github.com/vmihailenco/msgpack/v4 v4.3.11
+	github.com/vmihailenco/msgpack/v5 v5.0.0-alpha.2
 	go.mongodb.org/mongo-driver v1.3.2
 )
