@@ -3,14 +3,21 @@ package crypto
 import (
 	"crypto/rand"
 	"math/big"
-
-	"github.com/LonelyPale/goutils/errors"
 )
 
-// 生成指定长度的密钥
-func GenerateSecretKey(length int) ([]byte, error) {
-	if length <= 0 {
-		return nil, errors.New("digits must be greater than 0")
+const (
+	DefaultSecretKeyLength = 32 // 32byte = 256bit
+	DefaultSaltLength      = 32
+)
+
+// 生成指定字节长度的密钥
+func GenerateSecretKey(lengths ...int) ([]byte, error) {
+	var length int
+	if len(lengths) > 0 && lengths[0] > 0 {
+		//digits must be greater than 0
+		length = lengths[0]
+	} else {
+		length = DefaultSecretKeyLength
 	}
 
 	bs := make([]byte, length)
@@ -24,4 +31,15 @@ func GenerateSecretKey(length int) ([]byte, error) {
 	}
 
 	return bs, nil
+}
+
+func GenerateSalt(lengths ...int) ([]byte, error) {
+	var length int
+	if len(lengths) > 0 && lengths[0] > 0 {
+		//digits must be greater than 0
+		length = lengths[0]
+	} else {
+		length = DefaultSaltLength
+	}
+	return GenerateSecretKey(length)
 }

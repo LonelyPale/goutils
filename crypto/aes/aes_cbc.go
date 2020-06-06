@@ -10,6 +10,8 @@ import (
 	"github.com/LonelyPale/goutils/errors"
 )
 
+// AES的区块长度固定为128比特，密钥长度则可以是128，192或256比特；
+
 //对明文进行填充
 func Padding(plainText []byte, blockSize int) []byte {
 	n := blockSize - len(plainText)%blockSize //计算要填充的长度
