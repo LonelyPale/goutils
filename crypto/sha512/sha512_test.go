@@ -7,13 +7,15 @@ import (
 
 func Test(t *testing.T) {
 	startTime := time.Now()
-	for i := 0; i < 1000; i++ {
-		_, err := Hash([]byte("123qweasdzxc"))
+	data := []byte("123qweasdzxc")
+	var err error
+	for i := 0; i < 2048; i++ {
+		data, err = Hash(data)
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	t.Log("duration:", time.Since(startTime))
+	t.Log("duration:", time.Since(startTime), data)
 }
 
 func TestHash(t *testing.T) {
