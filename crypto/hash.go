@@ -7,8 +7,13 @@ import (
 
 type Hash []byte
 
-func NewHash(bs []byte) Hash {
-	return bs
+// bss 可以是 nil
+func NewHash(bss ...[]byte) Hash {
+	var hash []byte
+	for _, bs := range bss {
+		hash = append(hash, bs...)
+	}
+	return hash
 }
 
 func (h Hash) Bytes() []byte {
