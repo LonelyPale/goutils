@@ -11,6 +11,10 @@ func NewHash(bs []byte) Hash {
 	return bs
 }
 
+func (h Hash) Bytes() []byte {
+	return h
+}
+
 func (h Hash) String() string {
 	return h.Hex()
 }
