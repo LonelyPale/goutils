@@ -8,6 +8,7 @@ import (
 type Hash []byte
 
 // bss 可以是 nil
+// 等同于 Hash(bs)
 func NewHash(bss ...[]byte) Hash {
 	var hash []byte
 	for _, bs := range bss {
@@ -16,6 +17,7 @@ func NewHash(bss ...[]byte) Hash {
 	return hash
 }
 
+// 等同于 []byte(h)
 func (h Hash) Bytes() []byte {
 	return h
 }
