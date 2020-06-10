@@ -1,9 +1,12 @@
 package cache
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/allegro/bigcache"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 const (
@@ -64,7 +67,11 @@ func DefaultConfig(ts ...time.Duration) bigcache.Config {
 	}
 }
 
-func New(configs ...bigcache.Config) (*bigcache.BigCache, error) {
+type Cache struct {
+	*bigcache.BigCache
+}
+
+func New(configs ...bigcache.Config) (*Cache, error) {
 	var config bigcache.Config
 	if len(configs) > 0 {
 		config = configs[0]
@@ -72,5 +79,62 @@ func New(configs ...bigcache.Config) (*bigcache.BigCache, error) {
 		config = DefaultConfig()
 	}
 
-	return bigcache.NewBigCache(config)
+	cache, err := bigcache.NewBigCache(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Cache{cache}, nil
+}
+
+func (c *Cache) Set(key string, entry interface{}) error {
+	bs, err := msgpack.Marshal(entry)
+	if err != nil {
+		return err
+	}
+
+	return c.BigCache.Set(key, bs)
+}
+
+func (c *Cache) Get(key string, entry interface{}) error {
+	bs, err := c.BigCache.Get(key)
+	if err != nil {
+		return err
+	}
+
+	return msgpack.Unmarshal(bs, entry)
+}
+
+// 过时-禁用
+func (c *Cache) gettest(key string) (interface{}, error) {
+	type user struct {
+		Name string
+		Age  int
+		Data map[string]interface{}
+	}
+
+	startTime1 := time.Now()
+	typ := reflect.TypeOf(&user{}).Elem()
+	fmt.Println("reflect-typ duration:", time.Since(startTime1))
+
+	fmt.Println(typ.String(), typ.Name(), typ.PkgPath())
+	//fmt.Println(typ.Elem().String(), typ.Elem().Name(), typ.Elem().PkgPath())
+
+	startTime2 := time.Now()
+	elem := reflect.Indirect(reflect.New(typ)).Addr()
+	fmt.Println("reflect-elem duration:", time.Since(startTime2))
+
+	bs, err := c.BigCache.Get(key)
+	if err != nil {
+		return nil, err
+	}
+
+	obj := elem.Interface()
+	if err := msgpack.Unmarshal(bs, obj); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("reflect-end duration:", time.Since(startTime1))
+
+	return obj, nil
 }
