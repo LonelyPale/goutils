@@ -1,33 +1,33 @@
 package session
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test(t *testing.T) {
-	s, err := NewSession()
+	store, err := NewMemoryStore()
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("id:", s.ID())
+
+	s := store.New()
+	t.Log("id1:", s.ID())
 
 	s.Set("name", "tom")
 
 	name := s.Get("name")
-	t.Log(name)
+	t.Log("name1:", name)
 
 	if err := s.Save(); err != nil {
 		t.Fatal(err)
 	}
 
-	ss, err := NewSession(s.ID())
+	ss, err := store.Get(s.ID())
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log("id2:", ss.ID())
 
 	name2 := s.Get("name")
-	t.Log(name2)
-
-	if err := s.Save(); err != nil {
-		t.Fatal(err)
-	}
+	t.Log("name2:", name2)
 }

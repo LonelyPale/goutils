@@ -3,54 +3,45 @@ package session
 import (
 	"sync"
 
-	"github.com/LonelyPale/goutils/cache"
 	"github.com/LonelyPale/goutils/uuid"
 )
-
-var store *cache.Cache
-
-func init() {
-	var err error
-	store, err = cache.New()
-	if err != nil {
-		panic(err)
-	}
-}
 
 type Session interface {
 	ID() string
 	Get(key interface{}) interface{}
 	Set(key, value interface{})
-	Delete(ey interface{})
+	Delete(key interface{})
 	Save() error
 }
 
-type SimpleSession struct {
+// Simple Session
+type session struct {
 	mutex sync.RWMutex
+	store Store
 	Id    string
 	Data  map[interface{}]interface{}
 }
 
-func NewSession(ids ...string) (Session, error) {
-	s := &SimpleSession{Data: make(map[interface{}]interface{})}
-
+func NewSession(store Store, ids ...string) Session {
+	var id string
 	if len(ids) > 0 && len(ids[0]) > 0 {
-		s.Id = ids[0]
-		if err := store.Get(s.Id, s); err != nil {
-			return nil, err
-		}
+		id = ids[0]
 	} else {
-		s.Id = uuid.New().String()
+		id = uuid.New().String()
 	}
 
-	return s, nil
+	return &session{
+		store: store,
+		Id:    id,
+		Data:  make(map[interface{}]interface{}),
+	}
 }
 
-func (s *SimpleSession) ID() string {
+func (s *session) ID() string {
 	return s.Id
 }
 
-func (s *SimpleSession) Get(key interface{}) interface{} {
+func (s *session) Get(key interface{}) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -62,14 +53,14 @@ func (s *SimpleSession) Get(key interface{}) interface{} {
 	return val
 }
 
-func (s *SimpleSession) Set(key, value interface{}) {
+func (s *session) Set(key, value interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	s.Data[key] = value
 }
 
-func (s *SimpleSession) Delete(key interface{}) {
+func (s *session) Delete(key interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -78,9 +69,9 @@ func (s *SimpleSession) Delete(key interface{}) {
 	}
 }
 
-func (s *SimpleSession) Save() error {
+func (s *session) Save() error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	return store.Set(s.Id, s)
+	return s.store.Save(s)
 }
