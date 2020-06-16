@@ -7,13 +7,13 @@ import (
 	"github.com/LonelyPale/goutils/encoding/msgpack"
 )
 
-type User struct {
+type userStruct struct {
 	Name string
 	Age  int
 }
 
 func Test1(t *testing.T) {
-	user := &User{"tom", 10}
+	user := &userStruct{"tom", 10}
 
 	for i := 0; i < 10; i++ {
 		_, err := gob.Serialize(user)
@@ -31,7 +31,7 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
-	user := &User{"tom", 10}
+	user := &userStruct{"tom", 10}
 
 	bs, err := gob.Serialize(user)
 	if err != nil {
@@ -49,7 +49,7 @@ func Test2(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 10; i++ {
-		u := new(User)
+		u := new(userStruct)
 		if err := msgpack.Unmarshal(bs, u); err != nil {
 			t.Fatal(err)
 		}
