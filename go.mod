@@ -12,4 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/vmihailenco/msgpack/v5 v5.0.0-alpha.2
 	go.mongodb.org/mongo-driver v1.3.2
+	google.golang.org/grpc v1.29.1
 )
+
+replace google.golang.org/grpc => github.com/grpc/grpc-go v1.29.1

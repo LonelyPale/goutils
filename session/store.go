@@ -1,7 +1,13 @@
 package session
 
 import (
+	"context"
+	"net/http"
+	"strings"
+
 	"github.com/LonelyPale/goutils/cache"
+	"github.com/LonelyPale/goutils/errors"
+	"google.golang.org/grpc/metadata"
 )
 
 type Store interface {
@@ -43,4 +49,29 @@ func (m *MemoryStore) Delete(id string) error {
 
 func (m *MemoryStore) Save(s Session) error {
 	return m.store.Set(s.ID(), s)
+}
+
+func (m *MemoryStore) Session(request interface{}) (Session, error) {
+	switch req := request.(type) {
+	case http.Request:
+		authorization := req.Header.Get("Authorization")
+		token := strings.TrimSpace(strings.TrimPrefix(authorization, "Bearer"))
+		return m.Get(token)
+	case context.Context:
+		md, ok := metadata.FromIncomingContext(req)
+		if !ok {
+			return nil, errors.New("无Token认证信息")
+		}
+
+		var token string
+		val, ok := md["token"]
+		if !ok {
+			return nil, errors.New("无Token认证信息")
+		}
+
+		token = val[0]
+		return m.Get(token)
+	default:
+		return nil, errors.New("bad request auth")
+	}
 }

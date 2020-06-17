@@ -106,6 +106,7 @@ func (c *Cache) Get(key string, entry interface{}) error {
 }
 
 // 过时-禁用
+// Deprecated: use status.Errorf instead.
 func (c *Cache) gettest(key string) (interface{}, error) {
 	type user struct {
 		Name string
