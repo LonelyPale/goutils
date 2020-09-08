@@ -7,6 +7,7 @@ Go Utils
 
 ```shell
 go mod tidy
+go mod download
 
 go get -u github.com/BurntSushi/toml
 go get -u go.mongodb.org/mongo-driver
@@ -16,6 +17,6 @@ go list -m -json all
 
 ```shell
 git tag -ln
-git tag -a v0.0.4 -m "goutils-v0.0.4"
+git tag -a v0.0.5 -m "goutils-v0.0.5"
 git push origin --tags
 ```
