@@ -9,18 +9,20 @@ import (
 )
 
 type MongodbConfig struct {
-	URI         string
-	MaxPoolSize int
-	MinPoolSize int
-	Timeout     int //单位秒
+	URI               string
+	Timeout           int //单位秒
+	EnableTransaction bool
+	MaxPoolSize       int
+	MinPoolSize       int
 }
 
 func DefaultMongodbConfig() *MongodbConfig {
 	return &MongodbConfig{
-		URI:         "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet",
-		MaxPoolSize: 10,
-		MinPoolSize: 3,
-		Timeout:     10,
+		URI:               "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet",
+		EnableTransaction: false,
+		MaxPoolSize:       10,
+		MinPoolSize:       3,
+		Timeout:           10,
 	}
 }
 
