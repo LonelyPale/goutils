@@ -39,6 +39,10 @@ func (m Model) Collection() *Collection {
 	return m.coll
 }
 
+func (m Model) IsNil() bool {
+	return m.doc == nil || m.coll == nil
+}
+
 func (m Model) Validate(tags ...string) error {
 	return goutils.Validate(m.doc, tags...)
 }
