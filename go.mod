@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/allegro/bigcache v1.2.1
 	github.com/bwmarrin/snowflake v0.3.1-0.20190412223032-c09e69ae5993
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/google/uuid v1.1.1
 	github.com/json-iterator/go v1.1.9
