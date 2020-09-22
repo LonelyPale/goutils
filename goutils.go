@@ -3,8 +3,6 @@
 package goutils
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,19 +11,26 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/vmihailenco/msgpack/v5"
+
 	"github.com/LonelyPale/goutils/errors"
 )
 
-// 深拷贝
+//深拷贝
 func DeepCopy(dst, src interface{}) error {
-	var buf bytes.Buffer
-	if err := gob.NewEncoder(&buf).Encode(src); err != nil {
+	b, err := msgpack.Marshal(src)
+	if err != nil {
 		return err
 	}
-	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
+
+	if err := msgpack.Unmarshal(b, dst); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// 反射注入(struct 结构体)
+//反射注入(struct 结构体)
 func Inject(obj interface{}, key string, val interface{}) error {
 	value := reflect.ValueOf(obj)
 	if value.Kind() == reflect.Ptr {
@@ -53,10 +58,10 @@ func Inject(obj interface{}, key string, val interface{}) error {
 	return nil
 }
 
-// Fmt shorthand, XXX DEPRECATED
+//Fmt shorthand, XXX DEPRECATED
 var Fmt = fmt.Sprintf
 
-// TrapSignal catches the SIGTERM and executes cb function. After that it exits with code 1.
+//TrapSignal catches the SIGTERM and executes cb function. After that it exits with code 1.
 func TrapSignal(cb func()) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
