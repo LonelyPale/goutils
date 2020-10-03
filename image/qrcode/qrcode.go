@@ -56,11 +56,14 @@ func Generate(text string, opts ...*Options) (image.Image, error) {
 	qrc.ForegroundColor = opt.ForegroundColor
 	qrImg := qrc.Image(opt.Size)
 
-	backgroundImg := qrImg.Bounds()
-	newImg := image.NewRGBA(image.Rect(8, 8, 93, 93))
-	draw.Draw(newImg, backgroundImg, qrImg, image.Point{}, draw.Src)
+	if opt.LogoImage == nil {
+		return qrImg, nil
+	} else {
+		//todo: logo img
+		newImg := image.NewRGBA(image.Rect(8, 8, 93, 93))
+		backgroundImg := qrImg.Bounds()
+		draw.Draw(newImg, backgroundImg, qrImg, image.Point{}, draw.Src)
 
-	if opt.LogoImage != nil {
 		var logoImg image.Image
 		if opt.LogoResize.Width > 0 && opt.LogoResize.Height > 0 {
 			logoImg = resize.Resize(20, 20, logoImg, resize.Bilinear) //缩放logo尺寸
@@ -70,9 +73,9 @@ func Generate(text string, opts ...*Options) (image.Image, error) {
 			offset := image.Pt(opt.LogoPoint.X, opt.LogoPoint.Y)
 			draw.Draw(newImg, logoImg.Bounds().Add(offset), logoImg, image.Point{}, draw.Over)
 		}
-	}
 
-	return newImg, nil
+		return newImg, nil
+	}
 }
 
 func WriteFile(filename string, text string, opts ...*Options) error {

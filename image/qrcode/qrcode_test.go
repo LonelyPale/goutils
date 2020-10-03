@@ -1,13 +1,20 @@
 package qrcode
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestWriteFile(t *testing.T) {
-	if err := WriteFile("test.png", "123"); err != nil {
+	opts := DefaultOptions()
+	opts.Size = 200
+	//content := "1234567890"
+	content := "abcdefghijklmnopqrstuvwxyz"
+
+	if err := WriteFile("test.png", content, opts); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := WriteFile("test.jpg", "qwe"); err != nil {
+	if err := WriteFile("test.jpg", content, opts); err != nil {
 		t.Fatal(err)
 	}
 }
