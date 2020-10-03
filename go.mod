@@ -10,8 +10,10 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/google/uuid v1.1.1
 	github.com/json-iterator/go v1.1.9
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/vmihailenco/msgpack/v5 v5.0.0-alpha.2
 	go.mongodb.org/mongo-driver v1.3.2
 	google.golang.org/grpc v1.29.1
