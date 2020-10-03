@@ -2,8 +2,6 @@ package text
 
 import (
 	"image/color"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -40,22 +38,17 @@ func TestGenerateTextImage(t *testing.T) {
 	}
 
 	bgimg := "../../testdata/text/background.jpg"
-	var bs []byte
-	var err error
-
-	bs, err = GenerateTextImage([]Text{text}, bgimg, 80, "png")
+	img, err := GenerateTextImage([]Text{text}, bgimg)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := ioutil.WriteFile("../../testdata/text.png", bs, os.FileMode(0666)); err != nil {
+
+	if err := WriteFile(img, 0, "../../testdata/text.png"); err != nil {
 		t.Fatal(err)
 	}
 
-	bs, err = GenerateTextImage([]Text{text}, bgimg, 80, "jpg")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := ioutil.WriteFile("../../testdata/text.jpg", bs, os.FileMode(0666)); err != nil {
+	//jpeg.DefaultQuality
+	if err := WriteFile(img, 100, "../../testdata/text.jpg"); err != nil {
 		t.Fatal(err)
 	}
 }

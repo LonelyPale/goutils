@@ -166,7 +166,7 @@ func EncodeImage(img image.Image, quality int, typ string) ([]byte, error) {
 }
 
 //写入文件
-func writeFile(img image.Image, quality int, filename string) (err error) {
+func WriteFile(img image.Image, quality int, filename string) (err error) {
 	if filename == "" {
 		filename = "new_file.png"
 	}
@@ -191,7 +191,7 @@ func writeFile(img image.Image, quality int, filename string) (err error) {
 }
 
 //生成文字图片
-func GenerateTextImage(texts []Text, bgImagePath string, quality int, typ string) ([]byte, error) {
+func GenerateTextImage(texts []Text, bgImagePath string) (image.Image, error) {
 	img, err := readImage(bgImagePath)
 	if err != nil {
 		return nil, err
@@ -205,5 +205,5 @@ func GenerateTextImage(texts []Text, bgImagePath string, quality int, typ string
 		}
 	}
 
-	return EncodeImage(img, quality, typ)
+	return img, nil
 }
