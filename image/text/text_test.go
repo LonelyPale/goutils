@@ -1,4 +1,4 @@
-package image
+package text
 
 import (
 	"image/color"
@@ -10,7 +10,7 @@ import (
 func TestGenerateTextImage(t *testing.T) {
 	text := Text{
 		TextFont: TextFont{
-			Path:  "/Users/wyb/project/github/byinfo/testdata/font/FZSJ-BAOZNH.TTF",
+			Path:  "../../testdata/text/FZSJ-BAOZNH.TTF",
 			DPI:   72,
 			Size:  30,
 			Color: color.RGBA{R: 0, G: 0, B: 0, A: 255},
@@ -39,13 +39,23 @@ func TestGenerateTextImage(t *testing.T) {
 		},
 	}
 
-	bgimg := "/Users/wyb/project/github/byinfo/testdata/image/background.jpg"
-	bs, err := GenerateTextImage([]Text{text}, bgimg, 80)
+	bgimg := "../../testdata/text/background.jpg"
+	var bs []byte
+	var err error
+
+	bs, err = GenerateTextImage([]Text{text}, bgimg, 80, "png")
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err := ioutil.WriteFile("../../testdata/text.png", bs, os.FileMode(0666)); err != nil {
+		t.Fatal(err)
+	}
 
-	if err := ioutil.WriteFile("/Users/wyb/project/github/byinfo/testdata/text.jpg", bs, os.FileMode(0666)); err != nil {
+	bs, err = GenerateTextImage([]Text{text}, bgimg, 80, "jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ioutil.WriteFile("../../testdata/text.jpg", bs, os.FileMode(0666)); err != nil {
 		t.Fatal(err)
 	}
 }

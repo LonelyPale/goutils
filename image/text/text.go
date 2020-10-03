@@ -1,4 +1,4 @@
-package image
+package text
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ type Text struct {
 }
 
 //读取图片信息
-func readImage(filePath string) (*image.RGBA, error) {
+func readImage(filePath string) (image.Image, error) {
 	var imgFile *os.File
 	var bgImg image.Image //background image
 
@@ -68,6 +68,8 @@ func readImage(filePath string) (*image.RGBA, error) {
 		if err != nil {
 			return nil, fmt.Errorf("解析jpeg图片 %s", err)
 		}
+	} else {
+		return nil, fmt.Errorf("未知的图片格式 %s", fSuffix)
 	}
 
 	//RGBA
@@ -107,19 +109,19 @@ func readFont(filePath string) (*truetype.Font, error) {
 }
 
 //设置文字格式
-func setTextType(font *truetype.Font, img *image.RGBA, dpi, fontSize float64, cr color.Color) *freetype.Context {
+func setTextType(font *truetype.Font, img image.Image, dpi, fontSize float64, cr color.Color) *freetype.Context {
 	f := freetype.NewContext()
 	f.SetDPI(dpi)                  //设置分辨率
 	f.SetFont(font)                //设置字体
 	f.SetFontSize(fontSize)        //设置尺寸
 	f.SetClip(img.Bounds())        //设置用于绘制的剪辑矩形。
-	f.SetDst(img)                  //设置输出的图片
+	f.SetDst(img.(draw.Image))     //设置输出的图片
 	f.SetSrc(image.NewUniform(cr)) //设置用于绘制操作的源图像(字体颜色)
 	return f
 }
 
 //写入文字
-func writeText(text Text, img *image.RGBA) error {
+func writeText(text Text, img image.Image) error {
 	//读取字体信息
 	var font *truetype.Font
 	font, err := readFont(text.Path)
@@ -144,45 +146,64 @@ func writeText(text Text, img *image.RGBA) error {
 	return nil
 }
 
+func EncodeImage(img image.Image, quality int, typ string) ([]byte, error) {
+	buff := new(bytes.Buffer)
+
+	typ = strings.ToLower(typ)
+	if typ == "png" {
+		if err := png.Encode(buff, img); err != nil {
+			return nil, err
+		}
+	} else if typ == "jpg" || typ == "jpeg" {
+		if err := jpeg.Encode(buff, img, &jpeg.Options{Quality: quality}); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("未知的图片类型 %s", typ)
+	}
+
+	return buff.Bytes(), nil
+}
+
 //写入文件
-func writeFile(img *image.RGBA, quality int, filePath string) (err error) {
-	if filePath == "" {
-		filePath = "new_file.jpg"
+func writeFile(img image.Image, quality int, filename string) (err error) {
+	if filename == "" {
+		filename = "new_file.png"
 	}
 
-	var newFile *os.File
-	newFile, err = os.Create(filePath)
+	var bs []byte
+	fileSuffix := filepath.Ext(filename)
+	switch fileSuffix {
+	case ".png":
+		bs, err = EncodeImage(img, quality, "png")
+	case ".jpg":
+		bs, err = EncodeImage(img, quality, "jpg")
+	case ".jpeg":
+		bs, err = EncodeImage(img, quality, "jpeg")
+	default:
+		return fmt.Errorf("未知的图片扩展名 %s", fileSuffix)
+	}
 	if err != nil {
 		return err
 	}
 
-	err = jpeg.Encode(newFile, img, &jpeg.Options{Quality: quality})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ioutil.WriteFile(filename, bs, os.FileMode(0666))
 }
 
 //生成文字图片
-func GenerateTextImage(texts []Text, bgImagePath string, quality int) ([]byte, error) {
-	bgimg, err := readImage(bgImagePath)
+func GenerateTextImage(texts []Text, bgImagePath string, quality int, typ string) ([]byte, error) {
+	img, err := readImage(bgImagePath)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(texts) > 0 {
 		for _, text := range texts {
-			if err := writeText(text, bgimg); err != nil {
+			if err := writeText(text, img); err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	buff := new(bytes.Buffer)
-	if err := jpeg.Encode(buff, bgimg, &jpeg.Options{Quality: quality}); err != nil {
-		return nil, err
-	}
-
-	return buff.Bytes(), nil
+	return EncodeImage(img, quality, typ)
 }
