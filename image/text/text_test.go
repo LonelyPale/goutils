@@ -3,6 +3,8 @@ package text
 import (
 	"image/color"
 	"testing"
+
+	goimage "github.com/LonelyPale/goutils/image"
 )
 
 func TestGenerateTextImage(t *testing.T) {
@@ -38,17 +40,17 @@ func TestGenerateTextImage(t *testing.T) {
 	}
 
 	bgimg := "../../testdata/text/background.jpg"
-	img, err := GenerateTextImage([]Text{text}, bgimg)
+	img, err := GenerateTextImageFile([]Text{text}, bgimg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := WriteFile(img, 0, "../../testdata/text.png"); err != nil {
+	if err := goimage.WriteFile(img, 0, "../../testdata/text.png"); err != nil {
 		t.Fatal(err)
 	}
 
 	//jpeg.DefaultQuality
-	if err := WriteFile(img, 100, "../../testdata/text.jpg"); err != nil {
+	if err := goimage.WriteFile(img, 100, "../../testdata/text.jpg"); err != nil {
 		t.Fatal(err)
 	}
 }
