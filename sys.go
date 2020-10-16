@@ -15,6 +15,28 @@ func Exit(s string) {
 	os.Exit(1)
 }
 
+func LockPIDFile(pidfile string) error {
+	if IsFileNotExist(pidfile) {
+		if err := WritePIDFile(pidfile); err != nil {
+			return err
+		}
+
+		if err := NewFileLock(pidfile).Lock(); err != nil {
+			return err
+		}
+	} else {
+		if err := NewFileLock(pidfile).Lock(); err != nil {
+			return err
+		}
+
+		if err := WritePIDFile(pidfile); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func WritePIDFile(filepath string) error {
 	if len(filepath) == 0 {
 		if name, err := CurrentProcessName(); err != nil {
