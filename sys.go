@@ -15,7 +15,7 @@ func Exit(s string) {
 	os.Exit(1)
 }
 
-func CreatePIDFile(filepath string) error {
+func WritePIDFile(filepath string) error {
 	if len(filepath) == 0 {
 		var err error
 		if filepath, err = CurrentProcessName(); err != nil {
