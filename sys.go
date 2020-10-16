@@ -17,9 +17,10 @@ func Exit(s string) {
 
 func WritePIDFile(filepath string) error {
 	if len(filepath) == 0 {
-		var err error
-		if filepath, err = CurrentProcessName(); err != nil {
-			filepath = "./temp.pid"
+		if name, err := CurrentProcessName(); err != nil {
+			filepath = "temp.pid"
+		} else {
+			filepath = name + ".pid"
 		}
 	}
 
