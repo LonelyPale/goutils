@@ -3,26 +3,28 @@
 package config
 
 import (
-	"github.com/LonelyPale/goutils/config"
 	"log"
 	"os"
+
+	"github.com/LonelyPale/goutils/config"
 )
 
+//支持 go-spring 属性绑定
 type MongodbConfig struct {
-	URI               string
-	Timeout           int //单位秒
-	EnableTransaction bool
-	MaxPoolSize       int
-	MinPoolSize       int
+	URI               string `value:"${mongodb.uri:=mongodb://localhost}"`
+	MinPoolSize       int    `value:"${mongodb.min_pool_size:=3}"`
+	MaxPoolSize       int    `value:"${mongodb.max_pool_size:=10}"`
+	Timeout           int    `value:"${mongodb.timeout:=10}"` //单位秒
+	EnableTransaction bool   `value:"${mongodb.enable_transaction:=false}"`
 }
 
 func DefaultMongodbConfig() *MongodbConfig {
 	return &MongodbConfig{
 		URI:               "mongodb://user:password@ip1:port,ip2:port/?replicaSet=replicaSet",
-		EnableTransaction: false,
-		MaxPoolSize:       10,
 		MinPoolSize:       3,
+		MaxPoolSize:       10,
 		Timeout:           10,
+		EnableTransaction: false,
 	}
 }
 

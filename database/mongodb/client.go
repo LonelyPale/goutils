@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Client struct {
@@ -28,15 +29,29 @@ func Connect(opts *ClientOptions) (*Client, error) {
 		return nil, err
 	}
 
+	if err = client.mongoClient.Ping(ctx, readpref.Primary()); err != nil {
+		return nil, err
+	}
+
 	return client, nil
 }
 
+// NewClient 创建 MongoDB 客户端
 func NewClient(opts *ClientOptions) (*Client, error) {
 	mongoClient, err := mongo.NewClient(opts.mongoClientOptions)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
 		opts:        opts,
 		mongoClient: mongoClient,
-	}, err
+	}, nil
+}
+
+// CloseClient 关闭 MongoDB 客户端
+func CloseClient(client *Client) error {
+	return client.Disconnect(context.Background())
 }
 
 func (c *Client) MongoClient() *mongo.Client {
