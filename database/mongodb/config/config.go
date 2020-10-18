@@ -9,6 +9,10 @@ import (
 	"github.com/LonelyPale/goutils/config"
 )
 
+const (
+	KeyDefaultDBName = "mongodb.default_db_name"
+)
+
 //支持 go-spring 属性绑定
 type MongodbConfig struct {
 	URI               string `value:"${mongodb.uri:=mongodb://localhost}"`
@@ -16,6 +20,7 @@ type MongodbConfig struct {
 	MaxPoolSize       int    `value:"${mongodb.max_pool_size:=10}"`
 	Timeout           int    `value:"${mongodb.timeout:=10}"` //单位秒
 	EnableTransaction bool   `value:"${mongodb.enable_transaction:=false}"`
+	DefaultDBName     string `value:"${mongodb.default_db_name:=test}"`
 }
 
 func DefaultMongodbConfig() *MongodbConfig {

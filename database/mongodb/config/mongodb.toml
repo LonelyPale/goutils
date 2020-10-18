@@ -4,3 +4,4 @@ min_pool_size = 3 #最小连接池
 max_pool_size = 10 #最大连接池
 timeout = 10 #超时时间: 单位秒
 enable_transaction = false #是否启用事务
+default_db_name = "test" #默认的数据库名称
