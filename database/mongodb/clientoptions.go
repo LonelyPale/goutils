@@ -3,20 +3,23 @@
 package mongodb
 
 import (
-	"github.com/LonelyPale/goutils/database/mongodb/config"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/LonelyPale/goutils/database/mongodb/config"
 )
 
 type ClientOptions struct {
 	//custom options
-	URI               string
-	Timeout           time.Duration
-	EnableTransaction bool
+	URI               string        //数据库连接字符串
+	Timeout           time.Duration //单位秒
+	EnableTransaction bool          //默认不启用事务,启用事务需要打开副本集
+	DefaultDBName     string        //默认的数据库名称
 
 	//options.ClientOptions
-	MaxPoolSize uint64
-	MinPoolSize uint64
+	MaxPoolSize uint64 //最大连接池
+	MinPoolSize uint64 //最小连接池
 
 	mongoClientOptions *options.ClientOptions
 }
@@ -24,10 +27,11 @@ type ClientOptions struct {
 func NewClientOptions(uri string) *ClientOptions {
 	clientOptions := &ClientOptions{
 		URI:                uri,
-		Timeout:            10 * time.Second, //单位秒
-		EnableTransaction:  false,            //默认不启用事务,启用事务需要打开副本集
-		MaxPoolSize:        10,               //最大连接池
-		MinPoolSize:        3,                //最小连接池
+		Timeout:            10 * time.Second,
+		EnableTransaction:  false,
+		DefaultDBName:      "test",
+		MaxPoolSize:        10,
+		MinPoolSize:        3,
 		mongoClientOptions: options.Client(),
 	}
 	clientOptions.Apply()
@@ -37,6 +41,7 @@ func NewClientOptions(uri string) *ClientOptions {
 func NewClientOptionsFromConfig(conf *config.MongodbConfig) *ClientOptions {
 	clientOptions := NewClientOptions(conf.URI)
 	clientOptions.EnableTransaction = conf.EnableTransaction
+	clientOptions.DefaultDBName = conf.DefaultDBName
 	if conf.Timeout > 0 {
 		clientOptions.Timeout = time.Duration(conf.Timeout) * time.Second
 	}

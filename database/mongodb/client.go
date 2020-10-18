@@ -89,3 +89,11 @@ func (c *Client) StartSession(opts ...*options.SessionOptions) (mongo.Session, e
 func (c *Client) GetContext() (context.Context, context.CancelFunc) {
 	return TimeoutContext(c.opts.Timeout)
 }
+
+func (c *Client) DB(db ...string) *Database {
+	if len(db) > 0 && len(db[0]) > 0 {
+		return c.Database(db[0])
+	} else {
+		return c.Database(c.opts.DefaultDBName)
+	}
+}
