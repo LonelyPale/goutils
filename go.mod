@@ -17,6 +17,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	github.com/stretchr/testify v1.4.0
 	github.com/vmihailenco/msgpack/v5 v5.0.0-alpha.2
 	go.mongodb.org/mongo-driver v1.3.2
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect

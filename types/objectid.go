@@ -3,6 +3,7 @@
 package types
 
 import (
+	"github.com/LonelyPale/goutils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/LonelyPale/goutils/errors"
@@ -21,6 +22,8 @@ func ObjectIDFromHex(s string) (ObjectID, error) {
 }
 
 func ObjectIDFrom(i interface{}) (ObjectID, error) {
+	i = goutils.PrimitiveValue(i) //去掉指针的包装，以获得原始类型的值
+
 	switch v := i.(type) {
 	case ObjectID:
 		return v, nil
