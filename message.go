@@ -2,44 +2,36 @@ package goutils
 
 import "github.com/LonelyPale/goutils/errors/ecode"
 
-type Msg = Message
-
 type Message struct {
-	Code int         `json:"code"`
-	Text string      `json:"text,omitempty"`
-	Data interface{} `json:"data,omitempty"`
+	Code int         `json:"code"`           //状态码
+	Msg  string      `json:"msg,omitempty"`  //消息
+	Data interface{} `json:"data,omitempty"` //结果数据
 }
 
-func NewMessage(code int, text string, data interface{}) *Message {
-	return &Message{code, text, data}
-}
-
-func NewSuccessMessage(text string, datas ...interface{}) *Message {
-	code := ecode.StatusOK
-	if len(text) == 0 {
-		text = ecode.StatusText(code)
-	}
-
+func NewMessage(code int, msg string, datas ...interface{}) *Message {
 	var data interface{}
 	if len(datas) == 1 {
 		data = datas[0]
 	} else if len(datas) > 1 {
 		data = datas
 	}
+	return &Message{code, msg, data}
+}
 
-	return &Message{code, text, data}
+func NewSuccessMessage(datas ...interface{}) *Message {
+	return NewMessage(ecode.StatusOK, ecode.StatusText(ecode.StatusOK), datas...)
 }
 
 func NewErrorMessage(err error) *Message {
 	switch e := err.(type) {
 	case ecode.ErrorCode:
-		return &Message{e.Code(), e.Error(), e.Details()}
+		return &Message{Code: e.Code(), Msg: e.Error()}
 	default:
 		emsg := e.Error()
 		if len(emsg) > 0 {
-			return &Message{Code: ecode.StatusUndefinedError, Text: emsg}
+			return &Message{Code: ecode.StatusUndefinedError, Msg: emsg}
 		} else {
-			return &Message{Code: ecode.StatusUndefinedError, Text: ecode.StatusText(ecode.StatusUndefinedError), Data: err}
+			return &Message{Code: ecode.StatusUndefinedError, Msg: ecode.StatusText(ecode.StatusUndefinedError)}
 		}
 	}
 }

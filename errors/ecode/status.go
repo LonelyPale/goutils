@@ -7,7 +7,7 @@ import (
 
 const (
 	StatusOK             = 0
-	StatusUndefinedError = -1
+	StatusUndefinedError = 1
 )
 
 var statusText = map[int]string{
