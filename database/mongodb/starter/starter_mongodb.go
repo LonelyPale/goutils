@@ -12,12 +12,12 @@ import (
 func init() {
 	SpringBoot.
 		RegisterNameBeanFn("mongodb-client", func(cfg config.MongodbConfig) (*mongodb.Client, error) {
-			SpringLogger.Info("open mongodb")
+			SpringLogger.Info("open mongodb client.")
 			return mongodb.Connect(mongodb.NewClientOptionsFromConfig(&cfg))
 		}).
 		ConditionOnMissingBean((*mongodb.Client)(nil)).
 		Destroy(func(client *mongodb.Client) {
-			SpringLogger.Info("close mongodb")
+			SpringLogger.Info("close mongodb client.")
 			if err := mongodb.CloseClient(client); err != nil {
 				SpringLogger.Error(err)
 			}
