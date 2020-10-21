@@ -29,9 +29,9 @@ func NewErrorMessage(err error) *Message {
 	default:
 		emsg := e.Error()
 		if len(emsg) > 0 {
-			return &Message{Code: ecode.StatusUndefinedError, Msg: emsg}
+			return &Message{Code: ecode.StatusError, Msg: emsg}
 		} else {
-			return &Message{Code: ecode.StatusUndefinedError, Msg: ecode.StatusText(ecode.StatusUndefinedError)}
+			return &Message{Code: ecode.StatusError, Msg: ecode.StatusText(ecode.StatusError)}
 		}
 	}
 }

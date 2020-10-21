@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	StatusOK             = 0
-	StatusUndefinedError = 1
+	StatusOK    = 0
+	StatusError = 1
 )
 
 var statusText = map[int]string{
-	StatusOK:             "OK",
-	StatusUndefinedError: "Undefined Error",
+	StatusOK:    "OK",
+	StatusError: "Error",
 }
 
 func StatusText(code int) string {
@@ -36,6 +36,15 @@ type Status struct {
 	code    int
 	message string
 	details []interface{}
+}
+
+func New(err error) ErrorCode {
+	switch v := err.(type) {
+	case ErrorCode:
+		return v
+	default:
+		return Error(StatusError, v.Error())
+	}
 }
 
 // Error new status with code and message

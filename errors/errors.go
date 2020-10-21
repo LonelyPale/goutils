@@ -1,6 +1,9 @@
 package errors
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
 
 func UnknownError(r interface{}) error {
 	switch e := r.(type) {
@@ -11,7 +14,7 @@ func UnknownError(r interface{}) error {
 	case string:
 		return errors.New(e)
 	default:
-		return errors.New("unknown error")
+		return errors.New(fmt.Sprint(r))
 	}
 }
 
