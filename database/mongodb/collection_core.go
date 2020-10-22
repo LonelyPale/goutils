@@ -183,7 +183,7 @@ func (coll *Collection) update(ctx context.Context, filter interface{}, updater 
 }
 
 // 删除匹配的第一条记录, 返回删除数量
-func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
 	if coll == nil {
 		return 0, ErrNilCollection
 	}
@@ -210,7 +210,7 @@ func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts 
 		return 0, err
 	}
 
-	count := int(result.DeletedCount)
+	count := result.DeletedCount
 
 	// callback after
 	//ctx = context.WithValue(ctx, DeleteResultKey, result)
@@ -225,7 +225,7 @@ func (coll *Collection) deleteOne(ctx context.Context, filter interface{}, opts 
 }
 
 // 删除所有匹配的记录, 返回删除数量
-func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
+func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
 	if coll == nil {
 		return 0, ErrNilCollection
 	}
@@ -252,7 +252,7 @@ func (coll *Collection) delete(ctx context.Context, filter interface{}, opts ...
 		return 0, err
 	}
 
-	count := int(result.DeletedCount)
+	count := result.DeletedCount
 
 	// callback after
 	//ctx = context.WithValue(ctx, DeleteResultKey, result)

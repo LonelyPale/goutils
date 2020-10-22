@@ -30,7 +30,7 @@ type BeforeDeleter interface {
 }
 
 type AfterDeleter interface {
-	AfterDelete(ctx context.Context, filter interface{}, opts []*options.DeleteOptions, count int) error
+	AfterDelete(ctx context.Context, filter interface{}, opts []*options.DeleteOptions, count int64) error
 }
 
 type BeforeFinder interface {
