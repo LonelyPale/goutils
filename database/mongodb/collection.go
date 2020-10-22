@@ -184,8 +184,8 @@ func (coll *Collection) Update(ctx context.Context, filter interface{}, updater 
 	return result, nil
 }
 
-func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
-	var count int
+func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
+	var count int64
 
 	if coll.client.opts.EnableTransaction {
 		if isSessionContext(ctx) {
@@ -208,8 +208,8 @@ func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts 
 	return count, nil
 }
 
-func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int, error) {
-	var count int
+func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
+	var count int64
 
 	if coll.client.opts.EnableTransaction {
 		if isSessionContext(ctx) {
