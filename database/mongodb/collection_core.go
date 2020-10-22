@@ -309,11 +309,100 @@ func (coll *Collection) findOne(ctx context.Context, result interface{}, filter 
 	return nil
 }
 
+// 查找匹配的所有记录, result 为存储结果的对象指针, 且必须是指针
+// var users []model.User 或 users := make([]model.User, 0) 或 users := []model.User{}
+// var users []*model.User 或 users := make([]*model.User, 0) 或 users := []*model.User{}
+// 然后 err := Find(nil, &users, filter)
+// users := make([]interface{}, 0) 错误，不能是interface{}万能类型，必须是确定的类型
+func (coll *Collection) find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) (err error) {
+	//start := time.Now()
+
+	if coll == nil {
+		return ErrNilCollection
+	}
+
+	if result == nil {
+		return ErrNilResult
+	}
+
+	val := reflect.Indirect(reflect.ValueOf(result))
+	//fmt.Printf("val: %v\t%v\n", val, val.Kind())
+	if val.Kind() != reflect.Slice {
+		return ErrResultSlice
+	}
+
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	model := MakeInstance(coll.name)
+
+	// callback before
+	//ctx = context.WithValue(ctx, FindOptionsKey, opts)
+	before, ok := model.(BeforeFinder)
+	if ok {
+		if err := before.BeforeFind(ctx, result, filter, opts); err != nil {
+			return err
+		}
+	}
+
+	cur, err := coll.mongoCollection.Find(ctx, filter, opts...)
+	defer func() {
+		if cur != nil {
+			err = cur.Close(ctx)
+		}
+	}()
+	if err != nil {
+		return err
+	}
+
+	if err := cur.All(ctx, result); err != nil {
+		return err
+	}
+
+	//elapsed := time.Since(start)
+	//fmt.Println("run elapsed: ", elapsed)
+
+	// callback after
+	//ctx = context.WithValue(ctx, ResultKey, result)
+	after, ok := model.(AfterFinder)
+	if ok {
+		if err := after.AfterFind(ctx, result, filter, opts); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// 统计匹配的记录数量
+func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
+	if coll == nil {
+		return 0, ErrNilCollection
+	}
+
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	count, err := coll.mongoCollection.CountDocuments(ctx, filter, opts...)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
+}
+
 // 查找匹配的所有记录, result 为存储结果的对象指针
 // var users []*model.User 或 users := make([]*model.User, 0) 或 users := []*model.User{}
 // 然后 err := Find(&users, collUser, nil)
 // users := make([]interface{}, 0) 错误，不能是interface{}万能类型，必须是确定的类型
-func (coll *Collection) find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
+// Deprecated: 弃用，官方已增加 Cursor.All() 方法来设置结果集，不用再自己反射生成结果切片。
+func (coll *Collection) findV1(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
 	//start := time.Now()
 	if coll == nil {
 		return ErrNilCollection
@@ -398,24 +487,4 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 	}
 
 	return nil
-}
-
-// 统计匹配的记录数量
-func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
-	if coll == nil {
-		return 0, ErrNilCollection
-	}
-
-	if ctx == nil {
-		var cancel context.CancelFunc
-		ctx, cancel = coll.GetContext()
-		defer cancel()
-	}
-
-	count, err := coll.mongoCollection.CountDocuments(ctx, filter, opts...)
-	if err != nil {
-		return 0, err
-	}
-
-	return int(count), nil
 }
