@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/errors"
 	"github.com/LonelyPale/goutils/types"
 )
 
@@ -325,10 +326,9 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 		return ErrNilResult
 	}
 
-	val := reflect.Indirect(reflect.ValueOf(result))
-	//fmt.Printf("val: %v\t%v\n", val, val.Kind())
-	if val.Kind() != reflect.Slice {
-		return ErrResultSlice
+	resVal := reflect.ValueOf(result)
+	if resVal.Kind() != reflect.Ptr || reflect.Indirect(resVal).Kind() != reflect.Slice {
+		return errors.New("result argument must be a pointer to a slice")
 	}
 
 	if ctx == nil {
@@ -351,7 +351,9 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 	cur, err := coll.mongoCollection.Find(ctx, filter, opts...)
 	defer func() {
 		if cur != nil {
-			err = cur.Close(ctx)
+			if e := cur.Close(ctx); e != nil {
+				err = errors.Errors(err, e)
+			}
 		}
 	}()
 	if err != nil {
@@ -378,7 +380,7 @@ func (coll *Collection) find(ctx context.Context, result interface{}, filter int
 }
 
 // 统计匹配的记录数量
-func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
+func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	if coll == nil {
 		return 0, ErrNilCollection
 	}
@@ -394,7 +396,7 @@ func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*
 		return 0, err
 	}
 
-	return int(count), nil
+	return count, nil
 }
 
 // 查找匹配的所有记录, result 为存储结果的对象指针
@@ -433,7 +435,7 @@ func (coll *Collection) findV1(ctx context.Context, result interface{}, filter i
 	//fmt.Printf("val: %v\t%v\n", val, val.Kind())
 
 	if val.Kind() != reflect.Slice {
-		return ErrResultSlice
+		return errors.New("result slice type conversion failure")
 	}
 
 	cur, err := coll.mongoCollection.Find(ctx, filter, opts...)

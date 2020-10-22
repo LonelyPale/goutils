@@ -236,10 +236,30 @@ func (coll *Collection) FindOne(ctx context.Context, result interface{}, filter 
 	return coll.findOne(ctx, result, filter, opts...)
 }
 
+//result 必须是指向切片的指针或指向 Pager 接口的指针
 func (coll *Collection) Find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
-	return coll.find(ctx, result, filter, opts...)
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	pager, ok := result.(Paginator)
+	if !ok {
+		return coll.find(ctx, result, filter, opts...)
+	}
+
+	total, err := coll.Count(ctx, filter)
+	if err != nil {
+		return err
+	}
+	pager.SetTotal(total)
+
+	findOptions := options.Find().SetSkip(pager.Skip()).SetLimit(pager.Limit())
+	opts = append(opts, findOptions)
+	return coll.find(ctx, pager.Result(), filter, opts...)
 }
 
-func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int, error) {
+func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	return coll.count(ctx, filter, opts...)
 }

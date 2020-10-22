@@ -1,10 +1,13 @@
 package mongodb
 
 import (
-	"github.com/LonelyPale/goutils/types"
+	"testing"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"testing"
+
+	"github.com/LonelyPale/goutils/pagination"
+	"github.com/LonelyPale/goutils/types"
 )
 
 func TestCollection_Find(t *testing.T) {
@@ -21,20 +24,20 @@ func TestCollection_Find(t *testing.T) {
 	t.Log(result)
 }
 
-func TestCollection_Find1(t *testing.T) {
+func TestCollection_FindPagination(t *testing.T) {
 	collection := client.Database("TestDB").Collection("test")
-	opts := options.Find().SetSkip(2 * 1).SetLimit(2)
-
-	filter := map[string]string{}
 	var result []struct {
 		ID    types.ObjectID `bson:"_id,omitempty"`
 		Title string         `bson:"title,omitempty"`
 		Name  string         `bson:"name,omitempty"`
 	}
-	err := collection.Find(nil, &result, filter, opts)
+	pager := pagination.Pagination{Current: 2, PageSize: 2, Data: &result}
+	filter := map[string]string{}
+
+	err := collection.Find(nil, &pager, filter)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log(result)
+	t.Log(pager)
 }
