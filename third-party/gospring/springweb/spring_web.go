@@ -12,6 +12,7 @@ import (
 
 func init() {
 	SpringWeb.RpcInvoke = WebInvoke
+	SpringWeb.Validator = SpringWeb.NewDefaultValidator()
 }
 
 // WebInvoke 替换 spring-web 默认的 rpc 执行函数
