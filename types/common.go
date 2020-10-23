@@ -4,6 +4,13 @@ type A []interface{}
 
 type M map[string]interface{}
 
+func (m M) String(key string) string {
+	if m == nil {
+		return ""
+	}
+	return m[key].(string)
+}
+
 type E struct {
 	Key   string
 	Value interface{}

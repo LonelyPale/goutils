@@ -3,11 +3,11 @@ package controller
 import (
 	"net/http"
 
+	"github.com/go-spring/spring-logger"
 	"github.com/go-spring/spring-web"
 
 	"github.com/LonelyPale/goutils"
 	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/errors/ecode"
 )
 
 func init() {
@@ -26,16 +26,16 @@ func WebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext) interf
 				result = errors.UnknownError(r)
 			}
 			_ = webCtx.JSON(http.StatusOK, goutils.NewErrorMessage(result))
+			SpringLogger.Error(result)
 		}
 	}()
 
 	var result *goutils.Message
 	switch v := fn(webCtx).(type) {
+	case goutils.Message:
 	case error:
 		result = goutils.NewErrorMessage(v)
-	case ecode.ErrorCode:
-		result = goutils.NewErrorMessage(v)
-	case goutils.Message:
+		SpringLogger.Error(v)
 	default:
 		result = goutils.NewSuccessMessage(v)
 	}
