@@ -9,6 +9,10 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/go-spring/spring-boot v1.0.5 // indirect
+	github.com/go-spring/spring-error v1.0.5
+	github.com/go-spring/spring-logger v1.0.5
+	github.com/go-spring/spring-utils v1.0.5
+	github.com/go-spring/spring-web v1.0.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.1.1
 	github.com/json-iterator/go v1.1.9
