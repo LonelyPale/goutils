@@ -21,3 +21,7 @@ func defaultSessionFilter(config WebSessionConfig) SpringWeb.Filter {
 	store = memstore.NewStore([]byte(config.SecretKey))
 	return SpringGin.Filter(sessions.Sessions(config.Name, store))
 }
+
+func GetSession(ctx SpringWeb.WebContext) sessions.Session {
+	return sessions.Default(SpringGin.GinContext(ctx))
+}
