@@ -20,3 +20,7 @@ git tag -ln
 git tag -a v0.0.5 -m "goutils-v0.0.5"
 git push origin --tags
 ```
+
+## License
+
+This project is under MIT License. See the [LICENSE](LICENSE) file for the full license text.
