@@ -9,7 +9,7 @@ import (
 //去掉指针的包装，以获得原始类型(PrimitiveType)
 func PrimitiveValue(i interface{}) interface{} {
 	if i == nil {
-		panic(errors.ErrCanNotNil)
+		return nil
 	}
 
 	val := reflect.ValueOf(i)
