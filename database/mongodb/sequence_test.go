@@ -7,9 +7,9 @@ import (
 
 func TestGetSequence(t *testing.T) {
 	coll := client.DB().Collection("sequence")
-	sequence := NewSequence(coll)
+	sequence := NewSequence(coll, "test")
 
-	n, err := sequence.Inc("test")
+	n, err := sequence.Inc()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,13 +20,13 @@ func TestGetSequence(t *testing.T) {
 
 func TestGetSequenceGo(t *testing.T) {
 	coll := client.DB().Collection("sequence")
-	sequence := NewSequence(coll)
+	sequence := NewSequence(coll, "test")
 
 	var group sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		group.Add(1)
 		go func(i int) {
-			n, err := sequence.Inc("test")
+			n, err := sequence.Inc()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -35,6 +35,4 @@ func TestGetSequenceGo(t *testing.T) {
 		}(i)
 	}
 	group.Wait()
-
-	t.Log("Sequence:", sequence)
 }
