@@ -399,6 +399,30 @@ func (coll *Collection) count(ctx context.Context, filter interface{}, opts ...*
 	return count, nil
 }
 
+// 查找一条记录并修改
+func (coll *Collection) findOneAndUpdate(ctx context.Context, result interface{}, filter interface{}, update interface{}, opts ...*options.FindOneAndUpdateOptions) error {
+	if coll == nil {
+		return ErrNilCollection
+	}
+
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	if result == nil {
+		return ErrNilResult
+	}
+
+	err := coll.mongoCollection.FindOneAndUpdate(ctx, filter, update, opts...).Decode(result)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // 查找匹配的所有记录, result 为存储结果的对象指针
 // var users []*model.User 或 users := make([]*model.User, 0) 或 users := []*model.User{}
 // 然后 err := Find(&users, collUser, nil)

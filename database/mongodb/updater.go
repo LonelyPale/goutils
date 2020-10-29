@@ -10,6 +10,7 @@ import (
 const (
 	SetKey   = "$set"
 	UnsetKey = "$unset"
+	IncKey   = "$inc"
 )
 
 type Updater map[string]interface{}
@@ -24,6 +25,10 @@ func Set(values ...interface{}) Updater {
 
 func Unset(keys ...string) Updater {
 	return Updater{}.Unset(keys...)
+}
+
+func Inc(values ...interface{}) Updater {
+	return Updater{}.Inc(values...)
 }
 
 // 只支持map
@@ -80,6 +85,31 @@ func (u Updater) Unset(keys ...string) Updater {
 
 	for _, key := range keys {
 		unset[key] = ""
+	}
+
+	return u
+}
+
+// { $inc: { quantity: -2, "metrics.orders": 1 } }
+// { $inc: { <field1>: <amount1>, <field2>: <amount2>, ... } }
+func (u Updater) Inc(values ...interface{}) Updater {
+	number := len(values)
+
+	if number == 0 {
+		return u
+	} else if number == 1 {
+		u[IncKey] = values[0]
+	} else {
+		set, err := u.checkout(IncKey)
+		if err != nil {
+			return u
+		}
+
+		for i, n := 0, number/2; i < n; i++ {
+			key := values[i*2].(string)
+			val := values[i*2+1]
+			set[key] = val
+		}
 	}
 
 	return u

@@ -30,6 +30,7 @@ func DefaultMongodbConfig() *MongodbConfig {
 		MaxPoolSize:       10,
 		Timeout:           10,
 		EnableTransaction: false,
+		DefaultDBName:     "test",
 	}
 }
 

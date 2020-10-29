@@ -263,3 +263,7 @@ func (coll *Collection) Find(ctx context.Context, result interface{}, filter int
 func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	return coll.count(ctx, filter, opts...)
 }
+
+func (coll *Collection) FindOneAndUpdate(ctx context.Context, result interface{}, filter interface{}, update interface{}, opts ...*options.FindOneAndUpdateOptions) error {
+	return coll.findOneAndUpdate(ctx, result, filter, update, opts...)
+}
