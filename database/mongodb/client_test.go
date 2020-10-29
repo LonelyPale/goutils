@@ -3,12 +3,11 @@
 package mongodb
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/LonelyPale/goutils/database/mongodb/config"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const configPath = "/Users/wyb/project/github/goutils/mongodb.conf.test.toml"
@@ -40,9 +39,6 @@ func TestFindOne(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	conf := config.ReadConfigFile(configPath)
-	GetInstance(conf.Mongodb)
-
 	clientOptions := NewClientOptionsFromFile(configPath)
 	var err error
 	client, err = Connect(clientOptions)

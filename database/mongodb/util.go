@@ -1,8 +1,6 @@
 package mongodb
 
 import (
-	"sync"
-
 	"github.com/go-spring/spring-boot"
 	log "github.com/sirupsen/logrus"
 
@@ -13,15 +11,11 @@ const (
 	logModule = "mongodb"
 )
 
-var (
-	singleton *Client
-	once      sync.Once
-)
-
-func getClient(cfgs ...*config.MongodbConfig) *Client {
+func GetClient(cfgs ...*config.MongodbConfig) *Client {
 	var instance *Client
+	var err error
+
 	if len(cfgs) > 0 {
-		var err error
 		opts := NewClientOptionsFromConfig(cfgs[0])
 		instance, err = Connect(opts)
 		if err != nil {
@@ -29,19 +23,9 @@ func getClient(cfgs ...*config.MongodbConfig) *Client {
 		}
 	} else {
 		if ok := SpringBoot.GetBean(&instance); !ok {
-			log.WithField("module", logModule).Panic("Can't get mongodb instance")
+			log.WithField("module", logModule).Panic("Can't get spring mongodb instance")
 		}
 	}
+
 	return instance
-}
-
-func GetInstance(cfgs ...*config.MongodbConfig) *Client {
-	once.Do(func() {
-		singleton = getClient(cfgs...)
-	})
-	return singleton
-}
-
-func DB(db ...string) *Database {
-	return GetInstance().DB(db...)
 }

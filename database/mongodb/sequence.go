@@ -7,33 +7,28 @@ import (
 	"github.com/LonelyPale/goutils/pointer"
 )
 
-const (
-	SequenceCollectionName = "sequence"
-)
-
-// 注册模型类型
-func init() {
-	RegisterType((*Sequence)(nil), SequenceCollectionName)
-}
-
 type Sequence struct {
+	Model `bson:"-" json:"-"`
 	ID    string `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,min=1" vCreate:"required" vModify:"required" vDelete:"required"`
 	Value int64  `bson:"value,omitempty" json:"value,omitempty" validate:"omitempty,gte=1"`
 }
 
-func GetSequence(name string) (int64, error) {
+func NewSequence(coll *Collection) *Sequence {
+	sequence := new(Sequence)
+	sequence.Model = NewModel(sequence, coll)
+	return sequence
+}
+
+func (s *Sequence) Inc(name string) (int64, error) {
 	filter := ID(name)
 	update := Inc("value", 1)
-
-	var result *Sequence
-	coll := DB().Collection(SequenceCollectionName)
 	opts := &options.FindOneAndUpdateOptions{
 		Upsert: pointer.Bool(true),
 	}
 
-	if err := coll.FindOneAndUpdate(nil, &result, filter, update, opts); err != nil {
+	if err := s.coll.FindOneAndUpdate(nil, s, filter, update, opts); err != nil {
 		if err == mongo.ErrNoDocuments {
-			if err = coll.FindOneAndUpdate(nil, &result, filter, update, opts); err != nil {
+			if err = s.coll.FindOneAndUpdate(nil, s, filter, update, opts); err != nil {
 				return 0, err
 			}
 		} else {
@@ -41,5 +36,5 @@ func GetSequence(name string) (int64, error) {
 		}
 	}
 
-	return result.Value, nil
+	return s.Value, nil
 }
