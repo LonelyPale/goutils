@@ -9,13 +9,11 @@ func Bool(b bool) *bool {
 }
 
 func True() *bool {
-	b := true
-	return &b
+	return Bool(true)
 }
 
 func False() *bool {
-	b := false
-	return &b
+	return Bool(false)
 }
 
 func Int(n int) *int {

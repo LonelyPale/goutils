@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils/pointer"
+	"github.com/LonelyPale/goutils/types"
 )
 
 type Sequence struct {
@@ -30,7 +30,7 @@ func (s *Sequence) Inc() (int64, error) {
 	filter := ID(s.ID)
 	update := Inc("value", 1)
 	opts := &options.FindOneAndUpdateOptions{
-		Upsert: pointer.Bool(true),
+		Upsert: types.True(),
 	}
 
 	if err := s.coll.FindOneAndUpdate(nil, s, filter, update, opts); err != nil {
