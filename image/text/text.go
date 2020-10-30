@@ -94,10 +94,7 @@ func GenerateTextImage(texts []Text, bgImage image.Image) (image.Image, error) {
 		return nil, errors.New("background is not nil")
 	}
 
-	img, ok := bgImage.(draw.Image)
-	if !ok {
-		img = goimage.Clone(bgImage)
-	}
+	img := goimage.Clone(bgImage)
 
 	if len(texts) > 0 {
 		for _, text := range texts {
