@@ -1,7 +1,6 @@
 package springweb
 
 import (
-	"github.com/LonelyPale/goutils/thirdparty/gin/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-gin"
@@ -13,6 +12,7 @@ import (
 
 type WebServerConfig struct {
 	StarterWeb.WebServerConfig
+	Cors    WebCorsConfig
 	Session WebSessionConfig
 }
 
@@ -47,13 +47,16 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 	fRecover := SpringGin.Filter(gin.Recovery())
 	container.SetRecoveryFilter(fRecover)
 
+	// gin cors 中间件
+	if config.Cors.Enable {
+		container.AddFilter(CorsFilter(config.Cors))
+	}
+
 	// gin session 中间件
 	if config.Session.Enable {
 		fSession := SessionFilter(config.Session)
 		container.AddFilter(fSession)
 	}
-
-	container.AddFilter(SpringGin.Filter(middleware.Cors()))
 
 	return container
 }
