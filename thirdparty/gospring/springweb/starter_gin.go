@@ -1,6 +1,7 @@
 package springweb
 
 import (
+	"github.com/LonelyPale/goutils/thirdparty/gin/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-gin"
@@ -51,6 +52,8 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 		fSession := SessionFilter(config.Session)
 		container.AddFilter(fSession)
 	}
+
+	container.AddFilter(SpringGin.Filter(middleware.Cors()))
 
 	return container
 }

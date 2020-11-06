@@ -37,6 +37,7 @@ func Cors(origins ...string) gin.HandlerFunc {
 		//放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.Status(http.StatusOK)
+			c.Abort()
 			return
 		}
 
