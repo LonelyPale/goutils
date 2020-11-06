@@ -5,12 +5,13 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/LonelyPale/goutils"
 )
 
 func Cors(origins ...string) gin.HandlerFunc {
-	origin := goutils.If(len(origins) > 0, origins[0], "").(string)
+	var origin string
+	if len(origins) > 0 {
+		origin = origins[0]
+	}
 
 	return func(c *gin.Context) {
 		method := c.Request.Method
