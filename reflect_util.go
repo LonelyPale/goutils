@@ -28,3 +28,11 @@ func PrimitiveValue(i interface{}) interface{} {
 
 	return val.Interface()
 }
+
+// Indirect 解除 Type 的指针
+func Indirect(t reflect.Type) reflect.Type {
+	if t.Kind() != reflect.Ptr {
+		return t
+	}
+	return t.Elem()
+}

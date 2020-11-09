@@ -8,6 +8,8 @@ require (
 	github.com/bwmarrin/snowflake v0.3.1-0.20190412223032-c09e69ae5993
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-playground/locales v0.13.0
+	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/go-spring/spring-boot v1.0.5
 	github.com/go-spring/spring-error v1.0.5
