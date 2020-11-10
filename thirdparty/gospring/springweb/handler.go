@@ -4,18 +4,23 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-spring/spring-error"
 	"github.com/go-spring/spring-logger"
 	"github.com/go-spring/spring-utils"
 	"github.com/go-spring/spring-web"
+
+	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/validator"
 )
 
 func init() {
-	SpringWeb.Validator = SpringWeb.NewDefaultValidator()
+	//SpringWeb.Validator = SpringWeb.NewDefaultValidator()
+	if err := validator.DefaultValidator.SetLanguage(validator.ZH); err != nil {
+		panic(err)
+	}
 }
 
 func validBindFn(fnType reflect.Type) bool {
@@ -102,7 +107,7 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 		SpringError.ERROR.Panic(err).When(err != nil)
 
 		//验证绑定参数
-		err = SpringWeb.Validate(bindVal.Interface())
+		err = validator.Validate(bindVal.Interface())
 		SpringError.ERROR.Panic(err).When(err != nil)
 
 		in[i] = bindVal
