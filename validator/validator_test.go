@@ -42,7 +42,7 @@ func TestValidate2(t *testing.T) {
 	}
 
 	validate := NewDefaultValidator()
-	err := validate.SetLangage(ZH)
+	err := validate.SetLanguage(ZH)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -90,7 +90,7 @@ func (v *defaultValidator) validateStruct(obj interface{}, tags ...string) error
 	return v.validator.Struct(obj)
 }
 
-func (v *defaultValidator) SetLangage(language Language) error {
+func (v *defaultValidator) SetLanguage(language Language) error {
 	var err error
 	switch language {
 	case ZH:

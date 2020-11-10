@@ -4,6 +4,7 @@ package validator
 type Validator interface {
 	Engine() interface{}
 	Validate(obj interface{}, tags ...string) error
+	SetLanguage(language Language) error
 }
 
 // Validator 全局参数校验器
