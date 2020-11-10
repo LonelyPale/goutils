@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/go-spring/spring-error"
 	"github.com/go-spring/spring-logger"
 	"github.com/go-spring/spring-utils"
 	"github.com/go-spring/spring-web"
@@ -104,11 +103,11 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 		case ParamOtherStruct:
 			err = ctx.Bind(bindVal.Interface())
 		}
-		SpringError.ERROR.Panic(err).When(err != nil)
+		errors.Panic(err).When(err != nil)
 
 		//验证绑定参数
 		err = validator.Validate(bindVal.Interface())
-		SpringError.ERROR.Panic(err).When(err != nil)
+		errors.Panic(err).When(err != nil)
 
 		in[i] = bindVal
 	}
@@ -158,9 +157,6 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 			result = &v
 		case *goutils.Message:
 			result = v
-		case SpringError.ErrorCode:
-			result = goutils.NewMessage(int(v.Code), v.Msg)
-			SpringLogger.Error(v)
 		case error:
 			result = goutils.NewErrorMessage(v)
 			SpringLogger.Error(v)
