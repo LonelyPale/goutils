@@ -158,6 +158,9 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 			result = &v
 		case *goutils.Message:
 			result = v
+		case SpringError.ErrorCode:
+			result = goutils.NewMessage(int(v.Code), v.Msg)
+			SpringLogger.Error(v)
 		case error:
 			result = goutils.NewErrorMessage(v)
 			SpringLogger.Error(v)
