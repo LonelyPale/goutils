@@ -14,6 +14,7 @@ type WebServerConfig struct {
 	StarterWeb.WebServerConfig
 	Cors    WebCorsConfig
 	Session WebSessionConfig
+	Static  WebStaticConfig
 }
 
 func init() {
@@ -54,8 +55,12 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 
 	// gin session 中间件
 	if config.Session.Enable {
-		fSession := SessionFilter(config.Session)
-		container.AddFilter(fSession)
+		container.AddFilter(SessionFilter(config.Session))
+	}
+
+	// gin static 中间件
+	if config.Static.Enable {
+		container.AddFilter(StaticFilter(config.Static))
 	}
 
 	return container
