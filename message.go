@@ -1,7 +1,6 @@
 package goutils
 
 import (
-	"github.com/LonelyPale/goutils/encoding/json"
 	"github.com/LonelyPale/goutils/errors/ecode"
 )
 
@@ -37,14 +36,4 @@ func NewErrorMessage(err error) *Message {
 			return &Message{Code: ecode.StatusError, Msg: ecode.StatusText(ecode.StatusError)}
 		}
 	}
-}
-
-type RawMessage struct {
-	*Message
-	Data json.RawMessage
-}
-
-func (r *RawMessage) Msg() *Message {
-	r.Message.Data = r.Data
-	return r.Message
 }
