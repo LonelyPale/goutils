@@ -27,3 +27,5 @@ var (
 	// NewEncoder is exported by goutils/json package.
 	NewEncoder = json.NewEncoder
 )
+
+type RawMessage = jsoniter.RawMessage
