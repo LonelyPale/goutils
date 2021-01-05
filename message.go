@@ -1,6 +1,9 @@
 package goutils
 
-import "github.com/LonelyPale/goutils/errors/ecode"
+import (
+	"github.com/LonelyPale/goutils/encoding/json"
+	"github.com/LonelyPale/goutils/errors/ecode"
+)
 
 type Message struct {
 	Code int         `json:"code"`           //状态码
@@ -15,7 +18,7 @@ func NewMessage(code int, msg string, datas ...interface{}) *Message {
 	} else if len(datas) > 1 {
 		data = datas
 	}
-	return &Message{code, msg, data}
+	return &Message{Code: code, Msg: msg, Data: data}
 }
 
 func NewSuccessMessage(datas ...interface{}) *Message {
@@ -34,4 +37,14 @@ func NewErrorMessage(err error) *Message {
 			return &Message{Code: ecode.StatusError, Msg: ecode.StatusText(ecode.StatusError)}
 		}
 	}
+}
+
+type RawMessage struct {
+	*Message
+	Data json.RawMessage
+}
+
+func (r *RawMessage) Msg() *Message {
+	r.Message.Data = r.Data
+	return r.Message
 }
