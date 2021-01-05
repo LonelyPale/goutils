@@ -10,13 +10,13 @@ import (
 // go-spring spring-boot 启动器
 func init() {
 	SpringBoot.
-		RegisterNameBeanFn("websocket-server", func(opts *websocket.Options) *websocket.Server {
+		RegisterNameBeanFn("websocket-server", func(opts websocket.Options) *websocket.Server {
 			if !opts.Enable {
 				return nil
 			}
 
 			SpringLogger.Info("open websocket server.")
-			server := websocket.NewServer(websocket.NewReader, websocket.NewWriter, opts)
+			server := websocket.NewServer(websocket.NewReader, websocket.NewWriter, &opts)
 			go server.Run()
 			return server
 		}).
