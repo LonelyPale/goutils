@@ -109,6 +109,10 @@ func (s *Server) Run() {
 	}
 }
 
+func (s *Server) Close() error {
+	return nil
+}
+
 func (s *Server) ReaderHandle(typed string, handler Handler) {
 	s.readerRouterMu.Lock()
 	defer s.readerRouterMu.Unlock()
