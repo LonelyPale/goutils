@@ -16,7 +16,7 @@ func init() {
 			}
 
 			SpringLogger.Info("open websocket server.")
-			server := websocket.NewServer(websocket.NewReader, websocket.NewWriter, &opts)
+			server := websocket.NewServer(websocket.NewProcessor, &opts)
 			go server.Run()
 			return server
 		}).

@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"fmt"
+
 	"github.com/LonelyPale/goutils/encoding/json"
 	"github.com/LonelyPale/goutils/errors/ecode"
 )
@@ -11,6 +13,11 @@ type Message struct {
 	Code int         `json:"code"`           //状态码
 	Msg  string      `json:"msg,omitempty"`  //消息
 	Data interface{} `json:"data,omitempty"` //结果数据
+}
+
+//todo: 优化显示
+func (m Message) String() string {
+	return fmt.Sprintf(`[Type:%s Data:%s]`, m.Type, m.Data)
 }
 
 func NewMessage(code int, msg string, datas ...interface{}) *Message {
@@ -49,4 +56,13 @@ type RawMessage struct {
 func (r *RawMessage) Msg() *Message {
 	r.Message.Data = r.Data
 	return r.Message
+}
+
+type WSMessage struct {
+	Type int
+	Data []byte
+}
+
+func (w WSMessage) String() string {
+	return fmt.Sprintf("[Type:%d Data:%s]", w.Type, w.Data)
 }

@@ -8,26 +8,38 @@ import (
 )
 
 type Options struct {
-	Enable          bool          `value:"${web.server.websocket.enable:=false}"`            //是否启用WebSocket
-	Origin          bool          `value:"${web.server.websocket.origin:=true}"`             //是否启用跨域
-	ReadDeadline    time.Duration `value:"${web.server.websocket.read_deadline:=0}"`         //消息单次读取超时时间，单位：秒
-	WriteDeadline   time.Duration `value:"${web.server.websocket.write_deadline:=0}"`        //消息单次写入超时时间，单位：秒
-	ReadBufferSize  int           `value:"${web.server.websocket.read_buffer_size:=20480}"`  //connect read buffer size: 20kb
-	WriteBufferSize int           `value:"${web.server.websocket.write_buffer_size:=20480}"` //connect write buffer size: 20kb
-	ReadPoolSize    int           `value:"${web.server.websocket.read_pool_size:=10}"`       //读协程池大小
-	WritePoolSize   int           `value:"${web.server.websocket.write_pool_size:=10}"`      //写协程池大小
-	MaxMessageSize  int64         `value:"${web.server.websocket.max_message_size:=65535}"`  //从消息管道读取消息的最大字节: 65535 byte
-	InChanSize      int           `value:"${web.server.websocket.in_chan_size:=100}"`        // 待读管道大小
-	OutChanSize     int           `value:"${web.server.websocket.out_chan_size:=100}"`       // 待写管道大小
-	OutedChanSize   int           `value:"${web.server.websocket.outed_chan_size:=100}"`     // 已写管道大小
+	Enable            bool          `value:"${web.server.websocket.enable:=false}"`            //是否启用WebSocket
+	Origin            bool          `value:"${web.server.websocket.origin:=true}"`             //是否启用跨域
+	ReadDeadline      time.Duration `value:"${web.server.websocket.read_deadline:=0}"`         //消息单次读取超时时间，单位：秒
+	WriteDeadline     time.Duration `value:"${web.server.websocket.write_deadline:=0}"`        //消息单次写入超时时间，单位：秒
+	ReadBufferSize    int           `value:"${web.server.websocket.read_buffer_size:=20480}"`  //connect read buffer size: 20kb
+	WriteBufferSize   int           `value:"${web.server.websocket.write_buffer_size:=20480}"` //connect write buffer size: 20kb
+	MaxMessageSize    int64         `value:"${web.server.websocket.max_message_size:=65535}"`  //从消息管道读取消息的最大字节: 65535 byte
+	ProcessorPoolSize int           `value:"${web.server.websocket.processor_pool_size:=10}"`  //写协程池大小
+	InChanSize        int           `value:"${web.server.websocket.in_chan_size:=100}"`        // 待读管道大小
+	OutChanSize       int           `value:"${web.server.websocket.out_chan_size:=100}"`       // 待写管道大小
+}
+
+func DefaultOptions() *Options {
+	return &Options{
+		Enable:            true,
+		Origin:            true,
+		ReadDeadline:      0,
+		WriteDeadline:     0,
+		ReadBufferSize:    20480,
+		WriteBufferSize:   20480,
+		MaxMessageSize:    65535,
+		ProcessorPoolSize: 10,
+		InChanSize:        100,
+		OutChanSize:       100,
+	}
 }
 
 type Hub interface {
 	Options() *Options
 	Register(conn *Conn)
 	UnRegister(conn *Conn)
-	ReaderRoute(typed string) Handler
-	WriterRoute(typed string) Handler
+	Route(typed string) Handler
 }
 
 type Handler interface {
@@ -41,37 +53,35 @@ func (f HandlerFunc) Invoke(conn *Conn, msg *Message) {
 }
 
 type Server struct {
-	opts           *Options           //配置选项
-	register       chan *Conn         //上线注册连接
-	unregister     chan *Conn         //下线注销连接
-	conns          map[*Conn]struct{} //所有在线客户端的内存地址
-	readerFactory  ReaderFactory
-	writerFactory  WriterFactory
-	readerRouter   map[string]Handler
-	readerRouterMu sync.RWMutex
-	writerRouter   map[string]Handler
-	writerRouterMu sync.RWMutex
+	opts             *Options           //配置选项
+	register         chan *Conn         //上线注册连接
+	unregister       chan *Conn         //下线注销连接
+	conns            map[*Conn]struct{} //所有在线客户端的内存地址
+	router           map[string]Handler
+	routerMu         sync.RWMutex
+	processorFactory ProcessorFactory
 }
 
-func NewServer(readerFactory ReaderFactory, writerFactory WriterFactory, opts *Options) *Server {
+func NewServer(processorFactory ProcessorFactory, opts *Options) *Server {
 	return &Server{
-		opts:          opts,
-		register:      make(chan *Conn),
-		unregister:    make(chan *Conn),
-		conns:         make(map[*Conn]struct{}),
-		readerFactory: readerFactory,
-		writerFactory: writerFactory,
-		readerRouter:  make(map[string]Handler),
-		writerRouter:  make(map[string]Handler),
+		opts:             opts,
+		register:         make(chan *Conn),
+		unregister:       make(chan *Conn),
+		conns:            make(map[*Conn]struct{}),
+		router:           make(map[string]Handler),
+		processorFactory: processorFactory,
 	}
 }
 
 func (s *Server) Open(ctx *gin.Context) {
-	reader := s.readerFactory(s)
-	writer := s.writerFactory(s)
-	conn := NewConn(reader, writer, s.opts)
+	conn := NewConn(s.opts)
+	processor, err := s.processorFactory(conn, s)
+	if err != nil {
+		DefaultLogger.Error(err)
+		return
+	}
 
-	if err := conn.Open(ctx); err != nil {
+	if err := conn.Open(ctx.Writer, ctx.Request, nil, processor); err != nil {
 		DefaultLogger.Error(err)
 		return
 	}
@@ -113,9 +123,9 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) ReaderHandle(typed string, handler Handler) {
-	s.readerRouterMu.Lock()
-	defer s.readerRouterMu.Unlock()
+func (s *Server) Handle(typed string, handler Handler) {
+	s.routerMu.Lock()
+	defer s.routerMu.Unlock()
 
 	if typed == "" {
 		panic("WebSocket: invalid typed")
@@ -123,52 +133,22 @@ func (s *Server) ReaderHandle(typed string, handler Handler) {
 	if handler == nil {
 		panic("WebSocket: nil handler")
 	}
-	if _, exist := s.readerRouter[typed]; exist {
+	if _, exist := s.router[typed]; exist {
 		panic("WebSocket: multiple registrations for " + typed)
 	}
 
-	s.readerRouter[typed] = handler
+	s.router[typed] = handler
 }
 
-func (s *Server) ReaderHandleFunc(typed string, handler func(*Conn, *Message)) {
+func (s *Server) HandleFunc(typed string, handler func(*Conn, *Message)) {
 	if handler == nil {
 		panic("WebSocket: nil handler")
 	}
-	s.ReaderHandle(typed, HandlerFunc(handler))
+	s.Handle(typed, HandlerFunc(handler))
 }
 
-func (s *Server) WriterHandle(typed string, handler Handler) {
-	s.writerRouterMu.Lock()
-	defer s.writerRouterMu.Unlock()
-
-	if typed == "" {
-		panic("WebSocket: invalid typed")
-	}
-	if handler == nil {
-		panic("WebSocket: nil handler")
-	}
-	if _, exist := s.writerRouter[typed]; exist {
-		panic("WebSocket: multiple registrations for " + typed)
-	}
-
-	s.writerRouter[typed] = handler
-}
-
-func (s *Server) WriterHandleFunc(typed string, handler func(*Conn, *Message)) {
-	if handler == nil {
-		panic("WebSocket: nil handler")
-	}
-	s.WriterHandle(typed, HandlerFunc(handler))
-}
-
-func (s *Server) ReaderRoute(typed string) Handler {
-	s.readerRouterMu.RLock()
-	defer s.readerRouterMu.RUnlock()
-	return s.readerRouter[typed]
-}
-
-func (s *Server) WriterRoute(typed string) Handler {
-	s.writerRouterMu.RLock()
-	defer s.writerRouterMu.RUnlock()
-	return s.writerRouter[typed]
+func (s *Server) Route(typed string) Handler {
+	s.routerMu.RLock()
+	defer s.routerMu.RUnlock()
+	return s.router[typed]
 }

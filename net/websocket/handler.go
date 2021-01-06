@@ -1,13 +1,13 @@
 package websocket
 
 import (
-	"github.com/LonelyPale/goutils/validator"
 	"reflect"
 
 	"github.com/gorilla/websocket"
 
 	"github.com/LonelyPale/goutils/encoding/json"
 	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/validator"
 )
 
 func validBindFn(fnType reflect.Type) bool {

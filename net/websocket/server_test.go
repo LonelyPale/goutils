@@ -9,23 +9,12 @@ import (
 )
 
 func newServer() *Server {
-	opts := &Options{
-		Enable:          true,
-		Origin:          true,
-		ReadDeadline:    0,
-		WriteDeadline:   10,
-		ReadBufferSize:  20480,
-		WriteBufferSize: 20480,
-		ReadPoolSize:    10,
-		WritePoolSize:   10,
-		MaxMessageSize:  65535,
-	}
-	return NewServer(NewReader, NewWriter, opts)
+	return NewServer(NewProcessor, DefaultOptions())
 }
 
 func TestHandleFunc(t *testing.T) {
 	server := newServer()
-	server.ReaderHandleFunc("test", func(conn *Conn, message *Message) {
+	server.HandleFunc("test", func(conn *Conn, message *Message) {
 		sendWSMessage(conn)
 	})
 	go server.Run()
@@ -40,10 +29,8 @@ func TestHandleFunc(t *testing.T) {
 
 func TestBIND(t *testing.T) {
 	server := newServer()
-	server.ReaderHandle("test.other", BIND(testOtherHandler))
-	server.ReaderHandle("test.struct", BIND(testStructHandler))
-	//server.WriterHandle("test.other", BIND(writerHandler))
-	//server.WriterHandle("test.struct", BIND(writerHandler))
+	server.Handle("test.other", BIND(testOtherHandler))
+	server.Handle("test.struct", BIND(testStructHandler))
 	go server.Run()
 
 	engine := gin.Default()
@@ -76,8 +63,4 @@ func sendWSMessage(conn *Conn) {
 	}); err != nil {
 		panic(err)
 	}
-}
-
-func writerHandler(msg *Message) {
-	log.Println("write:", msg)
 }

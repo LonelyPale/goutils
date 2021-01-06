@@ -5,75 +5,41 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/LonelyPale/goutils/errors"
 )
 
 const DefaultWebSocketKey = "WebSocket"
 
-var DefaultLogger Logger = log.New()
-
 var (
 	ErrConnClosed = errors.New("websocket connection closed")
 )
 
-type Logger interface {
-	Error(args ...interface{})
-}
-
-type base interface {
-	SetConn(conn *Conn) error
-	OnError(err error, msg *WSMessage)
-	OnClose()
-}
-
-type Reader interface {
-	base
-	OnRead(msg *WSMessage)
-}
-
-type Writer interface {
-	base
-	OnWrite(msg *WSMessage)
-}
-
-type WSMessage struct {
-	Type int
-	Data []byte
-}
-
 type Conn struct {
-	opts   *Options
-	conn   *websocket.Conn
-	in     chan *WSMessage //待读管道
-	out    chan *WSMessage //待写管道
-	outed  chan *WSMessage //已写管道
-	quit   chan struct{}   //退出信号
-	quitMu sync.RWMutex
-	reader Reader
-	writer Writer
+	opts      *Options        //选项配置
+	conn      *websocket.Conn //WS连接
+	in        chan *WSMessage //待读管道
+	out       chan *WSMessage //待写管道
+	quit      chan struct{}   //退出信号
+	quitMu    sync.RWMutex    //退出信号锁
+	processor Processor       //消息处理器
 }
 
-func NewConn(reader Reader, writer Writer, opts *Options) *Conn {
+func NewConn(opts *Options) *Conn {
 	return &Conn{
-		opts:   opts,
-		reader: reader,
-		writer: writer,
-		in:     make(chan *WSMessage, opts.InChanSize),
-		out:    make(chan *WSMessage, opts.OutChanSize),
-		outed:  make(chan *WSMessage, opts.OutedChanSize),
-		quit:   make(chan struct{}),
+		opts: opts,
+		in:   make(chan *WSMessage, opts.InChanSize),
+		out:  make(chan *WSMessage, opts.OutChanSize),
+		quit: make(chan struct{}),
 	}
 }
 
-func (c *Conn) Open(ctx *gin.Context) error {
+func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, processor Processor) error {
 	var upGrader = websocket.Upgrader{
-		ReadBufferSize:  c.opts.ReadBufferSize,                             //读缓冲区
-		WriteBufferSize: c.opts.WriteBufferSize,                            //写缓冲区
-		Subprotocols:    []string{ctx.GetHeader("Sec-WebSocket-Protocol")}, // 处理 Sec-WebSocket-Protocol Header
+		ReadBufferSize:  c.opts.ReadBufferSize,                            //读缓冲区
+		WriteBufferSize: c.opts.WriteBufferSize,                           //写缓冲区
+		Subprotocols:    []string{r.Header.Get("Sec-WebSocket-Protocol")}, // 处理 Sec-WebSocket-Protocol Header
 		CheckOrigin: func(r *http.Request) bool { // cross origin domain
 			return c.opts.Origin
 		},
@@ -91,32 +57,21 @@ func (c *Conn) Open(ctx *gin.Context) error {
 	//header := http.Header{"Sec-WebSocket-Protocol": []string{"topics#" + topicsStr}}
 	//wsConn, err := upGrader.Upgrade(ctx.Writer, ctx.Request, header)
 
-	wsConn, err := upGrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	wsConn, err := upGrader.Upgrade(w, r, h)
 	if err != nil {
 		return err
 	}
 
 	c.conn = wsConn
 	c.conn.SetReadLimit(c.opts.MaxMessageSize)
-
-	if err := c.reader.SetConn(c); err != nil {
-		return err
-	}
-
-	if err := c.writer.SetConn(c); err != nil {
-		return err
-	}
-
+	c.processor = processor
 	return nil
 }
 
 func (c *Conn) Start() {
-	if c.reader != nil {
-		go c.ReadLoop()
-	}
-	if c.writer != nil {
-		go c.WriteLoop()
-	}
+	go c.ReadLoop()
+	go c.WriteLoop()
+	go c.ProcessLoop()
 }
 
 func (c *Conn) IsClose() bool {
@@ -142,20 +97,16 @@ func (c *Conn) Close() error {
 		close(c.quit)
 		close(c.in)
 		close(c.out)
-		close(c.outed)
 		return c.conn.Close()
 	}
 }
 
-// 1、处理callback事件
 func (c *Conn) ReadLoop() {
-	defer c.reader.OnClose()
-
-	go c.readProcess()
+	defer c.processor.OnClose()
 
 	for {
 		if msg, err := c.read(); err != nil {
-			c.reader.OnError(err, msg)
+			c.processor.OnError(err, msg)
 			return
 		}
 	}
@@ -195,17 +146,14 @@ func (c *Conn) read() (msg *WSMessage, err error) {
 	}
 }
 
-// 1、当conn关闭后，out队列中还有没处理完的数据(需要业务端自己记录处理没有执行已完成callback的msg)；
-// 2、当msg已发送到client后，需要callback回写数据库的情况；
-// 3、处理callback事件
+// 1、当conn关闭后，out管道中还有没处理完的消息(需要业务端自己处理没有发送的消息)；
+// 2、当msg已发送到client后，需要callback回写数据库的情况(特殊情况业务端自己处理)；
 func (c *Conn) WriteLoop() {
-	defer c.writer.OnClose()
-
-	go c.writeProcess()
+	defer c.processor.OnClose()
 
 	for msg := range c.out {
 		if err := c.write(msg); err != nil {
-			c.writer.OnError(err, msg)
+			c.processor.OnError(err, msg)
 			return
 		}
 	}
@@ -235,37 +183,26 @@ func (c *Conn) write(msg *WSMessage) (err error) {
 			return err
 		}
 
-		c.outed <- msg
 		return nil
 	}
 }
 
-// 1、当OnRead或OnWrite抛出panic后，程序被中断，但此时in或outed队列中还有没处理完的数据；
-// 2、正常中断待处理的in和outed队列；
-func (c *Conn) readProcess() {
+// 1、当conn关闭后，in管道中还有没处理完的数据；
+func (c *Conn) ProcessLoop() {
+	defer c.processor.OnQuit()
+
 	for msg := range c.in {
-		func(msg *WSMessage) {
-			defer func() {
-				if r := recover(); r != nil {
-					DefaultLogger.Error(r)
-				}
-			}()
-			c.reader.OnRead(msg)
-		}(msg)
+		c.process(msg)
 	}
 }
 
-func (c *Conn) writeProcess() {
-	for msg := range c.outed {
-		func(msg *WSMessage) {
-			defer func() {
-				if r := recover(); r != nil {
-					DefaultLogger.Error(r)
-				}
-			}()
-			c.writer.OnWrite(msg)
-		}(msg)
-	}
+func (c *Conn) process(msg *WSMessage) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.processor.OnError(errors.UnknownError(r), msg)
+		}
+	}()
+	c.processor.OnMessage(msg)
 }
 
 func (c *Conn) Read() *WSMessage {
