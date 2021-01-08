@@ -17,7 +17,7 @@ var (
 )
 
 type Conn struct {
-	opts      *Options        //选项配置
+	config    *Config         //配置
 	conn      *websocket.Conn //WS连接
 	in        chan *WSMessage //待读管道
 	out       chan *WSMessage //待写管道
@@ -26,22 +26,22 @@ type Conn struct {
 	processor Processor       //消息处理器
 }
 
-func NewConn(opts *Options) *Conn {
+func NewConn(config *Config) *Conn {
 	return &Conn{
-		opts: opts,
-		in:   make(chan *WSMessage, opts.InChanSize),
-		out:  make(chan *WSMessage, opts.OutChanSize),
-		quit: make(chan struct{}),
+		config: config,
+		in:     make(chan *WSMessage, config.InChanSize),
+		out:    make(chan *WSMessage, config.OutChanSize),
+		quit:   make(chan struct{}),
 	}
 }
 
 func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, processor Processor) error {
 	var upGrader = websocket.Upgrader{
-		ReadBufferSize:  c.opts.ReadBufferSize,                            //读缓冲区
-		WriteBufferSize: c.opts.WriteBufferSize,                           //写缓冲区
+		ReadBufferSize:  c.config.ReadBufferSize,                          //读缓冲区
+		WriteBufferSize: c.config.WriteBufferSize,                         //写缓冲区
 		Subprotocols:    []string{r.Header.Get("Sec-WebSocket-Protocol")}, // 处理 Sec-WebSocket-Protocol Header
 		CheckOrigin: func(r *http.Request) bool { // cross origin domain
-			return c.opts.Origin
+			return c.config.Origin
 		},
 	}
 
@@ -63,15 +63,14 @@ func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, proce
 	}
 
 	c.conn = wsConn
-	c.conn.SetReadLimit(c.opts.MaxMessageSize)
+	c.conn.SetReadLimit(c.config.MaxMessageSize)
 	c.processor = processor
-	return nil
-}
 
-func (c *Conn) Start() {
 	go c.ReadLoop()
 	go c.WriteLoop()
 	go c.ProcessLoop()
+
+	return nil
 }
 
 func (c *Conn) IsClose() bool {
@@ -126,8 +125,8 @@ func (c *Conn) read() (msg *WSMessage, err error) {
 	case <-c.quit:
 		return nil, ErrConnClosed
 	default:
-		if c.opts.ReadDeadline > 0 {
-			if err := c.conn.SetReadDeadline(time.Now().Add(c.opts.ReadDeadline * time.Second)); err != nil {
+		if c.config.ReadDeadline > 0 {
+			if err := c.conn.SetReadDeadline(time.Now().Add(c.config.ReadDeadline * time.Second)); err != nil {
 				return nil, err
 			}
 		}
@@ -173,8 +172,8 @@ func (c *Conn) write(msg *WSMessage) (err error) {
 	case <-c.quit:
 		return ErrConnClosed
 	default:
-		if c.opts.WriteDeadline > 0 {
-			if err := c.conn.SetWriteDeadline(time.Now().Add(c.opts.WriteDeadline * time.Second)); err != nil {
+		if c.config.WriteDeadline > 0 {
+			if err := c.conn.SetWriteDeadline(time.Now().Add(c.config.WriteDeadline * time.Second)); err != nil {
 				return err
 			}
 		}

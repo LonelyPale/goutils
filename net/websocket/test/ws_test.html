@@ -1,33 +1,59 @@
 <script>
     let token = "eyJ0eXBlIjoiMSIsImFsZyI6IkhTNTEyIn0.eyJkZXZpY2VfaWQiOiI4NjEwNjkwMzE3Njg2ODUiLCJleHBpcmVfdGltZSI6MTU4NTc5MTY4OCwicHJvZHVjdF9jb2RlIjoiY2hhaW5ub2RlIiwic291cmNlIjoiYXBwIiwidWlkIjozNjU2ODgsInVzZXJfdHlwZSI6IjEifQ.S6Nw-_9fPs2Or6LTkAo4NxvPqBmNzkgKTgf7p8XyI_HtZEFtqWdn_HFFxcw8DQvlmsMXFoRNlfZ9ueF5nKSDLA";
     let topics = "msg&order&notice&test";
+
     //let ws = new WebSocket("ws://localhost:8080/v1/api/wsping", ["token#" + token, "topics#" + topics]);
-    let ws = new WebSocket("ws://localhost:8080/");
 
-    //连接打开时触发
-    ws.onopen = function (evt) {
-        console.log("Connection open ...");
+    function ws1() {
+        let ws = new WebSocket("ws://localhost:8080/ws1");
 
-        let msg = {
-            type: 'test.other',
-            data: '123',
+        //连接打开时触发
+        ws.onopen = function (evt) {
+            console.log("ws1:", "Connection open ...");
+
+            let msg = {
+                type: 'test.other',
+                data: '123',
+            };
+            ws.send(JSON.stringify(msg));
         };
-        ws.send(JSON.stringify(msg));
 
-        let msg2 = {
-            type: 'test.struct',
-            data: {name: "json", age: 99},
+        //接收到消息时触发
+        ws.onmessage = function (evt) {
+            console.log("ws1:", "Received Message: " + evt.data);
         };
-        ws.send(JSON.stringify(msg2));
-    };
 
-    //接收到消息时触发
-    ws.onmessage = function (evt) {
-        console.log("Received Message: " + evt.data);
-    };
+        //连接关闭时触发
+        ws.onclose = function (evt) {
+            console.log("ws1:", "Connection closed.");
+        };
+    }
 
-    //连接关闭时触发
-    ws.onclose = function (evt) {
-        console.log("Connection closed.");
-    };
+    function ws2() {
+        let ws = new WebSocket("ws://localhost:8080/ws2");
+
+        //连接打开时触发
+        ws.onopen = function (evt) {
+            console.log("ws2:", "Connection open ...");
+
+            let msg2 = {
+                type: 'test.struct',
+                data: {name: "json", age: 99},
+            };
+            ws.send(JSON.stringify(msg2));
+        };
+
+        //接收到消息时触发
+        ws.onmessage = function (evt) {
+            console.log("ws2:", "Received Message: " + evt.data);
+        };
+
+        //连接关闭时触发
+        ws.onclose = function (evt) {
+            console.log("ws2:", "Connection closed.");
+        };
+    }
+
+    ws1();
+    ws2();
 </script>

@@ -30,8 +30,8 @@ type processor struct {
 type ProcessorFactory func(conn *Conn, hub Hub) (Processor, error)
 
 func NewProcessor(conn *Conn, hub Hub) (Processor, error) {
-	opts := hub.Options()
-	pool, err := ants.NewPoolWithFunc(opts.ProcessorPoolSize, func(i interface{}) {
+	conf := hub.Config()
+	pool, err := ants.NewPoolWithFunc(conf.ProcessorPoolSize, func(i interface{}) {
 		ProcessMessage(i, conn, hub)
 	})
 	if err != nil {

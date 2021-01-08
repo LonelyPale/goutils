@@ -8,37 +8,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newServer() *Server {
-	return NewServer(NewProcessor, DefaultOptions())
+var testServer = NewServer()
+
+func newTestContainer() *Container {
+	return NewContainer(NewProcessor, DefaultConfig())
 }
 
-func TestHandleFunc(t *testing.T) {
-	server := newServer()
-	server.HandleFunc("test", func(conn *Conn, message *Message) {
+func TestWebSocket(t *testing.T) {
+	container1 := testContainer1()
+	container2 := testContainer2()
+	testServer.AddContainer(container1, container2).Start()
+
+	engine := gin.Default()
+	engine.Handle(http.MethodGet, "/ws1", container1.OpenConnGin)
+	engine.Handle(http.MethodGet, "/ws2", container2.OpenConnGin)
+
+	if err := engine.Run(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testContainer1() *Container {
+	container := newTestContainer()
+	container.HandleFunc("test.other", func(conn *Conn, message *Message) {
 		sendWSMessage(conn)
 	})
-	go server.Run()
-
-	engine := gin.Default()
-	engine.Handle(http.MethodGet, "/", server.Open)
-
-	if err := engine.Run(); err != nil {
-		t.Fatal(err)
-	}
+	return container
 }
 
-func TestBIND(t *testing.T) {
-	server := newServer()
-	server.Handle("test.other", BIND(testOtherHandler))
-	server.Handle("test.struct", BIND(testStructHandler))
-	go server.Run()
-
-	engine := gin.Default()
-	engine.Handle(http.MethodGet, "/", server.Open)
-
-	if err := engine.Run(); err != nil {
-		t.Fatal(err)
-	}
+func testContainer2() *Container {
+	container := newTestContainer()
+	container.Handle("test.other", BIND(testOtherHandler))
+	container.Handle("test.struct", BIND(testStructHandler))
+	return container
 }
 
 func testOtherHandler(conn *Conn, message *Message, num *string) {
