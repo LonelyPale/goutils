@@ -2,6 +2,8 @@ package websocket
 
 import (
 	"encoding/json"
+	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/panjf2000/ants/v2"
@@ -15,10 +17,11 @@ type Logger interface {
 }
 
 type Processor interface {
-	OnMessage(msg *WSMessage)          //消息处理
-	OnError(err error, msg *WSMessage) //错误处理
-	OnClose()                          //关闭连接时
-	OnQuit()                           //退出协程时
+	Subprotocols(r *http.Request) []string //处理 WebSocket Subprotocols 子协议: 返回处理器支持的子协议
+	OnMessage(msg *WSMessage)              //消息处理
+	OnError(err error, msg *WSMessage)     //错误处理
+	OnClose()                              //关闭连接时
+	OnQuit()                               //退出协程时
 }
 
 type processor struct {
@@ -45,6 +48,10 @@ func NewProcessor(conn *Conn, hub Hub) (Processor, error) {
 	}, nil
 }
 
+func (p *processor) Subprotocols(r *http.Request) []string {
+	return ProcessSubprotocols(r)
+}
+
 func (p *processor) OnMessage(msg *WSMessage) {
 	if err := p.pool.Invoke(msg); err != nil {
 		p.OnError(err, msg)
@@ -63,6 +70,20 @@ func (p *processor) OnClose() {
 
 func (p *processor) OnQuit() {
 	p.pool.Release()
+}
+
+var ProcessSubprotocols = defaultProcessSubprotocols
+
+func defaultProcessSubprotocols(r *http.Request) []string {
+	h := strings.TrimSpace(r.Header.Get("Sec-Websocket-Protocol"))
+	if h == "" {
+		return nil
+	}
+	protocols := strings.Split(h, ",")
+	for i := range protocols {
+		protocols[i] = strings.TrimSpace(protocols[i])
+	}
+	return protocols
 }
 
 var ProcessMessage = defaultProcessMessage

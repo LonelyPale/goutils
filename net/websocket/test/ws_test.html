@@ -5,7 +5,7 @@
     //let ws = new WebSocket("ws://localhost:8080/v1/api/wsping", ["token#" + token, "topics#" + topics]);
 
     function ws1() {
-        let ws = new WebSocket("ws://localhost:8080/ws1");
+        let ws = new WebSocket("ws://localhost:8080/ws1", ["sid#123.&", "token#abc"]);
 
         //连接打开时触发
         ws.onopen = function (evt) {

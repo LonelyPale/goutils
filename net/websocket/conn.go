@@ -37,10 +37,10 @@ func NewConn(config *Config) *Conn {
 
 func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, processor Processor) error {
 	var upGrader = websocket.Upgrader{
-		ReadBufferSize:  c.config.ReadBufferSize,                          //读缓冲区
-		WriteBufferSize: c.config.WriteBufferSize,                         //写缓冲区
-		Subprotocols:    []string{r.Header.Get("Sec-WebSocket-Protocol")}, // 处理 Sec-WebSocket-Protocol Header
-		CheckOrigin: func(r *http.Request) bool { // cross origin domain
+		ReadBufferSize:  c.config.ReadBufferSize,   //读缓冲区
+		WriteBufferSize: c.config.WriteBufferSize,  //写缓冲区
+		Subprotocols:    processor.Subprotocols(r), //处理 Sec-WebSocket-Protocol Header: 设置支持的子协议
+		CheckOrigin: func(r *http.Request) bool { //cross origin domain: 设置是否支持跨域
 			return c.config.Origin
 		},
 	}
