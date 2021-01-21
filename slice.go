@@ -22,12 +22,12 @@ func MergeSliceByte(ss ...[]byte) []byte {
 	}
 }
 
-func ReverseByte(arr *[]byte) {
-	length := len(*arr)
+func ReverseByte(arr []byte) {
+	length := len(arr)
 	for i := 0; i < length/2; i++ {
 		idx := length - 1 - i
-		temp := (*arr)[i]
-		(*arr)[i] = (*arr)[idx]
-		(*arr)[idx] = temp
+		temp := arr[i]
+		arr[i] = arr[idx]
+		arr[idx] = temp
 	}
 }

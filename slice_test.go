@@ -20,6 +20,6 @@ func TestMergeSliceByte(t *testing.T) {
 
 func TestReverseByte(t *testing.T) {
 	a := []byte{1, 2, 3}
-	ReverseByte(&a)
+	ReverseByte(a)
 	assert.Equal(t, []byte{3, 2, 1}, a)
 }
