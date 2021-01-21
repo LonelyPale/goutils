@@ -19,3 +19,11 @@ func Test(t *testing.T) {
 	hash.Write([]byte("test"))                 // 写入加密数据
 	fmt.Printf("%x\n", hash.Sum(nil))          // 0eee86e484505ec4ab48c18095e6a8ac
 }
+
+func TestHash(t *testing.T) {
+	hash, err := Hash(sha256.New, []byte("test"), []byte("abc123"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%x\n", hash)
+}
