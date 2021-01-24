@@ -91,5 +91,95 @@ func Bcrypt(data, salt []byte, loops ...int) ([]byte, error) {
 	a4 := b1
 	newhash = goutils.MergeSliceByte(a1, a2, a3, a4)
 
+	newhash, err = sha512.Hash(append(newhash, []byte("Bcrypt")...))
+	if err != nil {
+		return nil, err
+	}
+
 	return newhash, nil
+}
+
+func BcryptSimple(data, salt []byte, loops ...int) ([]byte, error) {
+	var loop int
+	if len(loops) > 0 && loops[0] > 0 {
+		loop = loops[0]
+	} else {
+		loop = DefaultLoopNumber
+	}
+
+	hash, err := sha512.Hash(data)
+	if err != nil {
+		return nil, err
+	}
+
+	salt, err = sha512.Hash(salt)
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err = sha512.Hash(append(hash, salt...))
+	if err != nil {
+		return nil, err
+	}
+
+	tempHash := hash
+	tempSalt := salt
+	hashs := make([]byte, len(hash)*10)
+	for i := 0; i < 10; i++ {
+		tempHash, err = sha512.Hash(append(tempHash, byte(i)))
+		if err != nil {
+			return nil, err
+		}
+
+		tempSalt, err = sha512.Hash(append(tempSalt, byte(i)))
+		if err != nil {
+			return nil, err
+		}
+
+		tempHash, err = sha512.Hash(append(tempHash, tempSalt...))
+		if err != nil {
+			return nil, err
+		}
+
+		hashs = append(hashs, tempHash...)
+	}
+
+	hash, err = sha512.Hash(hashs)
+	if err != nil {
+		return nil, err
+	}
+
+	idxHash := len(hash) / 2
+	hash1 := hash[:idxHash]
+	hash2 := hash[idxHash:]
+
+	idxSalt := len(salt) / 2
+	salt1 := salt[:idxSalt]
+	salt2 := salt[idxSalt:]
+
+	loopnum := loop / 2
+	for i := 0; i < loopnum; i++ {
+		hash1, err = sha512.Hash(append(hash1, salt1...))
+		if err != nil {
+			return nil, err
+		}
+	}
+	for i := 0; i < loopnum; i++ {
+		hash2, err = sha512.Hash(append(hash2, salt2...))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	hash, err = sha512.Hash(append(hash1, hash2...))
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err = sha512.Hash(append(hash, []byte("BcryptSimple")...))
+	if err != nil {
+		return nil, err
+	}
+
+	return hash, nil
 }
