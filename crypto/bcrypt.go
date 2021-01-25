@@ -157,14 +157,13 @@ func BcryptSimple(data, salt []byte, loops ...int) ([]byte, error) {
 	salt1 := salt[:idxSalt]
 	salt2 := salt[idxSalt:]
 
-	loopnum := loop / 2
-	for i := 0; i < loopnum; i++ {
+	for i := 0; i < loop; i++ {
 		hash1, err = sha512.Hash(append(hash1, salt1...))
 		if err != nil {
 			return nil, err
 		}
 	}
-	for i := 0; i < loopnum; i++ {
+	for i := 0; i < loop; i++ {
 		hash2, err = sha512.Hash(append(hash2, salt2...))
 		if err != nil {
 			return nil, err
