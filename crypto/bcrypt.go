@@ -162,8 +162,7 @@ func BcryptSimple(data, salt []byte, loops ...int) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-	for i := 0; i < loop; i++ {
+
 		hash2, err = sha512.Hash(append(hash2, salt2...))
 		if err != nil {
 			return nil, err
