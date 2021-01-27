@@ -3,6 +3,7 @@ package mongodb
 
 import (
 	"context"
+	"reflect"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -60,8 +61,49 @@ func (coll *Collection) GetContext() (context.Context, context.CancelFunc) {
 	return coll.client.GetContext()
 }
 
+// todo: 考虑是否用 FindOneAndUpdate 替换，如用 FindOneAndUpdate 替换，则无法调用 Insert、Update callback
+// 创建或更新一条记录
+func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	var vid reflect.Value
+	vDoc := reflect.Indirect(reflect.ValueOf(document))
+
+	switch vDoc.Kind() {
+	case reflect.Map:
+		vid = vDoc.MapIndex(reflect.ValueOf(IDKey))
+	case reflect.Struct:
+		vid = vDoc.FieldByName(IDField)
+	}
+
+	//1、没有_id时创建
+	if !vid.IsValid() {
+		return coll.InsertOne(ctx, document, opts...)
+	}
+
+	//2、有_id时修改
+	id := vid.Interface().(types.ObjectID)
+	filter := ID(id)
+	updater := Set(document)
+	result, err := coll.UpdateOne(ctx, filter, updater)
+	if err != nil {
+		return id, err
+	}
+
+	//2.1、有_id时，但数据库不存在该记录，则创建
+	if result.UpsertedID == nil {
+		return coll.InsertOne(ctx, document, opts...)
+	}
+
+	return id, nil
+}
+
 // 查找一条记录，如果不存在，则插入一条记录
-func (coll *Collection) Save(ctx context.Context, filter interface{}, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {
 		var cancel context.CancelFunc
 		ctx, cancel = coll.GetContext()
