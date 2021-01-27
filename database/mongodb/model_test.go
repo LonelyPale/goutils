@@ -32,7 +32,7 @@ func init() {
 	RegisterType((*User)(nil), "test")
 }
 
-func TestModel_Put(t *testing.T) {
+func TestModel_Create(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
 	user := &User{
@@ -47,7 +47,7 @@ func TestModel_Put(t *testing.T) {
 	t.Logf("clear record: %v", n)
 
 	startTime := time.Now()
-	if err := user.Put(); err != nil {
+	if err := user.Create(); err != nil {
 		t.Fatal(err)
 	}
 	t.Log("time:", time.Since(startTime))
@@ -55,7 +55,7 @@ func TestModel_Put(t *testing.T) {
 	t.Log(user)
 }
 
-func TestModel_Put2(t *testing.T) {
+func TestModel_Create2(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
 	user := &User{
@@ -72,7 +72,7 @@ func TestModel_Put2(t *testing.T) {
 		t.Logf("clear record: %v", n)
 
 		startTime := time.Now()
-		if err := user.Put(sctx); err != nil {
+		if err := user.Create(sctx); err != nil {
 			return err
 		}
 		t.Log("time:", time.Since(startTime))
@@ -86,7 +86,7 @@ func TestModel_Put2(t *testing.T) {
 	}
 }
 
-func TestModel_Set(t *testing.T) {
+func TestModel_Update(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
 	id, err := types.ObjectIDFromHex("5ec81672973997c00c8ba6c8")
@@ -110,7 +110,7 @@ func TestModel_Set(t *testing.T) {
 	//updater := NewUpdater().Set("name", "Jerry-10", "age", 18)
 	//updater := NewUpdater("name", "Jerry-10", "age", 18).Unset("test","temp","namep")
 	startTime1 := time.Now()
-	if err := user.Set(); err != nil {
+	if err := user.Update(); err != nil {
 		t.Fatal(err)
 	}
 	t.Log("time-set:", time.Since(startTime1), user)

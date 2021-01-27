@@ -11,7 +11,9 @@ import (
 	"github.com/LonelyPale/goutils/types"
 )
 
-func (m Model) BeforeInsert(ctx context.Context, documents []interface{}, opts interface{}) error {
+// 定义 model 在 coll 内的通用方法，不依赖于 model 的具体值
+
+func (Model) BeforeInsert(ctx context.Context, documents []interface{}, opts interface{}) error {
 	for _, doc := range documents {
 		vDoc := reflect.ValueOf(doc) // 参数必须为指针地址
 		if vDoc.Kind() == reflect.Ptr {
@@ -32,7 +34,7 @@ func (m Model) BeforeInsert(ctx context.Context, documents []interface{}, opts i
 	return nil
 }
 
-func (m Model) AfterInsert(ctx context.Context, documents []interface{}, opts interface{}, ids []types.ObjectID) error {
+func (Model) AfterInsert(ctx context.Context, documents []interface{}, opts interface{}, ids []types.ObjectID) error {
 	for i, doc := range documents {
 		vDoc := reflect.ValueOf(doc)
 		if vDoc.Kind() == reflect.Ptr {
@@ -55,7 +57,7 @@ func (m Model) AfterInsert(ctx context.Context, documents []interface{}, opts in
 	return nil
 }
 
-func (m Model) BeforeUpdate(ctx context.Context, filter interface{}, updater interface{}, opts []*options.UpdateOptions) error {
+func (Model) BeforeUpdate(ctx context.Context, filter interface{}, updater interface{}, opts []*options.UpdateOptions) error {
 	up, ok := updater.(Updater)
 	if !ok {
 		return errors.New("not valid Updater")

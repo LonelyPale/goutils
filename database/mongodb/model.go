@@ -7,12 +7,6 @@ import (
 	"github.com/LonelyPale/goutils/validator"
 )
 
-const (
-	CreateTagName = "vCreate"
-	ModifyTagName = "vModify"
-	DeleteTagName = "vDelete"
-)
-
 /*
 type Service interface {
 	Start() (bool, error)
@@ -54,7 +48,7 @@ func (m Model) Validate(tags ...string) error {
 }
 
 // Create
-func (m Model) Put(ctxs ...context.Context) error {
+func (m Model) Create(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
@@ -76,8 +70,8 @@ func (m Model) Put(ctxs ...context.Context) error {
 	return nil
 }
 
-// Modify
-func (m Model) Set(ctxs ...context.Context) error {
+// Update
+func (m Model) Update(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
@@ -87,7 +81,7 @@ func (m Model) Set(ctxs ...context.Context) error {
 		defer cancel()
 	}
 
-	if err := m.Validate(ModifyTagName); err != nil {
+	if err := m.Validate(UpdateTagName); err != nil {
 		return err
 	}
 
@@ -103,33 +97,6 @@ func (m Model) Set(ctxs ...context.Context) error {
 	filter := ID(vid.Interface())
 	updater := Set(m.doc)
 	if _, err := m.coll.UpdateOne(ctx, filter, updater); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m Model) Get(ctxs ...context.Context) error {
-	var ctx context.Context
-	if len(ctxs) > 0 {
-		ctx = ctxs[0]
-	} else {
-		var cancel context.CancelFunc
-		ctx, cancel = m.coll.GetContext()
-		defer cancel()
-	}
-
-	vDoc := reflect.ValueOf(m.doc)
-	if vDoc.Kind() == reflect.Ptr {
-		vDoc = vDoc.Elem()
-	}
-	vid := vDoc.FieldByName(IDField)
-	if vid.Kind() == reflect.Invalid {
-		return ErrNilObjectID
-	}
-
-	filter := ID(vid.Interface())
-	if err := m.coll.FindOne(ctx, m.doc, filter); err != nil {
 		return err
 	}
 
@@ -168,7 +135,8 @@ func (m Model) Delete(ctxs ...context.Context) error {
 	return nil
 }
 
-func (m Model) Save(filter interface{}, ctxs ...context.Context) error {
+// Read
+func (m Model) Get(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
@@ -178,25 +146,52 @@ func (m Model) Save(filter interface{}, ctxs ...context.Context) error {
 		defer cancel()
 	}
 
-	if err := m.Validate(CreateTagName); err != nil {
-		return err
-	}
-
-	id, err := m.coll.Save(ctx, filter, m.doc)
-	if err != nil {
-		return err
-	}
-
 	vDoc := reflect.ValueOf(m.doc)
 	if vDoc.Kind() == reflect.Ptr {
 		vDoc = vDoc.Elem()
 	}
 	vid := vDoc.FieldByName(IDField)
-	if vid.CanSet() {
-		for i, n := range id {
-			v := vid.Index(i)
-			v.SetUint(uint64(n))
-		}
+	if vid.Kind() == reflect.Invalid {
+		return ErrNilObjectID
+	}
+
+	filter := ID(vid.Interface())
+	if err := m.coll.FindOne(ctx, m.doc, filter); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m Model) Save(ctxs ...context.Context) error {
+	var ctx context.Context
+	if len(ctxs) > 0 {
+		ctx = ctxs[0]
+	} else {
+		var cancel context.CancelFunc
+		ctx, cancel = m.coll.GetContext()
+		defer cancel()
+	}
+
+	if _, err := m.coll.Save(ctx, m.doc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m Model) FindOrInsert(filter interface{}, ctxs ...context.Context) error {
+	var ctx context.Context
+	if len(ctxs) > 0 {
+		ctx = ctxs[0]
+	} else {
+		var cancel context.CancelFunc
+		ctx, cancel = m.coll.GetContext()
+		defer cancel()
+	}
+
+	if _, err := m.coll.FindOrInsert(ctx, filter, m.doc); err != nil {
+		return err
 	}
 
 	return nil

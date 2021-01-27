@@ -82,6 +82,9 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 
 	//1、没有_id时创建
 	if !vid.IsValid() {
+		if err := validate(document, CreateTagName); err != nil {
+			return types.NilObjectID, err
+		}
 		return coll.InsertOne(ctx, document, opts...)
 	}
 
@@ -89,6 +92,11 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 	id := vid.Interface().(types.ObjectID)
 	filter := ID(id)
 	updater := Set(document)
+
+	if err := validate(document, UpdateTagName); err != nil {
+		return id, err
+	}
+
 	result, err := coll.UpdateOne(ctx, filter, updater)
 	if err != nil {
 		return id, err
@@ -96,6 +104,9 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 
 	//2.1、有_id时，但数据库不存在该记录，则创建
 	if result.UpsertedID == nil {
+		if err := validate(document, CreateTagName); err != nil {
+			return id, err
+		}
 		return coll.InsertOne(ctx, document, opts...)
 	}
 
@@ -112,6 +123,10 @@ func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, do
 
 	if filter == nil {
 		return types.NilObjectID, ErrNilFilter
+	}
+
+	if err := validate(document, CreateTagName); err != nil {
+		return types.NilObjectID, err
 	}
 
 	count, err := coll.Count(ctx, filter)
