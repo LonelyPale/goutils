@@ -4,7 +4,13 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/validator"
+)
+
+const (
+	CreateTagName = "vCreate"
+	ModifyTagName = "vModify"
+	DeleteTagName = "vDelete"
 )
 
 /*
@@ -44,9 +50,10 @@ func (m Model) IsNil() bool {
 }
 
 func (m Model) Validate(tags ...string) error {
-	return goutils.Validate(m.doc, tags...)
+	return validator.Validate(m.doc, tags...)
 }
 
+// Create
 func (m Model) Put(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
@@ -57,6 +64,10 @@ func (m Model) Put(ctxs ...context.Context) error {
 		defer cancel()
 	}
 
+	if err := m.Validate(CreateTagName); err != nil {
+		return err
+	}
+
 	_, err := m.coll.InsertOne(ctx, m.doc)
 	if err != nil {
 		return err
@@ -65,6 +76,7 @@ func (m Model) Put(ctxs ...context.Context) error {
 	return nil
 }
 
+// Modify
 func (m Model) Set(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
@@ -73,6 +85,10 @@ func (m Model) Set(ctxs ...context.Context) error {
 		var cancel context.CancelFunc
 		ctx, cancel = m.coll.GetContext()
 		defer cancel()
+	}
+
+	if err := m.Validate(ModifyTagName); err != nil {
+		return err
 	}
 
 	vDoc := reflect.ValueOf(m.doc)
@@ -120,6 +136,7 @@ func (m Model) Get(ctxs ...context.Context) error {
 	return nil
 }
 
+// Delete
 func (m Model) Delete(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
@@ -128,6 +145,10 @@ func (m Model) Delete(ctxs ...context.Context) error {
 		var cancel context.CancelFunc
 		ctx, cancel = m.coll.GetContext()
 		defer cancel()
+	}
+
+	if err := m.Validate(DeleteTagName); err != nil {
+		return err
 	}
 
 	vDoc := reflect.ValueOf(m.doc)
@@ -155,6 +176,10 @@ func (m Model) Save(filter interface{}, ctxs ...context.Context) error {
 		var cancel context.CancelFunc
 		ctx, cancel = m.coll.GetContext()
 		defer cancel()
+	}
+
+	if err := m.Validate(CreateTagName); err != nil {
+		return err
 	}
 
 	id, err := m.coll.Save(ctx, filter, m.doc)
