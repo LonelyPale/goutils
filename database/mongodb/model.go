@@ -136,7 +136,7 @@ func (m Model) Delete(ctxs ...context.Context) error {
 }
 
 // Read
-func (m Model) Get(ctxs ...context.Context) error {
+func (m Model) Query(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {
 		ctx = ctxs[0]
