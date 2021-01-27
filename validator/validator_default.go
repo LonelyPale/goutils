@@ -9,6 +9,10 @@ import (
 	"github.com/LonelyPale/goutils/errors"
 )
 
+const (
+	defaultTagName = "validate"
+)
+
 // defaultValidator 默认的参数校验器
 type defaultValidator struct {
 	validator  *validator.Validate //验证器
@@ -17,7 +21,11 @@ type defaultValidator struct {
 
 // NewDefaultValidator defaultValidator 的构造函数
 func NewDefaultValidator() *defaultValidator {
-	return &defaultValidator{validator: validator.New()}
+	v := &defaultValidator{validator: validator.New()}
+	for _, validType := range customValidateTypes {
+		v.validator.RegisterCustomTypeFunc(validType.fn, validType.types...)
+	}
+	return v
 }
 
 // Engine 返回原始的参数校验引擎
@@ -73,12 +81,10 @@ func (v *defaultValidator) validateStruct(obj interface{}, tags ...string) error
 		return errors.New("validate object is nil")
 	}
 
-	for _, validType := range customValidateTypes {
-		v.validator.RegisterCustomTypeFunc(validType.fn, validType.types...)
-	}
-
 	if len(tags) > 0 && len(tags[0]) > 0 {
 		v.validator.SetTagName(tags[0])
+	} else {
+		v.validator.SetTagName(defaultTagName)
 	}
 
 	if v.translator != nil {
