@@ -22,11 +22,7 @@ const (
 	Bits             = 2048
 )
 
-var Base64Encoding *base64.Encoding
-
-func init() {
-	Base64Encoding = base64.RawURLEncoding
-}
+var Base64Encoding = base64.StdEncoding
 
 type XRsa struct {
 	publicKey  *rsa.PublicKey

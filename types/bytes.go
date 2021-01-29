@@ -5,6 +5,9 @@ import (
 	"encoding/hex"
 )
 
+// default base64 encoder
+var Base64Encoding = base64.StdEncoding
+
 type Bytes []byte
 
 // bss 可以是 nil
@@ -30,8 +33,15 @@ func (b Bytes) Hex() string {
 	return hex.EncodeToString(b)
 }
 
-func (b Bytes) Base64() string {
-	return base64.RawURLEncoding.EncodeToString(b)
+func (b Bytes) Base64(encodings ...*base64.Encoding) string {
+	var encoding *base64.Encoding
+	if len(encodings) == 0 || encodings[0] == nil {
+		encoding = Base64Encoding
+	} else {
+		encoding = encodings[0]
+	}
+
+	return encoding.EncodeToString(b)
 }
 
 func (b *Bytes) FromString(s string) {
@@ -48,8 +58,15 @@ func (b *Bytes) FromHex(s string) error {
 	return nil
 }
 
-func (b *Bytes) FromBase64(s string) error {
-	bs, err := base64.RawURLEncoding.DecodeString(s)
+func (b *Bytes) FromBase64(s string, encodings ...*base64.Encoding) error {
+	var encoding *base64.Encoding
+	if len(encodings) == 0 || encodings[0] == nil {
+		encoding = Base64Encoding
+	} else {
+		encoding = encodings[0]
+	}
+
+	bs, err := encoding.DecodeString(s)
 	if err != nil {
 		return err
 	}
