@@ -1,6 +1,7 @@
-package springweb
+package starter
 
 import (
+	"github.com/LonelyPale/goutils/thirdparty/gospring/springweb"
 	"github.com/gin-gonic/gin"
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-gin"
@@ -12,9 +13,9 @@ import (
 
 type WebServerConfig struct {
 	StarterWeb.WebServerConfig
-	Cors    WebCorsConfig
-	Session WebSessionConfig
-	Static  WebStaticConfig
+	Cors    springweb.WebCorsConfig
+	Session springweb.WebSessionConfig
+	Static  springweb.WebStaticConfig
 }
 
 func init() {
@@ -50,17 +51,17 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 
 	// gin cors 中间件
 	if config.Cors.Enable {
-		container.AddFilter(CorsFilter(config.Cors))
+		container.AddFilter(springweb.CorsFilter(config.Cors))
 	}
 
 	// gin session 中间件
 	if config.Session.Enable {
-		container.AddFilter(SessionFilter(config.Session))
+		container.AddFilter(springweb.SessionFilter(config.Session))
 	}
 
 	// gin static 中间件
 	if config.Static.Enable {
-		container.AddFilter(StaticFilter(config.Static))
+		container.AddFilter(springweb.StaticFilter(config.Static))
 	}
 
 	return container
