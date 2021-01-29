@@ -86,9 +86,14 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 		}
 
 		var err error
-		bindVal := reflect.New(b.bindParam[i].Type.Elem())
-		ginCtx := ctx.NativeContext().(*gin.Context)
+		var bindVal reflect.Value
+		if b.bindParam[i].Type.Kind() == reflect.Ptr {
+			bindVal = reflect.New(b.bindParam[i].Type.Elem())
+		} else {
+			bindVal = reflect.New(b.bindParam[i].Type)
+		}
 
+		ginCtx := ctx.NativeContext().(*gin.Context)
 		switch param.ParamType {
 		case ParamJsonStruct:
 			err = ginCtx.ShouldBindJSON(bindVal.Interface())
@@ -100,16 +105,23 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 			err = ginCtx.ShouldBindQuery(bindVal.Interface())
 		case ParamHeaderStruct:
 			err = ginCtx.ShouldBindHeader(bindVal.Interface())
-		case ParamOtherStruct:
+		case ParamStruct, ParamOther:
 			err = ctx.Bind(bindVal.Interface())
 		}
 		errors.Panic(err).When(err != nil)
 
 		//验证绑定参数
-		err = validator.Validate(bindVal.Interface())
-		errors.Panic(err).When(err != nil)
+		if param.ParamType == ParamStruct || param.ParamType == ParamJsonStruct || param.ParamType == ParamFormStruct ||
+			param.ParamType == ParamUriStruct || param.ParamType == ParamQueryStruct || param.ParamType == ParamHeaderStruct {
+			err = validator.Validate(bindVal.Interface())
+			errors.Panic(err).When(err != nil)
+		}
 
-		in[i] = bindVal
+		if b.bindParam[i].Type.Kind() == reflect.Ptr {
+			in[i] = bindVal
+		} else {
+			in[i] = bindVal.Elem()
+		}
 	}
 
 	// 执行处理函数，并返回结果

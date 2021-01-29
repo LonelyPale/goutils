@@ -1,7 +1,6 @@
 package starter
 
 import (
-	"github.com/LonelyPale/goutils/thirdparty/gospring/springweb"
 	"github.com/gin-gonic/gin"
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-gin"
@@ -9,6 +8,7 @@ import (
 	"github.com/go-spring/starter-web"
 
 	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/thirdparty/gospring/springweb"
 )
 
 type WebServerConfig struct {

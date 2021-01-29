@@ -17,6 +17,8 @@ type ParamType uint
 
 const (
 	ParamInvalid ParamType = iota
+	ParamStruct
+	ParamOther
 	ParamContext
 	ParamWebContext
 	ParamJsonStruct
@@ -24,7 +26,6 @@ const (
 	ParamUriStruct
 	ParamQueryStruct
 	ParamHeaderStruct
-	ParamOtherStruct
 )
 
 type Param struct {
@@ -56,13 +57,13 @@ func NewParam(typ reflect.Type) Param {
 				} else if s := tag.Get("header"); len(s) > 0 {
 					paramType = ParamHeaderStruct
 				} else {
-					paramType = ParamOtherStruct
+					paramType = ParamStruct
 				}
 			} else {
-				paramType = ParamOtherStruct
+				paramType = ParamStruct
 			}
 		} else {
-			paramType = ParamInvalid
+			paramType = ParamOther
 		}
 	}
 
