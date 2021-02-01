@@ -7,19 +7,32 @@ func MergeSliceByte(ss ...[]byte) []byte {
 	case 1:
 		return ss[0]
 	default:
-		length := 0
-		for _, s := range ss {
-			length += len(s)
-		}
-
-		slice := make([]byte, length)
-		index := 0
-		for _, s := range ss {
-			copy(slice[index:], s)
-			index += len(s)
-		}
-		return slice
+		return mergeSliceCopy(ss...)
 	}
+}
+
+// copy 效率要比 append 大概高20%-30%
+func mergeSliceCopy(ss ...[]byte) []byte {
+	length := 0
+	for _, s := range ss {
+		length += len(s)
+	}
+
+	slice := make([]byte, length)
+	index := 0
+	for _, s := range ss {
+		copy(slice[index:], s)
+		index += len(s)
+	}
+	return slice
+}
+
+func mergeSliceAppend(ss ...[]byte) []byte {
+	slice := make([]byte, 0)
+	for _, s := range ss {
+		slice = append(slice, s...)
+	}
+	return slice
 }
 
 func ReverseByte(arr []byte) []byte {

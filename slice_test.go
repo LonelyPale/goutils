@@ -2,6 +2,7 @@ package goutils
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +16,24 @@ func TestMergeSliceByte(t *testing.T) {
 
 	assert.Equal(t, bs, MergeSliceByte())
 	assert.Equal(t, a, MergeSliceByte(a))
+	assert.Equal(t, a, MergeSliceByte(a, nil))
 	assert.Equal(t, d, MergeSliceByte(a, b, c))
+
+	var count1 time.Duration
+	for i := 0; i < 1000000; i++ {
+		t1 := time.Now()
+		mergeSliceCopy(a, b, c)
+		count1 += time.Since(t1)
+	}
+	t.Log("copy count1: ", count1/1000000)
+
+	var count2 time.Duration
+	for i := 0; i < 1000000; i++ {
+		t1 := time.Now()
+		mergeSliceAppend(a, b, c)
+		count2 += time.Since(t1)
+	}
+	t.Log("append count2: ", count2/1000000)
 }
 
 func TestReverseByte(t *testing.T) {
