@@ -10,7 +10,16 @@ import (
 	"github.com/LonelyPale/goutils/errors"
 )
 
-// AES的区块长度固定为128比特，密钥长度则可以是128，192或256比特；
+//todo: 优化base64等输出格式
+//todo: 现在是前置iv，增加后置iv
+//todo: 加入salt，把不标准的key生成统一的key
+
+// AES的区块长度固定为128比特，向量iv长度固定为128比特，密钥长度固定为128、192、256比特。
+// 标准的AES是没有salt概念的，自定义时可以扩展salt用来生成长度不标准的key的hash，用于统一key的长度。
+//          key  iv   block
+// AES-128  128  128  128
+// AES-192  192  128  128
+// AES-256  256  128  128
 
 //对明文进行填充
 func Padding(plainText []byte, blockSize int) []byte {
