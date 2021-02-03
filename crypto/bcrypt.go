@@ -1,8 +1,6 @@
 package crypto
 
 import (
-	"fmt"
-
 	"github.com/LonelyPale/goutils"
 	"github.com/LonelyPale/goutils/crypto/sha512"
 )
@@ -26,8 +24,11 @@ func Bcrypt(data, salt []byte, loops ...int) ([]byte, error) {
 		return nil, err
 	}
 
+	//逆序盐
+	saltReverse := goutils.ReverseByte(append([]byte{}, salt...))
+
 	//2 前置盐
-	hash, err = sha512.Hash(append(salt, hash...))
+	salt, err = sha512.Hash(goutils.MergeSliceByte(salt, hash))
 	if err != nil {
 		return nil, err
 	}
@@ -39,21 +40,15 @@ func Bcrypt(data, salt []byte, loops ...int) ([]byte, error) {
 	}
 	goutils.ReverseByte(hashReverse)
 
-	//逆序盐
-	saltReverse := make([]byte, len(salt))
-	fmt.Println(123, len(salt))
-	copy(saltReverse, salt)
-	goutils.ReverseByte(saltReverse)
-
 	//4 后置盐
-	hashReverse, err = sha512.Hash(append(hashReverse, saltReverse...))
+	saltReverse, err = sha512.Hash(goutils.MergeSliceByte(hashReverse, saltReverse))
 	if err != nil {
 		return nil, err
 	}
-	goutils.ReverseByte(hashReverse)
+	goutils.ReverseByte(saltReverse)
 
 	//5 合并哈希
-	newhash := make([]byte, len(hash)*2+len(salt)*2)
+	newhash := make([]byte, 0)
 	newhash = append(newhash, salt...)
 	for i := range hash {
 		newhash = append(newhash, hash[i])
