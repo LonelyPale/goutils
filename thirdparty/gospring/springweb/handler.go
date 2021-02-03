@@ -1,7 +1,6 @@
 package springweb
 
 import (
-	"io/ioutil"
 	"net/http"
 	"reflect"
 
@@ -73,12 +72,6 @@ func (b *bindHandler) Invoke(ctx SpringWeb.WebContext) {
 }
 
 func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
-	defer ctx.Request().Body.Close()
-	body, err := ioutil.ReadAll(ctx.Request().Body)
-	if err != nil {
-		return []interface{}{err}
-	}
-
 	in := make([]reflect.Value, len(b.bindParam))
 
 	// 反射创建需要绑定请求参数
@@ -114,13 +107,12 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 		case ParamHeaderStruct:
 			err = ginCtx.ShouldBindHeader(bindVal.Interface())
 		case ParamStruct, ParamOther:
-			err = json.Unmarshal(body, bindVal.Interface())
+			err = json.NewDecoder(ctx.Request().Body).Decode(bindVal.Interface())
 		}
 		errors.Panic(err).When(err != nil)
 
-		//验证绑定参数
-		if param.ParamType == ParamStruct || param.ParamType == ParamJsonStruct || param.ParamType == ParamFormStruct ||
-			param.ParamType == ParamUriStruct || param.ParamType == ParamQueryStruct || param.ParamType == ParamHeaderStruct {
+		//验证绑定参数：gin的bind方法会自己验证参数，所以只用验证ParamStruct
+		if param.ParamType == ParamStruct {
 			err = validator.Validate(bindVal.Interface())
 			errors.Panic(err).When(err != nil)
 		}
