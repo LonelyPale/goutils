@@ -1,6 +1,7 @@
 package springweb
 
 import (
+	"io/ioutil"
 	"net/http"
 	"reflect"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/go-spring/spring-web"
 
 	"github.com/LonelyPale/goutils"
+	"github.com/LonelyPale/goutils/encoding/json"
 	"github.com/LonelyPale/goutils/errors"
 	"github.com/LonelyPale/goutils/validator"
 )
@@ -71,6 +73,12 @@ func (b *bindHandler) Invoke(ctx SpringWeb.WebContext) {
 }
 
 func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
+	defer ctx.Request().Body.Close()
+	body, err := ioutil.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return []interface{}{err}
+	}
+
 	in := make([]reflect.Value, len(b.bindParam))
 
 	// 反射创建需要绑定请求参数
@@ -106,7 +114,7 @@ func (b *bindHandler) call(ctx SpringWeb.WebContext) []interface{} {
 		case ParamHeaderStruct:
 			err = ginCtx.ShouldBindHeader(bindVal.Interface())
 		case ParamStruct, ParamOther:
-			err = ctx.Bind(bindVal.Interface())
+			err = json.Unmarshal(body, bindVal.Interface())
 		}
 		errors.Panic(err).When(err != nil)
 
