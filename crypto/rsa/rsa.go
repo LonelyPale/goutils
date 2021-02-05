@@ -94,25 +94,33 @@ func CreateKeys(publicKeyWriter, privateKeyWriter io.Writer, keyLengths ...int) 
 }
 
 func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
-	block, _ := pem.Decode(publicKey)
-	if block == nil {
-		return nil, errors.New("public key error")
+	var pub *rsa.PublicKey
+	var pri *rsa.PrivateKey
+	if len(publicKey) > 0 {
+		block, _ := pem.Decode(publicKey)
+		if block == nil {
+			return nil, errors.New("public key error")
+		}
+
+		pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		pub = pubInterface.(*rsa.PublicKey)
 	}
 
-	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
+	if len(privateKey) > 0 {
+		var err error
+		block, _ := pem.Decode(privateKey)
+		if block == nil {
+			return nil, errors.New("private key error!")
+		}
 
-	pub := pubInterface.(*rsa.PublicKey)
-	block, _ = pem.Decode(privateKey)
-	if block == nil {
-		return nil, errors.New("private key error!")
-	}
-
-	pri, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
+		pri, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &XRsa{
