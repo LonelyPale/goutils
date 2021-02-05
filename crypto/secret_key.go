@@ -3,6 +3,8 @@ package crypto
 import (
 	"crypto/rand"
 	"math/big"
+
+	"github.com/LonelyPale/goutils/types"
 )
 
 const (
@@ -11,7 +13,7 @@ const (
 )
 
 // 生成指定字节长度的密钥
-func GenerateSecretKey(lengths ...int) ([]byte, error) {
+func GenerateSecretKey(lengths ...int) (types.Bytes, error) {
 	var length int
 	if len(lengths) > 0 && lengths[0] > 0 {
 		//digits must be greater than 0
@@ -33,7 +35,7 @@ func GenerateSecretKey(lengths ...int) ([]byte, error) {
 	return bs, nil
 }
 
-func GenerateSalt(lengths ...int) ([]byte, error) {
+func GenerateSalt(lengths ...int) (types.Bytes, error) {
 	var length int
 	if len(lengths) > 0 && lengths[0] > 0 {
 		//digits must be greater than 0

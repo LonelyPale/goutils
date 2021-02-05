@@ -18,6 +18,6 @@ func TestGenerateSecretKey(t *testing.T) {
 			t.Fatal("gen length error")
 		}
 
-		t.Log("duration", time.Since(startTime), key)
+		t.Log(key.Hex(), "duration:", time.Since(startTime))
 	}
 }
