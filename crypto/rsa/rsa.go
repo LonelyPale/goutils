@@ -102,12 +102,14 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 			return nil, errors.New("public key error")
 		}
 
-		pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+		//pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+		pubInterface, err := x509.ParsePKCS1PublicKey(block.Bytes)
 		if err != nil {
 			return nil, err
 		}
 
-		pub = pubInterface.(*rsa.PublicKey)
+		//pub = pubInterface.(*rsa.PublicKey)
+		pub = pubInterface
 	}
 
 	if len(privateKey) > 0 {
