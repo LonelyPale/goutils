@@ -7,78 +7,110 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/asn1"
-	"encoding/base64"
 	"encoding/pem"
-	"io"
 
 	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/types"
+)
+
+type Type uint
+
+//加密解密流程、签名验签流程
+const (
+	PKCS1v15 Type = 1 + iota // RSAES-PKCS1-v1_5、RSASSA-PKCS1-v1_5
+	OAEP                     // RSAES-OAEP
+	PSS                      // RSASSA-PSS
+	maxRsaType
+)
+
+type KeyType uint
+
+//公私钥格式
+const (
+	PKCS1 KeyType = 1 + iota //PKCS #1
+	PKCS8                    //PKCS #8
+	PKIX                     //公钥通用
+	maxRsaKeyType
 )
 
 const (
-	CharSet          = "UTF-8"
-	Base64Format     = "UrlSafeNoPadding"
-	AlgorithmKeyType = "PKCS1"
-	AlgorithmSign    = crypto.SHA256
-	Bits             = 2048
+	DefaultType    = PKCS1v15
+	DefaultKeyType = PKCS1
+	DefaultBits    = 2048
+	DefaultHash    = crypto.SHA256
 )
 
-var Base64Encoding = base64.StdEncoding
+type Options struct {
+	Type       Type
+	KeyType    KeyType
+	Bits       int
+	Hash       crypto.Hash //RSA-OAEP RSA-PSS
+	Label      []byte      //RSA-OAEP
+	SaltLength int         //RSA-PSS
+}
+
+func DefaultOptions() *Options {
+	return &Options{
+		Type:       DefaultType,
+		KeyType:    DefaultKeyType,
+		Bits:       DefaultBits,
+		Hash:       DefaultHash,
+		Label:      nil,
+		SaltLength: rsa.PSSSaltLengthAuto,
+	}
+}
 
 type XRsa struct {
+	opts       *Options
 	publicKey  *rsa.PublicKey
 	privateKey *rsa.PrivateKey
 }
 
-func CreateKeysToBase64(keyLengths ...int) (string, string, error) {
-	pubKey := bytes.NewBuffer(make([]byte, 0))
-	priKey := bytes.NewBuffer(make([]byte, 0))
-	if err := CreateKeys(pubKey, priKey, keyLengths...); err != nil {
-		return "", "", err
+// 生成密钥对(公私钥)
+func CreateKeys(opts ...*Options) (types.Bytes, types.Bytes, error) {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = DefaultOptions()
 	}
 
-	return pubKey.String(), priKey.String(), nil
-}
+	publicKeyWriter := bytes.NewBuffer(make([]byte, 0))
+	privateKeyWriter := bytes.NewBuffer(make([]byte, 0))
 
-func CreateKeysToBytes(keyLengths ...int) ([]byte, []byte, error) {
-	pubKey := bytes.NewBuffer(make([]byte, 0))
-	priKey := bytes.NewBuffer(make([]byte, 0))
-	if err := CreateKeys(pubKey, priKey, keyLengths...); err != nil {
+	// 生成私钥, bits位数长度
+	privateKey, err := rsa.GenerateKey(rand.Reader, opt.Bits)
+	if err != nil {
 		return nil, nil, err
 	}
 
-	return pubKey.Bytes(), priKey.Bytes(), nil
-}
-
-// 生成密钥对
-func CreateKeys(publicKeyWriter, privateKeyWriter io.Writer, keyLengths ...int) error {
-	var bits int
-	if len(keyLengths) > 0 && keyLengths[0] > 0 {
-		bits = keyLengths[0]
-	} else {
-		bits = Bits
+	var derStream []byte
+	switch opt.KeyType {
+	case PKCS1:
+		derStream = x509.MarshalPKCS1PrivateKey(privateKey)
+	case PKCS8:
+		derStream, err = x509.MarshalPKCS8PrivateKey(privateKey)
+		if err != nil {
+			return nil, nil, err
+		}
+	default:
+		return nil, nil, errors.New("crypto/rsa: invalid KeyType for options")
 	}
 
-	// 生成私钥文件, bits位数长度
-	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
-	if err != nil {
-		return err
-	}
-
-	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
 	block := &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: derStream,
 	}
 	err = pem.Encode(privateKeyWriter, block)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	// 生成公钥文件
+	// 生成公钥
 	publicKey := &privateKey.PublicKey
 	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	block = &pem.Block{
@@ -87,49 +119,24 @@ func CreateKeys(publicKeyWriter, privateKeyWriter io.Writer, keyLengths ...int) 
 	}
 	err = pem.Encode(publicKeyWriter, block)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return nil
+	return publicKeyWriter.Bytes(), privateKeyWriter.Bytes(), nil
 }
 
-func NewXRsaPKCS1(publicKey []byte, privateKey []byte) (*XRsa, error) {
-	var pub *rsa.PublicKey
-	var pri *rsa.PrivateKey
-	var err error
-	if len(publicKey) > 0 {
-		block, _ := pem.Decode(publicKey)
-		if block == nil {
-			return nil, errors.New("public key error")
-		}
-
-		pub, err = x509.ParsePKCS1PublicKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
+// 解析密钥对(公私钥)
+func NewXRsa(publicKey []byte, privateKey []byte, opts ...*Options) (*XRsa, error) {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = DefaultOptions()
 	}
 
-	if len(privateKey) > 0 {
-		block, _ := pem.Decode(privateKey)
-		if block == nil {
-			return nil, errors.New("private key error!")
-		}
+	var pubKey *rsa.PublicKey
+	var priKey *rsa.PrivateKey
 
-		pri, err = x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &XRsa{
-		publicKey:  pub,
-		privateKey: pri,
-	}, nil
-}
-
-func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
-	var pub *rsa.PublicKey
-	var pri *rsa.PrivateKey
 	if len(publicKey) > 0 {
 		block, _ := pem.Decode(publicKey)
 		if block == nil {
@@ -141,138 +148,202 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 			return nil, err
 		}
 
-		pub = pubInterface.(*rsa.PublicKey)
+		pubKey = pubInterface.(*rsa.PublicKey)
 	}
 
 	if len(privateKey) > 0 {
-		var err error
 		block, _ := pem.Decode(privateKey)
 		if block == nil {
 			return nil, errors.New("private key error!")
 		}
 
-		pri, err = x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
+		var err error
+		var priInterface interface{}
+		switch opt.KeyType {
+		case PKCS1:
+			priKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+		case PKCS8:
+			priInterface, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			priKey = priInterface.(*rsa.PrivateKey)
+		default:
+			return nil, errors.New("crypto/rsa: invalid KeyType for options")
 		}
 	}
 
 	return &XRsa{
-		publicKey:  pub,
-		privateKey: pri,
+		opts:       opt,
+		publicKey:  pubKey,
+		privateKey: priKey,
 	}, nil
 }
 
-// 公钥加密
-func (r *XRsa) Encrypt(data []byte) ([]byte, error) {
-	partLen := r.publicKey.N.BitLen()/8 - 11
-	chunks := split(data, partLen)
+// 公钥加密 encrypted
+func (x *XRsa) Encrypt(plaintext []byte, opts ...*Options) (types.Bytes, error) {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = x.opts
+	}
+
+	//明文过长时分段
+	var partLen int
+	switch opt.Type {
+	case PKCS1v15:
+		partLen = x.publicKey.Size() - 11
+	case OAEP:
+		partLen = x.publicKey.Size() - 2*opt.Hash.Size() - 2
+	default:
+		return nil, errors.New("crypto/rsa: invalid Type for options")
+	}
+	chunks := split(plaintext, partLen)
+
 	buffer := bytes.NewBuffer([]byte{})
 	for _, chunk := range chunks {
-		encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, r.publicKey, chunk)
+		var ciphertext []byte
+		var err error
+
+		switch opt.Type {
+		case PKCS1v15:
+			ciphertext, err = rsa.EncryptPKCS1v15(rand.Reader, x.publicKey, chunk)
+		case OAEP:
+			ciphertext, err = rsa.EncryptOAEP(opt.Hash.New(), rand.Reader, x.publicKey, chunk, opt.Label)
+		default:
+			return nil, errors.New("crypto/rsa: invalid Type for options")
+		}
 		if err != nil {
 			return nil, err
 		}
 
-		buffer.Write(encrypted)
+		buffer.Write(ciphertext)
 	}
+
 	return buffer.Bytes(), nil
 }
 
-// 私钥解密
-func (r *XRsa) Decrypt(encrypted []byte) ([]byte, error) {
-	partLen := r.publicKey.N.BitLen() / 8
-	chunks := split(encrypted, partLen)
+// 私钥解密  decrypted
+func (x *XRsa) Decrypt(ciphertext []byte, opts ...*Options) (types.Bytes, error) {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = x.opts
+	}
+
+	//密文分段，rsa(PKCS1v15、OAEP)密文段的长度和公钥的长度相等
+	partLen := x.publicKey.Size()
+	chunks := split(ciphertext, partLen)
 	buffer := bytes.NewBuffer([]byte{})
 	for _, chunk := range chunks {
-		decrypted, err := rsa.DecryptPKCS1v15(rand.Reader, r.privateKey, chunk)
+		var plaintext []byte
+		var err error
+
+		switch opt.Type {
+		case PKCS1v15:
+			plaintext, err = rsa.DecryptPKCS1v15(rand.Reader, x.privateKey, chunk)
+		case OAEP:
+			plaintext, err = rsa.DecryptOAEP(opt.Hash.New(), rand.Reader, x.privateKey, chunk, opt.Label)
+		default:
+			return nil, errors.New("crypto/rsa: invalid Type for options")
+		}
 		if err != nil {
 			return nil, err
 		}
 
-		buffer.Write(decrypted)
+		buffer.Write(plaintext)
 	}
+
 	return buffer.Bytes(), nil
 }
 
-// 私钥签名
-func (r *XRsa) Sign(data []byte) ([]byte, error) {
-	h := AlgorithmSign.New()
+// 私钥签名 signature
+func (x *XRsa) Sign(data []byte, opts ...*Options) (types.Bytes, error) {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = x.opts
+	}
+
+	h := opt.Hash.New()
 	if _, err := h.Write(data); err != nil {
 		return nil, err
 	}
-
 	hashed := h.Sum(nil)
-	sign, err := rsa.SignPKCS1v15(rand.Reader, r.privateKey, AlgorithmSign, hashed)
+
+	var signature []byte
+	var err error
+	switch opt.Type {
+	case PKCS1v15:
+		signature, err = rsa.SignPKCS1v15(rand.Reader, x.privateKey, opt.Hash, hashed)
+	case PSS:
+		signature, err = rsa.SignPSS(rand.Reader, x.privateKey, opt.Hash, hashed, &rsa.PSSOptions{
+			SaltLength: opt.SaltLength,
+			Hash:       opt.Hash,
+		})
+	default:
+		return nil, errors.New("crypto/rsa: invalid Type for options")
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return sign, nil
+	return signature, nil
 }
 
-// 公钥验签
-func (r *XRsa) Verify(data []byte, sign []byte) error {
-	h := AlgorithmSign.New()
+// 公钥验签 verifies
+func (x *XRsa) Verify(data []byte, sign []byte, opts ...*Options) error {
+	var opt *Options
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	} else {
+		opt = x.opts
+	}
+
+	h := opt.Hash.New()
 	if _, err := h.Write(data); err != nil {
 		return err
 	}
-
 	hashed := h.Sum(nil)
-	return rsa.VerifyPKCS1v15(r.publicKey, AlgorithmSign, hashed, sign)
-}
 
-func (r *XRsa) EncryptToBase64(data []byte) (string, error) {
-	bs, err := r.Encrypt(data)
-	if err != nil {
-		return "", err
+	switch opt.Type {
+	case PKCS1v15:
+		return rsa.VerifyPKCS1v15(x.publicKey, opt.Hash, hashed, sign)
+	case PSS:
+		return rsa.VerifyPSS(x.publicKey, opt.Hash, hashed, sign, &rsa.PSSOptions{
+			SaltLength: opt.SaltLength,
+			Hash:       opt.Hash,
+		})
+	default:
+		return errors.New("crypto/rsa: invalid Type for options")
 	}
-
-	return Base64Encoding.EncodeToString(bs), nil
-}
-
-func (r *XRsa) DecryptFromBase64(encrypted string) ([]byte, error) {
-	raw, err := Base64Encoding.DecodeString(encrypted)
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Decrypt(raw)
-}
-
-// 数据签名
-func (r *XRsa) SignToBase64(data []byte) (string, error) {
-	sign, err := r.Sign(data)
-	if err != nil {
-		return "", err
-	}
-
-	return Base64Encoding.EncodeToString(sign), nil
-}
-
-func (r *XRsa) VerifyFromBase64(data []byte, sign string) error {
-	decodedSign, err := Base64Encoding.DecodeString(sign)
-	if err != nil {
-		return err
-	}
-
-	return r.Verify(data, decodedSign)
 }
 
 func split(buf []byte, lim int) [][]byte {
 	var chunk []byte
 	chunks := make([][]byte, 0, len(buf)/lim+1)
+
 	for len(buf) >= lim {
 		chunk, buf = buf[:lim], buf[lim:]
 		chunks = append(chunks, chunk)
 	}
+
 	if len(buf) > 0 {
 		chunks = append(chunks, buf[:])
 	}
+
 	return chunks
 }
 
-func MarshalPKCS8PrivateKey(key *rsa.PrivateKey) ([]byte, error) {
+//MarshalPKCS8PrivateKey
+//Pkcs1ToPkcs8 将 pkcs1 PrivateKey 转到 pkcs8 PrivateKey 自定义
+func Pkcs1ToPkcs8(key []byte) (types.Bytes, error) {
 	info := struct {
 		Version             int
 		PrivateKeyAlgorithm []asn1.ObjectIdentifier
@@ -282,12 +353,8 @@ func MarshalPKCS8PrivateKey(key *rsa.PrivateKey) ([]byte, error) {
 	info.Version = 0
 	info.PrivateKeyAlgorithm = make([]asn1.ObjectIdentifier, 1)
 	info.PrivateKeyAlgorithm[0] = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
-	info.PrivateKey = x509.MarshalPKCS1PrivateKey(key)
+	info.PrivateKey = key
+	//info.PrivateKey = x509.MarshalPKCS1PrivateKey(key *rsa.PrivateKey)
 
-	k, err := asn1.Marshal(info)
-	if err != nil {
-		return nil, err
-	}
-
-	return k, nil
+	return asn1.Marshal(info)
 }
