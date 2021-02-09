@@ -180,18 +180,16 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 	default:
 		lastIndex := len(out) - 1
 		last := out[lastIndex]
-		if l, ok := last.(error); ok && l != nil {
+		if l, ok := last.(error); ok {
 			result = goutils.NewErrorMessage(l)
 			SpringLogger.Error(l)
-		} else if ok && l == nil {
+		} else {
 			out = out[:lastIndex]
 			if len(out) == 1 {
 				result = goutils.NewSuccessMessage(out[0])
 			} else {
 				result = goutils.NewSuccessMessage(out)
 			}
-		} else {
-			result = goutils.NewSuccessMessage(out)
 		}
 	}
 
