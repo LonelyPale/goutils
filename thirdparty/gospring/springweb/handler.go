@@ -146,12 +146,12 @@ var WebInvoke = defaultWebInvoke
 func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext) []interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
-			result, ok := r.(error)
+			e, ok := r.(error)
 			if !ok {
-				result = errors.UnknownError(r)
+				e = errors.UnknownError(r)
 			}
-			_ = webCtx.JSON(http.StatusOK, goutils.NewErrorMessage(result))
-			SpringLogger.Error(result)
+			SpringLogger.Error(e)
+			_ = webCtx.JSON(http.StatusOK, goutils.NewErrorMessage(e))
 		}
 	}()
 
@@ -168,16 +168,28 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 		case *goutils.Message:
 			result = v
 		case error:
-			result = goutils.NewErrorMessage(v)
-			SpringLogger.Error(v)
+			if v != nil {
+				result = goutils.NewErrorMessage(v)
+				SpringLogger.Error(v)
+			} else {
+				result = goutils.NewSuccessMessage()
+			}
 		default:
 			result = goutils.NewSuccessMessage(v)
 		}
 	default:
-		last := out[len(out)-1]
+		lastIndex := len(out) - 1
+		last := out[lastIndex]
 		if l, ok := last.(error); ok && l != nil {
 			result = goutils.NewErrorMessage(l)
 			SpringLogger.Error(l)
+		} else if ok && l == nil {
+			out = out[:lastIndex]
+			if len(out) == 1 {
+				result = goutils.NewSuccessMessage(out[0])
+			} else {
+				result = goutils.NewSuccessMessage(out)
+			}
 		} else {
 			result = goutils.NewSuccessMessage(out)
 		}
