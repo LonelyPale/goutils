@@ -141,11 +141,9 @@ func (b *bindHandler) FileLine() (file string, line int, fnName string) {
 // WebInvoke 可自定义的 web 执行函数
 var WebInvoke = defaultWebInvoke
 
+// todo: 目前 HTTP Web 只能返回 json 格式的数据
 // defaultWebInvoke 默认的 web 执行函数
 func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext) []interface{}) {
-	// 目前 HTTP Web 只能返回 json 格式的数据
-	webCtx.Header("Content-Type", "application/json")
-
 	defer func() {
 		if r := recover(); r != nil {
 			result, ok := r.(error)
@@ -185,5 +183,13 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 		}
 	}
 
-	_ = webCtx.JSON(http.StatusOK, result)
+	//_ = webCtx.JSON(http.StatusOK, result)
+	b, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := webCtx.Blob(http.StatusOK, SpringWeb.MIMEApplicationJSONCharsetUTF8, b); err != nil {
+		panic(err)
+	}
 }
