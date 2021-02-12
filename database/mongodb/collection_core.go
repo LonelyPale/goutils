@@ -12,6 +12,8 @@ import (
 	"github.com/LonelyPale/goutils/types"
 )
 
+// mongodb验证规则: Insert在collection_core中验证，Save在collection中验证，Update在model中验证
+
 // 插入一条记录, 返回 ObjectID
 func (coll *Collection) insertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
 	if coll == nil {
@@ -26,6 +28,13 @@ func (coll *Collection) insertOne(ctx context.Context, document interface{}, opt
 
 	// 根据集合名称找到已注册的模型反射实例
 	model := MakeInstance(coll.name)
+
+	if model != nil {
+		// 验证新增
+		if err := validate(document, CreateTagName); err != nil {
+			return types.NilObjectID, err
+		}
+	}
 
 	// callback before
 	//ctx = context.WithValue(ctx, InsertOneOptionsKey, opts)
@@ -67,7 +76,15 @@ func (coll *Collection) insert(ctx context.Context, documents []interface{}, opt
 		defer cancel()
 	}
 
+	// 根据集合名称找到已注册的模型反射实例
 	model := MakeInstance(coll.name)
+
+	if model != nil {
+		// 验证新增
+		if err := validate(documents, CreateTagName); err != nil {
+			return nil, err
+		}
+	}
 
 	// callback before
 	//ctx = context.WithValue(ctx, InsertManyOptionsKey, opts)

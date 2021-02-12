@@ -116,7 +116,7 @@ func TestModel_Update(t *testing.T) {
 	t.Log("time-set:", time.Since(startTime1), user)
 }
 
-func TestModel_Get(t *testing.T) {
+func TestModel_Find(t *testing.T) {
 	opts := NewClientOptions("")
 	client, err := Connect(opts)
 	if err != nil {
@@ -133,7 +133,7 @@ func TestModel_Get(t *testing.T) {
 	user.Model = NewModel(user, coll)
 
 	startTime := time.Now()
-	if err := user.Get(); err != nil {
+	if err := user.Find(); err != nil {
 		t.Fatal(err)
 	}
 	t.Log("time:", time.Since(startTime))

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultTagName = "validate"
+	DefaultTagName = "validate"
 )
 
 // defaultValidator 默认的参数校验器
@@ -84,7 +84,7 @@ func (v *defaultValidator) validateStruct(obj interface{}, tags ...string) error
 	if len(tags) > 0 && len(tags[0]) > 0 {
 		v.validator.SetTagName(tags[0])
 	} else {
-		v.validator.SetTagName(defaultTagName)
+		v.validator.SetTagName(DefaultTagName)
 	}
 
 	if v.translator != nil {

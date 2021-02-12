@@ -2,10 +2,10 @@ package mongodb
 
 // 验证tag: 增删查改 CRUD
 const (
-	CreateTagName = "vCreate"
-	UpdateTagName = "vUpdate"
-	DeleteTagName = "vDelete"
-	ReadTagName   = "vRead"
+	CreateTagName = "vCreate" //增
+	UpdateTagName = "vUpdate" //改
+	DeleteTagName = "vDelete" //删
+	ReadTagName   = "vRead"   //查
 )
 
 type ModelValidator interface {

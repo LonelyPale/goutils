@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/LonelyPale/goutils/types"
 	"github.com/LonelyPale/goutils/validator"
 )
 
@@ -58,10 +59,6 @@ func (m Model) Create(ctxs ...context.Context) error {
 		defer cancel()
 	}
 
-	if err := m.Validate(CreateTagName); err != nil {
-		return err
-	}
-
 	_, err := m.coll.InsertOne(ctx, m.doc)
 	if err != nil {
 		return err
@@ -94,7 +91,12 @@ func (m Model) Update(ctxs ...context.Context) error {
 		return ErrNilObjectID
 	}
 
-	filter := ID(vid.Interface())
+	id := vid.Interface()
+	if id.(types.ObjectID).IsZero() {
+		return ErrNilObjectID
+	}
+
+	filter := ID(id)
 	updater := Set(m.doc)
 	if _, err := m.coll.UpdateOne(ctx, filter, updater); err != nil {
 		return err

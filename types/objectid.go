@@ -3,9 +3,9 @@
 package types
 
 import (
-	"github.com/LonelyPale/goutils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/LonelyPale/goutils"
 	"github.com/LonelyPale/goutils/errors"
 )
 
