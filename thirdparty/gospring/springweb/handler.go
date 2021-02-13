@@ -16,13 +16,6 @@ import (
 	"github.com/LonelyPale/goutils/validator"
 )
 
-func init() {
-	//SpringWeb.Validator = SpringWeb.NewDefaultValidator()
-	if err := validator.DefaultValidator.SetLanguage(validator.ZH); err != nil {
-		panic(err)
-	}
-}
-
 func validBindFn(fnType reflect.Type) bool {
 	// fn 必须是函数
 	// 入参(0-n): context.Context、SpringWeb.WebContext、*struct{`json`}、*struct{`form`}、*struct{`uri`}、*struct{`query`}、*struct{`header`}
@@ -157,6 +150,13 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 
 	var result *goutils.Message
 	out := fn(webCtx)
+
+	//处理 ResultHandler 回调
+	for _, handler := range resultHandlers {
+		if handler != nil {
+			out = handler.Invoke(out)
+		}
+	}
 
 	switch len(out) {
 	case 0:

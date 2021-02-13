@@ -1,5 +1,12 @@
 package validator
 
+func init() {
+	//SpringWeb.Validator = SpringWeb.NewDefaultValidator()
+	if err := DefaultValidator.SetLanguage(ZH); err != nil {
+		panic(err)
+	}
+}
+
 // Validator 参数校验器接口
 type Validator interface {
 	Engine() interface{}
