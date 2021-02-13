@@ -28,7 +28,7 @@ func NewSuccessMessage(datas ...interface{}) *Message {
 func NewErrorMessage(err error) *Message {
 	switch e := err.(type) {
 	case ecode.ErrorCode:
-		return &Message{Code: e.Code(), Msg: e.Error()}
+		return &Message{Code: e.Code(), Msg: e.Error(), Data: e.Details()}
 	case validator.ValidationErrors:
 		return &Message{Code: ecode.StatusError, Msg: e.Error(), Data: e}
 	default:
