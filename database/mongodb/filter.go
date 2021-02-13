@@ -44,6 +44,10 @@ func And(values ...interface{}) Filter {
 	return Filter{}.And(values...)
 }
 
+func In(key string, value interface{}) Filter {
+	return Filter{}.In(key, value)
+}
+
 func ID(value interface{}) Filter {
 	return Filter{}.ID(value)
 }
