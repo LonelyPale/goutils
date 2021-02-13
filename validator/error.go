@@ -2,59 +2,36 @@ package validator
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 )
 
-const (
-	fieldErrMsg = "%s: %s"
-)
-
-type ValidationErrors []FieldError
+type ValidationErrors []*FieldError
 
 func (ve ValidationErrors) Error() string {
 	buff := bytes.NewBufferString("")
-	var fe *fieldError
+	var fe *FieldError
 	for i := 0; i < len(ve); i++ {
-		fe = ve[i].(*fieldError)
+		fe = ve[i]
 		buff.WriteString(fe.Error())
 		buff.WriteString("\n")
 	}
 	return strings.TrimSpace(buff.String())
 }
 
-type FieldError interface {
-	Error() string
-	Field() string
-	Label() string
+var _ error = new(FieldError)
+
+type FieldError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
 }
 
-// 用来判断 type T 是否实现了接口 I, 用作类型断言, 如果 T 没有实现接口 I, 则编译错误.
-var _ FieldError = new(fieldError)
-var _ error = new(fieldError)
-
-type fieldError struct {
-	field   string
-	label   string
-	message string
-}
-
-func newFieldError(field string, label string, message string) FieldError {
-	return &fieldError{
-		field:   field,
-		label:   label,
-		message: message,
+func NewFieldError(field string, message string) *FieldError {
+	return &FieldError{
+		Field:   field,
+		Message: message,
 	}
 }
 
-func (fe *fieldError) Error() string {
-	return fmt.Sprintf(fieldErrMsg, fe.label, fe.message)
-}
-
-func (fe *fieldError) Field() string {
-	return fe.field
-}
-
-func (fe *fieldError) Label() string {
-	return fe.label
+func (fe *FieldError) Error() string {
+	return fe.Message
 }

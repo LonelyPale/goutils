@@ -13,6 +13,9 @@ const (
 	DefaultTagName = "validate"
 )
 
+// 用来判断 type T 是否实现了接口 I, 用作类型断言, 如果 T 没有实现接口 I, 则编译错误.
+var _ Validator = new(defaultValidator)
+
 // defaultValidator 默认的参数校验器
 type defaultValidator struct {
 	validator  *validator.Validate //验证器
