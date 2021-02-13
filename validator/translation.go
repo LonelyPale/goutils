@@ -1,15 +1,12 @@
 package validator
 
 import (
-	"reflect"
-	"strings"
-
+	"github.com/LonelyPale/goutils/errors"
 	"github.com/go-playground/locales/zh"
 	"github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	zhtrans "github.com/go-playground/validator/v10/translations/zh"
-
-	"github.com/LonelyPale/goutils/errors"
+	"reflect"
 )
 
 type Language uint
@@ -50,11 +47,20 @@ func Translate(err error, trans ut.Translator) error {
 		return err
 	}
 
-	var errList []string
+	errList := make(ValidationErrors, 0)
 	for _, e := range errs {
 		// can translate each error one at a time.
-		errList = append(errList, e.Translate(trans))
+		errList = append(errList, newFieldError(e.Field(), e.Tag(), e.Translate(trans)))
 	}
 
-	return errors.New(strings.Join(errList, "|"))
+	return errList
+
+	//v1: 直接拼接错误字符串
+	//var errList []string
+	//for _, e := range errs {
+	//	// can translate each error one at a time.
+	//	errList = append(errList, e.Translate(trans))
+	//}
+	//
+	//return errors.New(strings.Join(errList, "|"))
 }
