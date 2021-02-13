@@ -2,6 +2,7 @@ package goutils
 
 import (
 	"github.com/LonelyPale/goutils/errors/ecode"
+	"github.com/LonelyPale/goutils/validator"
 )
 
 type Message struct {
@@ -28,6 +29,8 @@ func NewErrorMessage(err error) *Message {
 	switch e := err.(type) {
 	case ecode.ErrorCode:
 		return &Message{Code: e.Code(), Msg: e.Error()}
+	case validator.ValidationErrors:
+		return &Message{Code: ecode.StatusError, Msg: e.Error(), Data: e}
 	default:
 		emsg := e.Error()
 		if len(emsg) > 0 {

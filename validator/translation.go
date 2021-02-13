@@ -1,12 +1,14 @@
 package validator
 
 import (
-	"github.com/LonelyPale/goutils/errors"
+	"reflect"
+
 	"github.com/go-playground/locales/zh"
 	"github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	zhtrans "github.com/go-playground/validator/v10/translations/zh"
-	"reflect"
+
+	"github.com/LonelyPale/goutils/errors"
 )
 
 type Language uint
