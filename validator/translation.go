@@ -2,7 +2,6 @@ package validator
 
 import (
 	"reflect"
-	"strings"
 
 	"github.com/go-playground/locales/zh"
 	"github.com/go-playground/universal-translator"
@@ -53,14 +52,7 @@ func Translate(err error, trans ut.Translator) error {
 	errList := make(ValidationErrors, 0)
 	for _, e := range errs {
 		// can translate each error one at a time.
-		fieldName := e.StructField()
-		field, _ := e.Type().FieldByName(fieldName)
-		jsonTags := strings.Split(field.Tag.Get("json"), ",")
-		if len(jsonTags) > 0 && len(jsonTags[0]) > 0 {
-			errList = append(errList, NewFieldError(jsonTags[0], e.Translate(trans)))
-		} else {
-			errList = append(errList, NewFieldError(fieldName, e.Translate(trans)))
-		}
+		errList = append(errList, NewFieldError(e.StructField(), e.Translate(trans)))
 	}
 
 	return errList
