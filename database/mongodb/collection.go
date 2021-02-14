@@ -18,7 +18,7 @@ type Collection struct {
 	mongoCollection *mongo.Collection
 }
 
-func newCollection(db *Database, name string, opts ...*options.CollectionOptions) *Collection {
+func newCollection(db *Database, name string, opts ...*CollectionOptions) *Collection {
 	return &Collection{
 		client:          db.client,
 		db:              db,
@@ -43,7 +43,7 @@ func (coll *Collection) Name() string {
 	return coll.name
 }
 
-func (coll *Collection) Clone(opts ...*options.CollectionOptions) (*Collection, error) {
+func (coll *Collection) Clone(opts ...*CollectionOptions) (*Collection, error) {
 	mongoCollection, err := coll.mongoCollection.Clone(opts...)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (coll *Collection) GetContext() (context.Context, context.CancelFunc) {
 
 // todo: 考虑是否用 FindOneAndUpdate 替换，如用 FindOneAndUpdate 替换，则无法调用 Insert、Update callback
 // 创建或更新一条记录
-func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {
 		var cancel context.CancelFunc
 		ctx, cancel = coll.GetContext()
@@ -108,7 +108,7 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 }
 
 // 查找一条记录，如果不存在，则插入一条记录
-func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, document interface{}, opts ...*InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {
 		var cancel context.CancelFunc
 		ctx, cancel = coll.GetContext()
@@ -135,7 +135,7 @@ func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, do
 	return id, nil
 }
 
-func (coll *Collection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (types.ObjectID, error) {
+func (coll *Collection) InsertOne(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (types.ObjectID, error) {
 	var id types.ObjectID
 
 	if coll.client.opts.EnableTransaction {
@@ -159,7 +159,7 @@ func (coll *Collection) InsertOne(ctx context.Context, document interface{}, opt
 	return id, nil
 }
 
-func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) ([]types.ObjectID, error) {
+func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opts ...*InsertManyOptions) ([]types.ObjectID, error) {
 	var ids []types.ObjectID
 
 	if coll.client.opts.EnableTransaction {
@@ -183,7 +183,7 @@ func (coll *Collection) Insert(ctx context.Context, documents []interface{}, opt
 	return ids, nil
 }
 
-func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updater interface{}, opts ...*UpdateOptions) (*mongo.UpdateResult, error) {
 	var result *mongo.UpdateResult
 
 	if coll.client.opts.EnableTransaction {
@@ -207,7 +207,7 @@ func (coll *Collection) UpdateOne(ctx context.Context, filter interface{}, updat
 	return result, nil
 }
 
-func (coll *Collection) Update(ctx context.Context, filter interface{}, updater interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (coll *Collection) Update(ctx context.Context, filter interface{}, updater interface{}, opts ...*UpdateOptions) (*mongo.UpdateResult, error) {
 	var result *mongo.UpdateResult
 
 	if coll.client.opts.EnableTransaction {
@@ -231,7 +231,7 @@ func (coll *Collection) Update(ctx context.Context, filter interface{}, updater 
 	return result, nil
 }
 
-func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
+func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (int64, error) {
 	var count int64
 
 	if coll.client.opts.EnableTransaction {
@@ -255,7 +255,7 @@ func (coll *Collection) DeleteOne(ctx context.Context, filter interface{}, opts 
 	return count, nil
 }
 
-func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (int64, error) {
+func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (int64, error) {
 	var count int64
 
 	if coll.client.opts.EnableTransaction {
@@ -279,12 +279,12 @@ func (coll *Collection) Delete(ctx context.Context, filter interface{}, opts ...
 	return count, nil
 }
 
-func (coll *Collection) FindOne(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOneOptions) error {
+func (coll *Collection) FindOne(ctx context.Context, result interface{}, filter interface{}, opts ...*FindOneOptions) error {
 	return coll.findOne(ctx, result, filter, opts...)
 }
 
 //result 必须是指向切片的指针或指向 Pager 接口的指针
-func (coll *Collection) Find(ctx context.Context, result interface{}, filter interface{}, opts ...*options.FindOptions) error {
+func (coll *Collection) Find(ctx context.Context, result interface{}, filter interface{}, opts ...*FindOptions) error {
 	if ctx == nil {
 		var cancel context.CancelFunc
 		ctx, cancel = coll.GetContext()
@@ -307,10 +307,10 @@ func (coll *Collection) Find(ctx context.Context, result interface{}, filter int
 	return coll.find(ctx, pager.Result(), filter, opts...)
 }
 
-func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
+func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*CountOptions) (int64, error) {
 	return coll.count(ctx, filter, opts...)
 }
 
-func (coll *Collection) FindOneAndUpdate(ctx context.Context, result interface{}, filter interface{}, update interface{}, opts ...*options.FindOneAndUpdateOptions) error {
+func (coll *Collection) FindOneAndUpdate(ctx context.Context, result interface{}, filter interface{}, update interface{}, opts ...*FindOneAndUpdateOptions) error {
 	return coll.findOneAndUpdate(ctx, result, filter, update, opts...)
 }
