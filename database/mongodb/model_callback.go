@@ -69,7 +69,7 @@ func (Model) BeforeUpdate(ctx context.Context, filter interface{}, updater inter
 	}
 
 	if _, ok := set.(Updater); ok {
-		up.ModifyTime(time.Now())
+		up.UpdateTime(time.Now())
 	} else {
 		vObj := reflect.ValueOf(set)
 		if vObj.Kind() == reflect.Ptr {
@@ -78,7 +78,7 @@ func (Model) BeforeUpdate(ctx context.Context, filter interface{}, updater inter
 			return errors.ErrMustPointer
 		}
 
-		val := vObj.FieldByName(ModifyTimeField)
+		val := vObj.FieldByName(UpdateTimeField)
 		if val.CanSet() && val.Type().String() == "time.Time" {
 			now := time.Now()
 			vnow := reflect.ValueOf(now)

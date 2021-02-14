@@ -11,7 +11,7 @@ import (
 
 type Sequence struct {
 	Model `bson:"-" json:"-"`
-	ID    string `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,min=1" vCreate:"required" vModify:"required" vDelete:"required"`
+	ID    string `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,min=1" vCreate:"required" vUpdate:"required" vDelete:"required"`
 	Value int64  `bson:"value,omitempty" json:"value,omitempty" validate:"omitempty,gte=1"`
 	mutex sync.Mutex
 }

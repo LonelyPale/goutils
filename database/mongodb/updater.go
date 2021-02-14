@@ -123,12 +123,12 @@ func (u Updater) Delete(key string) {
 	delete(u, key)
 }
 
-func (u Updater) ModifyTime(value interface{}) Updater {
+func (u Updater) UpdateTime(value interface{}) Updater {
 	set, err := u.checkout(SetKey)
 	if err != nil {
 		return u
 	}
 
-	set[ModifyTimeKey] = value
+	set[UpdateTimeKey] = value
 	return u
 }
