@@ -129,6 +129,6 @@ func (u Updater) UpdateTime(value interface{}) Updater {
 		return u
 	}
 
-	set[UpdateTimeKey] = value
+	set[UpdateTimeBson] = value
 	return u
 }

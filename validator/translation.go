@@ -52,6 +52,7 @@ func Translate(err error, trans ut.Translator) error {
 	errList := make(ValidationErrors, 0)
 	for _, e := range errs {
 		// can translate each error one at a time.
+		//todo: 前面Validate(obj interface{}, tags ...string) error内已反射获取过type，向后传可拿到json tag，就不用业务端再处理标签名了
 		errList = append(errList, NewFieldError(e.StructField(), e.Translate(trans)))
 	}
 

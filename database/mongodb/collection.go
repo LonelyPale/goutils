@@ -75,7 +75,7 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 
 	switch vDoc.Kind() {
 	case reflect.Map:
-		vid = vDoc.MapIndex(reflect.ValueOf(IDKey))
+		vid = vDoc.MapIndex(reflect.ValueOf(IDBson)) //map 没有struct tag(bson)，所以无法从 id 自动转换为 _id
 	case reflect.Struct:
 		vid = vDoc.FieldByName(IDField)
 	}

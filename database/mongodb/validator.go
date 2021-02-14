@@ -5,7 +5,7 @@ const (
 	CreateTagName = "vCreate" //增
 	UpdateTagName = "vUpdate" //改
 	DeleteTagName = "vDelete" //删
-	ReadTagName   = "vRead"   //查
+	FindTagName   = "vFind"   //查
 )
 
 type ModelValidator interface {

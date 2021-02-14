@@ -137,7 +137,7 @@ func (m Model) Delete(ctxs ...context.Context) error {
 	return nil
 }
 
-// Read
+// Find
 func (m Model) Find(ctxs ...context.Context) error {
 	var ctx context.Context
 	if len(ctxs) > 0 {

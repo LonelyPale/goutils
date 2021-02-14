@@ -36,6 +36,25 @@ func NewFilter(values ...interface{}) Filter {
 	return make(Filter).Set(values...)
 }
 
+func NewFilterByMap(m types.M, mtype ModelType) Filter {
+	filter := Filter{}
+
+	for key, val := range m {
+		ftype := mtype.Field(key)
+		if ftype == nil {
+			continue
+		}
+
+		if key == IDJson {
+			filter.ID(val)
+		} else {
+			filter.Set(ftype.Bson(), val)
+		}
+	}
+
+	return filter
+}
+
 func Or(values ...interface{}) Filter {
 	return Filter{}.Or(values...)
 }
@@ -226,6 +245,6 @@ func (f Filter) Regex(key string, value primitive.Regex) Filter {
 }
 
 func (f Filter) ID(value interface{}) Filter {
-	f[IDKey] = value
+	f[IDBson] = value
 	return f
 }

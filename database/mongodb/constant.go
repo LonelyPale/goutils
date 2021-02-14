@@ -2,13 +2,18 @@ package mongodb
 
 // Field Constant
 const (
-	// db bson field name
-	IDKey         = "_id" // MongoDB ObjectID Field Name
-	CreateTimeKey = "createTime"
-	UpdateTimeKey = "updateTime"
-
 	// go struct field name
 	IDField         = "ID"
 	CreateTimeField = "CreateTime"
 	UpdateTimeField = "UpdateTime"
+
+	// db bson field name
+	IDBson         = "_id" // MongoDB ObjectID Field Name
+	CreateTimeBson = "createTime"
+	UpdateTimeBson = "updateTime"
+
+	// web json field name
+	IDJson         = "id"
+	CreateTimeJson = "createTime"
+	UpdateTimeJson = "updateTime"
 )
