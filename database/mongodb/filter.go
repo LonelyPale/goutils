@@ -36,7 +36,7 @@ func NewFilter(values ...interface{}) Filter {
 	return make(Filter).Set(values...)
 }
 
-func NewFilterByMap(m types.M, mtype ModelType) Filter {
+func NewFilterByMap(m map[string]interface{}, mtype ModelType) Filter {
 	filter := Filter{}
 
 	for key, val := range m {
