@@ -3,9 +3,10 @@
 package mongodb
 
 import (
+	log "github.com/sirupsen/logrus"
+
 	"github.com/LonelyPale/goutils/errors"
 	"github.com/LonelyPale/goutils/types"
-	log "github.com/sirupsen/logrus"
 )
 
 // Query and Projection Operators
@@ -67,40 +68,6 @@ func In(key string, value interface{}) Filter {
 
 func ID(value interface{}) Filter {
 	return Filter{}.ID(value)
-}
-
-func (f Filter) checkout(key string) (Filter, error) {
-	val, ok := f[key]
-	if !ok {
-		val = Filter{}
-		f[key] = val
-	}
-
-	filter, ok := val.(Filter)
-	if !ok {
-		err := errors.Errorf("%v object not Filter", key)
-		log.Warn(err)
-		return filter, err
-	}
-
-	return filter, nil
-}
-
-func (f Filter) checkoutA(key string) (types.A, error) {
-	val, ok := f[key]
-	if !ok {
-		val = types.A{}
-		f[key] = val
-	}
-
-	filter, ok := val.(types.A)
-	if !ok {
-		err := errors.Errorf("%v object not valid types.A", key)
-		log.Warn(err)
-		return filter, err
-	}
-
-	return filter, nil
 }
 
 // { name: "go" }
@@ -207,7 +174,11 @@ func (f Filter) Gt(key string, value interface{}) Filter {
 }
 
 func (f Filter) Gte(key string, value interface{}) Filter {
-	f[key] = Filter{GteKey: value}
+	subf, err := f.checkout(key)
+	if err != nil {
+		panic(err)
+	}
+	f[key] = subf.Set(GteKey, value)
 	return f
 }
 
@@ -217,7 +188,11 @@ func (f Filter) Lt(key string, value interface{}) Filter {
 }
 
 func (f Filter) Lte(key string, value interface{}) Filter {
-	f[key] = Filter{LteKey: value}
+	subf, err := f.checkout(key)
+	if err != nil {
+		panic(err)
+	}
+	f[key] = subf.Set(LteKey, value)
 	return f
 }
 
@@ -249,4 +224,40 @@ func (f Filter) Regex(key string, value interface{}) Filter {
 func (f Filter) ID(value interface{}) Filter {
 	f[IDBson] = value
 	return f
+}
+
+func (f Filter) checkout(key string) (Filter, error) {
+	val, ok := f[key]
+	if !ok {
+		val = Filter{}
+		f[key] = val
+		return val.(Filter), nil
+	}
+
+	filter, ok := val.(Filter)
+	if !ok {
+		err := errors.Errorf("%v object not Filter", key)
+		log.Warn(err)
+		return filter, err
+	}
+
+	return filter, nil
+}
+
+func (f Filter) checkoutA(key string) (types.A, error) {
+	val, ok := f[key]
+	if !ok {
+		val = types.A{}
+		f[key] = val
+		return val.(types.A), nil
+	}
+
+	filter, ok := val.(types.A)
+	if !ok {
+		err := errors.Errorf("%v object not valid types.A", key)
+		log.Warn(err)
+		return filter, err
+	}
+
+	return filter, nil
 }
