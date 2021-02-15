@@ -3,11 +3,9 @@
 package mongodb
 
 import (
-	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/LonelyPale/goutils/errors"
 	"github.com/LonelyPale/goutils/types"
+	log "github.com/sirupsen/logrus"
 )
 
 // Query and Projection Operators
@@ -53,16 +51,6 @@ func NewFilterByMap(m map[string]interface{}, mtype ModelType) Filter {
 	}
 
 	return filter
-}
-
-func Like(s string) string {
-	if s[0:1] != "/" {
-		s = "/" + s
-	}
-	if s[len(s)-1:] != "/" {
-		s = s + "/"
-	}
-	return s
 }
 
 func Or(values ...interface{}) Filter {
@@ -248,9 +236,13 @@ func (f Filter) Size(key string, value interface{}) Filter {
 	return f
 }
 
-// todo: 待整理
-func (f Filter) Regex(key string, value primitive.Regex) Filter {
-	f[key] = value
+// 模糊查询
+func (f Filter) Regex(key string, value interface{}) Filter {
+	if val, ok := value.(Regex); ok {
+		f[key] = val
+	} else {
+		f[key] = Regex{Pattern: value.(string), Options: "i"}
+	}
 	return f
 }
 
