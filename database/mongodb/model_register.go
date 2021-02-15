@@ -207,7 +207,8 @@ func Var(field interface{}, name string, mname string, tags ...string) error {
 	}
 
 	valTag := ft.ValidateTag().Validate()
-	valTag = strings.ReplaceAll(valTag, "omitempty", "")
+	valTag = strings.ReplaceAll(valTag, "omitempty,", "")
+	valTag = strings.ReplaceAll(valTag, ",omitempty", "")
 
 	err := validator.Var(field, valTag)
 
