@@ -198,3 +198,18 @@ func (vt *validateTag) Find() string {
 func (vt *validateTag) Label() string {
 	return vt.label
 }
+
+func Var(field interface{}, name string, mname string, tags ...string) error {
+	mt := GetModelType(mname)
+	ft := mt.Field(name)
+	if ft == nil {
+		return ErrNilResult
+	}
+
+	valTag := ft.ValidateTag().Validate()
+	valTag = strings.ReplaceAll(valTag, "omitempty", "")
+
+	err := validator.Var(field, valTag)
+
+	return err
+}

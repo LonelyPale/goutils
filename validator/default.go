@@ -37,6 +37,10 @@ func (v *defaultValidator) Engine() interface{} {
 	return v.validator
 }
 
+func (v *defaultValidator) Var(field interface{}, tag string) error {
+	return v.validator.Var(field, tag)
+}
+
 // Validate 校验参数
 func (v *defaultValidator) Validate(obj interface{}, tags ...string) error {
 	var vobj reflect.Value
@@ -85,6 +89,7 @@ func (v *defaultValidator) validateStruct(obj interface{}, tags ...string) error
 		return errors.New("validate object is nil")
 	}
 
+	//todo: 并发时是否线程安全？
 	if len(tags) > 0 && len(tags[0]) > 0 {
 		v.validator.SetTagName(tags[0])
 	} else {
