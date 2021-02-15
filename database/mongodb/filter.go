@@ -178,7 +178,7 @@ func (f Filter) Gte(key string, value interface{}) Filter {
 	if err != nil {
 		panic(err)
 	}
-	f[key] = subf.Set(GteKey, value)
+	subf.Set(GteKey, value)
 	return f
 }
 
@@ -192,7 +192,7 @@ func (f Filter) Lte(key string, value interface{}) Filter {
 	if err != nil {
 		panic(err)
 	}
-	f[key] = subf.Set(LteKey, value)
+	subf.Set(LteKey, value)
 	return f
 }
 
@@ -226,6 +226,7 @@ func (f Filter) ID(value interface{}) Filter {
 	return f
 }
 
+//todo: 待优化
 func (f Filter) checkout(key string) (Filter, error) {
 	val, ok := f[key]
 	if !ok {
@@ -244,6 +245,7 @@ func (f Filter) checkout(key string) (Filter, error) {
 	return filter, nil
 }
 
+//todo: 待优化
 func (f Filter) checkoutA(key string) (types.A, error) {
 	val, ok := f[key]
 	if !ok {
