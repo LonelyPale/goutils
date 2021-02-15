@@ -38,6 +38,9 @@ func (v *defaultValidator) Engine() interface{} {
 }
 
 func (v *defaultValidator) Var(field interface{}, tag string) error {
+	if v.translator != nil {
+		return Translate(v.validator.Var(field, tag), v.translator)
+	}
 	return v.validator.Var(field, tag)
 }
 
