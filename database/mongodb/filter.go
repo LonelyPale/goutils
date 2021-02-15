@@ -55,6 +55,16 @@ func NewFilterByMap(m map[string]interface{}, mtype ModelType) Filter {
 	return filter
 }
 
+func Like(s string) string {
+	if s[0:1] != "/" {
+		s = "/" + s
+	}
+	if s[len(s)-1:] != "/" {
+		s = s + "/"
+	}
+	return s
+}
+
 func Or(values ...interface{}) Filter {
 	return Filter{}.Or(values...)
 }
