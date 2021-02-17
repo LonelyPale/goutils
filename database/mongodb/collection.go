@@ -4,10 +4,13 @@ package mongodb
 import (
 	"context"
 	"reflect"
+	"strings"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/LonelyPale/goutils/errors"
 	"github.com/LonelyPale/goutils/types"
 )
 
@@ -107,6 +110,7 @@ func (coll *Collection) Save(ctx context.Context, document interface{}, opts ...
 	return id, nil
 }
 
+// 推荐优先使用唯一索引来解决字段的唯一性问题，只有在有性能问题时才使用先查询再插入的方法
 // 查找一条记录，如果不存在，则插入一条记录
 func (coll *Collection) FindOrInsert(ctx context.Context, filter interface{}, document interface{}, opts ...*InsertOneOptions) (types.ObjectID, error) {
 	if ctx == nil {
@@ -313,4 +317,30 @@ func (coll *Collection) Count(ctx context.Context, filter interface{}, opts ...*
 
 func (coll *Collection) FindOneAndUpdate(ctx context.Context, result interface{}, filter interface{}, update interface{}, opts ...*FindOneAndUpdateOptions) error {
 	return coll.findOneAndUpdate(ctx, result, filter, update, opts...)
+}
+
+// 创建唯一索引
+func (coll *Collection) CreateUniqueIndex(keys ...string) ([]string, error) {
+	if len(keys) == 0 {
+		return nil, errors.New("CreateUniqueIndex: keys is empty")
+	}
+
+	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
+
+	// 复合索引
+	keysDoc := D{}
+	for _, key := range keys {
+		if strings.HasPrefix(key, "-") { //降序
+			keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), int32(-1))
+		} else { //升序
+			keysDoc = keysDoc.Append(key, int32(1))
+		}
+	}
+
+	indexModel := mongo.IndexModel{
+		Keys:    keysDoc,
+		Options: options.Index().SetUnique(true),
+	}
+
+	return coll.CreateIndex(nil, []mongo.IndexModel{indexModel}, opts)
 }

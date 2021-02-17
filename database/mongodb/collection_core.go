@@ -531,3 +531,18 @@ func (coll *Collection) findV1(ctx context.Context, result interface{}, filter i
 
 	return nil
 }
+
+// 创建索引
+func (coll *Collection) CreateIndex(ctx context.Context, models []mongo.IndexModel, opts ...*options.CreateIndexesOptions) ([]string, error) {
+	if coll == nil {
+		return nil, ErrNilCollection
+	}
+
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = coll.GetContext()
+		defer cancel()
+	}
+
+	return coll.mongoCollection.Indexes().CreateMany(ctx, models, opts...)
+}

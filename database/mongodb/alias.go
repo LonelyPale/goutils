@@ -1,9 +1,11 @@
 package mongodb
 
 import (
-	"github.com/LonelyPale/goutils/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/LonelyPale/goutils/types"
 )
 
 type CollectionOptions = options.CollectionOptions
@@ -20,6 +22,10 @@ type FindOptions = options.FindOptions
 type FindOneAndUpdateOptions = options.FindOneAndUpdateOptions
 
 type CountOptions = options.CountOptions
+
+type IndexModel = mongo.IndexModel
+type IndexOptions = options.IndexOptions
+type CreateIndexesOptions = options.CreateIndexesOptions
 
 type Regex = primitive.Regex
 
