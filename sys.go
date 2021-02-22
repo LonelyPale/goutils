@@ -16,7 +16,7 @@ func Exit(s string) {
 }
 
 func LockPIDFile(pidfile string) error {
-	if IsFileNotExist(pidfile) {
+	if FileNotExist(pidfile) {
 		if err := WritePIDFile(pidfile); err != nil {
 			return err
 		}

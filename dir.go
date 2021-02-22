@@ -9,13 +9,13 @@ import (
 )
 
 // file and folder
-func IsFileExist(path string) bool {
+func FileExist(path string) bool {
 	_, err := os.Stat(path)
 	return !os.IsNotExist(err)
 }
 
 // file and folder
-func IsFileNotExist(path string) bool {
+func FileNotExist(path string) bool {
 	_, err := os.Stat(path)
 	return os.IsNotExist(err)
 }
