@@ -18,6 +18,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/LonelyPale/goutils"
 )
 
 func publicKey(priv interface{}) interface{} {
@@ -33,11 +35,11 @@ func publicKey(priv interface{}) interface{} {
 	}
 }
 
-func GenerateDefaultCert() {
-	GenerateCert("localhost", "", 365*24*time.Hour, false, 2048, "", false)
+func GenerateDefaultCert(home ...string) {
+	GenerateCert("localhost", "", 365*24*time.Hour, false, 2048, "", false, home...)
 }
 
-func GenerateCert(host string, validFrom string, validFor time.Duration, isCA bool, rsaBits int, ecdsaCurve string, ed25519Key bool) {
+func GenerateCert(host string, validFrom string, validFor time.Duration, isCA bool, rsaBits int, ecdsaCurve string, ed25519Key bool, home ...string) {
 	if len(host) == 0 {
 		//log.Fatalf("Missing required --host parameter")
 		host = "localhost"
@@ -133,7 +135,8 @@ func GenerateCert(host string, validFrom string, validFor time.Duration, isCA bo
 		log.Fatalf("Failed to create certificate: %v", err)
 	}
 
-	certOut, err := os.Create("cert.pem")
+	certPath := goutils.URLJoin(home[0], "cert.pem")
+	certOut, err := os.Create(certPath)
 	if err != nil {
 		log.Fatalf("Failed to open cert.pem for writing: %v", err)
 	}
@@ -145,7 +148,8 @@ func GenerateCert(host string, validFrom string, validFor time.Duration, isCA bo
 	}
 	log.Print("wrote cert.pem\n")
 
-	keyOut, err := os.OpenFile("key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyPath := goutils.URLJoin(home[0], "key.pem")
+	keyOut, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		log.Fatalf("Failed to open key.pem for writing: %v", err)
 		return
