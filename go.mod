@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/allegro/bigcache v1.2.1
 	github.com/bwmarrin/snowflake v0.3.1-0.20190412223032-c09e69ae5993
+	github.com/eclipse/paho.mqtt.golang v1.3.2
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-contrib/static v0.0.0-20200916080430-d45d9a37d28e
 	github.com/gin-gonic/gin v1.6.3
@@ -20,7 +21,7 @@ require (
 	github.com/go-spring/starter-web v1.0.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.1.1
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/json-iterator/go v1.1.9
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
