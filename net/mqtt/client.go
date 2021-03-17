@@ -9,6 +9,8 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 )
 
+type Client = mqtt.Client
+
 func NewClient(config *Config) mqtt.Client {
 	//mqtt.DEBUG = log.New(os.Stdout, "", 0)
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
