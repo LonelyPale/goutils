@@ -19,7 +19,7 @@ func init() {
 			SpringLogger.Info("MQTT client connected successfully.")
 			return client, nil
 		}).
-		ConditionOnMissingBean((mqtt.Client)(nil)).
+		ConditionOnMissingBean((*mqtt.Client)(nil)).
 		Destroy(func(client mqtt.Client) {
 			client.Disconnect(300)
 			SpringLogger.Info("MQTT client closed successfully.")
