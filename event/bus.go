@@ -59,12 +59,12 @@ func (eb *Bus) Subscribe(typ string, ch Chan) {
 }
 
 // 订阅方法
-func (eb *Bus) SubscribeFunc(typ string, fun HandlerFunc) error {
+func (eb *Bus) SubscribeFunc(typ string, fun HandlerFunc) {
 	pool, err := ants.NewPoolWithFunc(ProcessorPoolSize, func(i interface{}) {
 		fun(i.(Event))
 	})
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	eb.lock.Lock()
@@ -82,8 +82,6 @@ func (eb *Bus) SubscribeFunc(typ string, fun HandlerFunc) error {
 			}
 		}
 	}()
-
-	return nil
 }
 
 // 安全释放协程池
