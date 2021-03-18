@@ -10,6 +10,6 @@ func Subscribe(typ string, ch Chan) {
 	defaultBus.Subscribe(typ, ch)
 }
 
-func SubscribeFunc(typ string, fun HandlerFunc) error {
-	return defaultBus.SubscribeFunc(typ, fun)
+func SubscribeFunc(typ string, fun HandlerFunc) {
+	defaultBus.SubscribeFunc(typ, fun)
 }
