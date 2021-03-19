@@ -19,7 +19,11 @@ func NewClient(config *Config) mqtt.Client {
 		AddBroker(config.BrokerURI).
 		SetClientID(config.ClientID).
 		SetKeepAlive(time.Duration(config.KeepAlive) * time.Second).
-		SetPingTimeout(time.Duration(config.PingTimeout) * time.Second)
+		SetPingTimeout(time.Duration(config.PingTimeout) * time.Second).
+		SetAutoReconnect(config.AutoReconnect).
+		SetMaxReconnectInterval(time.Duration(config.MaxReconnectInterval) * time.Second).
+		SetUsername(config.Username).
+		SetPassword(config.Password)
 	opts.SetDefaultPublishHandler(defaultHandler) // 设置默认的消息处理回调函数
 
 	return mqtt.NewClient(opts)
