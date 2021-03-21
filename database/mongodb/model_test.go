@@ -11,25 +11,28 @@ import (
 )
 
 type User struct {
-	Model      `bson:"-"`
-	ID         types.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	CreateTime time.Time      `bson:"createTime,omitempty" json:"createTime,omitempty"`
-	ModifyTime time.Time      `bson:"modifyTime,omitempty" json:"modifyTime,omitempty"`
-	Num        int
-	Test       []string
-	Temp       *[]int
-	Name       string
-	NameP      *string
-	Age        int   `bson:"age,omitempty"`
-	AgeP       *int  `bson:",omitempty"`
-	Is         bool  `bson:",omitempty"`
-	IsP        *bool `bson:",omitempty"`
-	prv        string
-	prvp       *string
+	Model `bson:",inline"`
+	Num   int
+	Test  []string
+	Temp  *[]int
+	Name  string
+	NameP *string
+	Age   int   `bson:"age,omitempty"`
+	AgeP  *int  `bson:",omitempty"`
+	Is    bool  `bson:",omitempty"`
+	IsP   *bool `bson:",omitempty"`
+	prv   string
+	prvp  *string
+	Sub   `bson:",inline"`
+}
+
+type Sub struct {
+	Test1 int    `bson:"test1,omitempty"`
+	Test2 string `bson:"test2,omitempty"`
 }
 
 func init() {
-	RegisterType((*User)(nil), "test")
+	RegisterModel((*User)(nil), "test")
 }
 
 func TestModel_Create(t *testing.T) {
@@ -37,6 +40,10 @@ func TestModel_Create(t *testing.T) {
 
 	user := &User{
 		Name: "james",
+		Sub: Sub{
+			Test1: 123,
+			Test2: "abc",
+		},
 	}
 	user.Model = NewModel(user, coll)
 
@@ -89,13 +96,14 @@ func TestModel_Create2(t *testing.T) {
 func TestModel_Update(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("5ec81672973997c00c8ba6c8")
+	id, err := types.ObjectIDFromHex("6056b38fb0eb31305e24c08a")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	user := &User{ID: id, Name: "Jerry"}
+	user := &User{Name: "Jerry"}
 	user.Model = NewModel(user, coll)
+	user.ID = id
 
 	//startTime := time.Now()
 	//if err := user.Get(); err != nil {
@@ -117,20 +125,16 @@ func TestModel_Update(t *testing.T) {
 }
 
 func TestModel_Find(t *testing.T) {
-	opts := NewClientOptions("")
-	client, err := Connect(opts)
-	if err != nil {
-		t.Fatal(err)
-	}
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("5ec5d7637ebc566c3b8f3b46")
+	id, err := types.ObjectIDFromHex("6056b38fb0eb31305e24c08a")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	user := &User{ID: id}
+	user := &User{}
 	user.Model = NewModel(user, coll)
+	user.ID = id
 
 	startTime := time.Now()
 	if err := user.Find(); err != nil {

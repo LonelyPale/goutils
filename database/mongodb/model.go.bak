@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"context"
-	"time"
+	"reflect"
 
 	"github.com/LonelyPale/goutils/types"
 	"github.com/LonelyPale/goutils/validator"
@@ -28,16 +28,12 @@ type Service interface {
 */
 // todo: doc可优化为接口类型,如上例
 type Model struct {
-	ID         types.ObjectID `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,len=12" vCreate:"isdefault" vUpdate:"required" vDelete:"required" vFind:"required" label:"编号"`
-	CreateTime time.Time      `bson:"createTime,omitempty" json:"createTime,omitempty" validate:"omitempty" label:"创建时间"`
-	UpdateTime time.Time      `bson:"updateTime,omitempty" json:"updateTime,omitempty" validate:"omitempty" label:"更新时间"`
-
-	doc  interface{} `bson:"-" json:"-"`
-	coll *Collection `bson:"-" json:"-"`
+	doc  interface{}
+	coll *Collection
 }
 
 func NewModel(doc interface{}, coll *Collection) Model {
-	return Model{doc: doc, coll: coll}
+	return Model{doc, coll}
 }
 
 func (m Model) Collection() *Collection {
@@ -86,11 +82,21 @@ func (m Model) Update(ctxs ...context.Context) error {
 		return err
 	}
 
-	if m.ID.IsZero() {
+	vDoc := reflect.ValueOf(m.doc)
+	if vDoc.Kind() == reflect.Ptr {
+		vDoc = vDoc.Elem()
+	}
+	vid := vDoc.FieldByName(IDField)
+	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := ID(m.ID)
+	id := vid.Interface()
+	if id.(types.ObjectID).IsZero() {
+		return ErrNilObjectID
+	}
+
+	filter := ID(id)
 	updater := Set(m.doc)
 	if _, err := m.coll.UpdateOne(ctx, filter, updater); err != nil {
 		return err
@@ -110,11 +116,20 @@ func (m Model) Delete(ctxs ...context.Context) error {
 		defer cancel()
 	}
 
-	if m.ID.IsZero() {
+	if err := m.Validate(DeleteTagName); err != nil {
+		return err
+	}
+
+	vDoc := reflect.ValueOf(m.doc)
+	if vDoc.Kind() == reflect.Ptr {
+		vDoc = vDoc.Elem()
+	}
+	vid := vDoc.FieldByName(IDField)
+	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := ID(m.ID)
+	filter := ID(vid.Interface())
 	if _, err := m.coll.DeleteOne(ctx, filter); err != nil {
 		return err
 	}
@@ -133,11 +148,16 @@ func (m Model) Find(ctxs ...context.Context) error {
 		defer cancel()
 	}
 
-	if m.ID.IsZero() {
+	vDoc := reflect.ValueOf(m.doc)
+	if vDoc.Kind() == reflect.Ptr {
+		vDoc = vDoc.Elem()
+	}
+	vid := vDoc.FieldByName(IDField)
+	if vid.Kind() == reflect.Invalid {
 		return ErrNilObjectID
 	}
 
-	filter := ID(m.ID)
+	filter := ID(vid.Interface())
 	if err := m.coll.FindOne(ctx, m.doc, filter); err != nil {
 		return err
 	}

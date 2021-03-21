@@ -3,9 +3,9 @@ package mongodb
 import "testing"
 
 func TestModelRegister(t *testing.T) {
-	RegisterType((*Model)(nil))
+	RegisterModel((*Model)(nil))
 
-	for k := range typeRegistry {
+	for k := range modelRegistry {
 		t.Log(k)
 	}
 
