@@ -40,12 +40,19 @@ func NewModel(doc interface{}, coll *Collection) Model {
 	return Model{doc: doc, coll: coll}
 }
 
-func (m Model) Collection() *Collection {
-	return m.coll
+//初始化文档和集合
+func (m *Model) Init(doc interface{}, coll *Collection) {
+	m.doc = doc
+	m.coll = coll
 }
 
-func (m Model) IsNil() bool {
-	return m.doc == nil || m.coll == nil
+//是否已初始化
+func (m Model) IsInited() bool {
+	return m.doc != nil && m.coll != nil
+}
+
+func (m Model) Collection() *Collection {
+	return m.coll
 }
 
 func (m Model) Validate(tags ...string) error {
