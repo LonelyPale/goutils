@@ -140,7 +140,7 @@ func TestModel_Find(t *testing.T) {
 
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("6058376fd7889c8703058df4")
+	id, err := types.ObjectIDFromHex("6058481014eee1d530389413")
 	if err != nil {
 		t.Fatal(err)
 	}

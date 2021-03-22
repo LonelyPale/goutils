@@ -24,6 +24,15 @@ func Now() Time {
 	return Time{time.Now()}
 }
 
+// MarshalJSON marshal json
+func (t Time) MarshalJSON() ([]byte, error) {
+	bs := make([]byte, 0, len(DefaultTimeFormat)+2)
+	bs = append(bs, '"')
+	bs = t.Time.AppendFormat(bs, DefaultTimeFormat)
+	bs = append(bs, '"')
+	return bs, nil
+}
+
 // UnmarshalJSON unmarshal json
 func (t *Time) UnmarshalJSON(data []byte) error {
 	if len(data) == 0 || string(data) == `""` {
@@ -46,13 +55,10 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshal json
-func (t Time) MarshalJSON() ([]byte, error) {
-	bs := make([]byte, 0, len(DefaultTimeFormat)+2)
-	bs = append(bs, '"')
-	bs = t.Time.AppendFormat(bs, DefaultTimeFormat)
-	bs = append(bs, '"')
-	return bs, nil
+// MarshalBSON marshal bson
+func (t Time) MarshalBSON() ([]byte, error) {
+	dt := t.UnixNano() / 1000000
+	return writei64(dt), nil
 }
 
 // UnmarshalBSON unmarshal bson
@@ -68,17 +74,18 @@ func (t *Time) UnmarshalBSON(data []byte) error {
 	return nil
 }
 
-// MarshalBSON marshal bson
-func (t Time) MarshalBSON() ([]byte, error) {
-	dt := t.UnixNano() / 1000000
-	return writei64(dt), nil
-}
-
 // MarshalBSONValue marshal bson value
 func (t Time) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	bytes, err := t.MarshalBSON()
 	return bson.TypeDateTime, bytes, err
 	//return bson.MarshalValue(t.Time) //原生实现
+}
+
+func (t *Time) UnmarshalBSONValue(btype bsontype.Type, data []byte) error {
+	if btype == bson.TypeDateTime {
+		return t.UnmarshalBSON(data)
+	}
+	return errors.Errorf("unsupported data type %v into a types.Time", btype)
 }
 
 func readi64(src []byte) int64 {
