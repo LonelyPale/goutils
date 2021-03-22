@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"time"
 
 	"github.com/LonelyPale/goutils/types"
 	"github.com/LonelyPale/goutils/validator"
@@ -29,8 +28,8 @@ type Service interface {
 // todo: doc可优化为接口类型,如上例
 type Model struct {
 	ID         types.ObjectID `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,len=12" vCreate:"isdefault" vUpdate:"required" vDelete:"required" vFind:"required" label:"编号"`
-	CreateTime time.Time      `bson:"createTime,omitempty" json:"createTime,omitempty" validate:"omitempty" label:"创建时间"`
-	UpdateTime time.Time      `bson:"updateTime,omitempty" json:"updateTime,omitempty" validate:"omitempty" label:"更新时间"`
+	CreateTime types.Time     `bson:"createTime,omitempty" json:"createTime,omitempty" validate:"omitempty" label:"创建时间"`
+	UpdateTime types.Time     `bson:"updateTime,omitempty" json:"updateTime,omitempty" validate:"omitempty" label:"更新时间"`
 
 	doc  interface{} `bson:"-" json:"-"`
 	coll *Collection `bson:"-" json:"-"`

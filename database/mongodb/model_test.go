@@ -27,8 +27,10 @@ type User struct {
 }
 
 type Sub struct {
-	Test1 int    `bson:"test1,omitempty"`
-	Test2 string `bson:"test2,omitempty"`
+	Test1    int        `bson:"test1,omitempty"`
+	Test2    string     `bson:"test2,omitempty"`
+	TestTime types.Time `bson:"test_time,omitempty"`
+	//TestTime types.Time `bson:"-"`
 }
 
 func init() {
@@ -41,8 +43,9 @@ func TestModel_Create(t *testing.T) {
 	user := &User{
 		Name: "james",
 		Sub: Sub{
-			Test1: 123,
-			Test2: "abc",
+			Test1:    123,
+			Test2:    "abc",
+			TestTime: types.Now(),
 		},
 	}
 	user.Model = NewModel(user, coll)
@@ -96,7 +99,7 @@ func TestModel_Create2(t *testing.T) {
 func TestModel_Update(t *testing.T) {
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("6056b38fb0eb31305e24c08a")
+	id, err := types.ObjectIDFromHex("6058376fd7889c8703058df4")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,9 +128,19 @@ func TestModel_Update(t *testing.T) {
 }
 
 func TestModel_Find(t *testing.T) {
+	//var tTime = reflect.TypeOf(time.Time{})
+	//builder := bson.NewRegistryBuilder()
+	//builder.RegisterCodec(tTime, bsoncodec.NewTimeCodec(&bsonoptions.TimeCodecOptions{UseLocalTimeZone: types.Bool(true)}))
+	//bson.DefaultRegistry = builder.Build()
+	//b, err := bson.DefaultRegistry.LookupDecoder(tTime)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//t.Log(b)
+
 	coll := client.Database("test").Collection("test")
 
-	id, err := types.ObjectIDFromHex("6056b38fb0eb31305e24c08a")
+	id, err := types.ObjectIDFromHex("6058376fd7889c8703058df4")
 	if err != nil {
 		t.Fatal(err)
 	}

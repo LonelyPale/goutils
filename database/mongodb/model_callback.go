@@ -24,8 +24,12 @@ func (Model) BeforeInsert(ctx context.Context, documents []interface{}, opts int
 
 		// 设置创建时间
 		vCreateTime := vDoc.FieldByName(CreateTimeField)
-		if vCreateTime.CanSet() && vCreateTime.Type().String() == "time.Time" {
+		if vCreateTime.CanSet() && vCreateTime.Type().String() == "time.Time" { //默认时间格式
 			now := time.Now()
+			vnow := reflect.ValueOf(now)
+			vCreateTime.Set(vnow)
+		} else if vCreateTime.CanSet() && vCreateTime.Type().String() == "types.Time" { //自定义时间格式
+			now := types.Now()
 			vnow := reflect.ValueOf(now)
 			vCreateTime.Set(vnow)
 		}
@@ -79,8 +83,12 @@ func (Model) BeforeUpdate(ctx context.Context, filter interface{}, updater inter
 		}
 
 		val := vObj.FieldByName(UpdateTimeField)
-		if val.CanSet() && val.Type().String() == "time.Time" {
+		if val.CanSet() && val.Type().String() == "time.Time" { //默认时间格式
 			now := time.Now()
+			vnow := reflect.ValueOf(now)
+			val.Set(vnow)
+		} else if val.CanSet() && val.Type().String() == "types.Time" { //自定义时间格式
+			now := types.Now()
 			vnow := reflect.ValueOf(now)
 			val.Set(vnow)
 		}

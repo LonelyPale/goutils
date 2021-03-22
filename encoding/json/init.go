@@ -2,11 +2,11 @@
 
 package json
 
-import . "github.com/LonelyPale/goutils/encoding/json/codec"
+import "github.com/LonelyPale/goutils/encoding/json/codec"
 
 // register jsoniter custom plugins
 func init() {
-	RegisterTimeAsFormartCodec()
-	//RegisterObjectIDCodec()
-	//RegisterDecimal128Codec()
+	codec.RegisterTimeAsFormartCodec()
+	//codec.RegisterObjectIDCodec() //mongo-driver已原生实现
+	//codec.RegisterDecimal128Codec() //暂未使用
 }
