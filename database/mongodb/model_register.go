@@ -70,6 +70,25 @@ func newModelType(mtype reflect.Type) *modelType {
 		} else {
 			mt.fields[ft.field] = ft
 		}
+
+		// 处理内联结构体 inline struct
+		if field.Type.Kind() == reflect.Struct {
+			bsonTag := field.Tag.Get("bson")
+			btags := strings.Split(bsonTag, ",")
+			if len(btags) >= 2 && btags[1] == "inline" {
+				inTyp := field.Type
+				inNum := inTyp.NumField()
+				for j := 0; j < inNum; j++ {
+					inField := inTyp.Field(j)
+					inft := newFieldType(inField)
+					if len(inft.json) > 0 && inft.json != "-" {
+						mt.fields[inft.json] = inft
+					} else {
+						mt.fields[inft.field] = inft
+					}
+				}
+			}
+		}
 	}
 
 	return mt
