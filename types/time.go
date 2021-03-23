@@ -35,8 +35,8 @@ func (t Time) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON unmarshal json
 func (t *Time) UnmarshalJSON(data []byte) error {
-	if len(data) == 0 || string(data) == `""` {
-		return errors.New("data is empty")
+	if len(data) == 0 || string(data) == `""` || string(data) == `null` {
+		return nil
 	}
 
 	var now time.Time

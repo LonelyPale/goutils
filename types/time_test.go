@@ -1,13 +1,12 @@
 package types
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/LonelyPale/goutils/encoding/json"
 )
 
 func TestTime(t *testing.T) {
