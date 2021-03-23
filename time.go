@@ -11,3 +11,11 @@ func TimeParse(value string) (time.Time, error) {
 func TimeParseInLocation(value string) (time.Time, error) {
 	return time.ParseInLocation(DefaultTimeFormart, value, time.Local)
 }
+
+func TimeParseToUTC(value string) (time.Time, error) {
+	t, err := time.ParseInLocation(DefaultTimeFormart, value, time.Local)
+	if err != nil {
+		return t, err
+	}
+	return t.UTC(), nil
+}
