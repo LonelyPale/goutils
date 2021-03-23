@@ -1,6 +1,7 @@
 package mongodb
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -155,6 +156,15 @@ func TestModel_Find(t *testing.T) {
 	}
 	t.Log("time:", time.Since(startTime))
 	t.Log(user.ID)
+	t.Log(user)
+}
+
+func TestModel_Json(t *testing.T) {
+	str := `{"id":"6058481014eee1d530389413","createTime":"2021-02-12 13:22:52","updateTime":"2021-02-17 21:47:11", "Name":"abc123"}`
+	var user User
+	if err := json.Unmarshal([]byte(str), &user); err != nil {
+		t.Fatal(err)
+	}
 	t.Log(user)
 }
 
