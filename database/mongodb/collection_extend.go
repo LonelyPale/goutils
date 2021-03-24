@@ -12,30 +12,16 @@ func (coll *Collection) DeleteByID(i interface{}) (int64, error) {
 		filter = ID(v)
 	case []types.ObjectID:
 		filter = In(IDBson, v)
-	case string, types.Bytes:
+	case string:
 		id, err := types.ObjectIDFrom(v)
 		if err != nil {
 			return 0, err
 		}
 		filter = ID(id)
 	case []string:
-		ids := make([]types.ObjectID, len(v))
-		for n, val := range v {
-			id, err := types.ObjectIDFrom(val)
-			if err != nil {
-				return 0, err
-			}
-			ids[n] = id
-		}
-		filter = In(IDBson, ids)
-	case []types.Bytes:
-		ids := make([]types.ObjectID, len(v))
-		for n, val := range v {
-			id, err := types.ObjectIDFrom(val)
-			if err != nil {
-				return 0, err
-			}
-			ids[n] = id
+		ids, err := types.ObjectIDSliceFrom(v)
+		if err != nil {
+			return 0, err
 		}
 		filter = In(IDBson, ids)
 	default:
@@ -53,7 +39,7 @@ func (coll *Collection) FindByID(result interface{}, i interface{}) error {
 		return coll.FindOne(nil, result, filter)
 	case []types.ObjectID:
 		filter = In(IDBson, v)
-	case string, types.Bytes:
+	case string:
 		id, err := types.ObjectIDFrom(v)
 		if err != nil {
 			return err
@@ -61,23 +47,9 @@ func (coll *Collection) FindByID(result interface{}, i interface{}) error {
 		filter = ID(id)
 		return coll.FindOne(nil, result, filter)
 	case []string:
-		ids := make([]types.ObjectID, len(v))
-		for n, val := range v {
-			id, err := types.ObjectIDFrom(val)
-			if err != nil {
-				return err
-			}
-			ids[n] = id
-		}
-		filter = In(IDBson, ids)
-	case []types.Bytes:
-		ids := make([]types.ObjectID, len(v))
-		for n, val := range v {
-			id, err := types.ObjectIDFrom(val)
-			if err != nil {
-				return err
-			}
-			ids[n] = id
+		ids, err := types.ObjectIDSliceFrom(v)
+		if err != nil {
+			return err
 		}
 		filter = In(IDBson, ids)
 	default:
