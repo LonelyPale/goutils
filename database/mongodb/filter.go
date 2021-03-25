@@ -35,7 +35,7 @@ func NewFilter(values ...interface{}) Filter {
 	return make(Filter).Set(values...)
 }
 
-func NewFilterByMap(m map[string]interface{}, mtype ModelType) Filter {
+func NewFilterFromMap(m map[string]interface{}, mtype ModelType) Filter {
 	filter := Filter{}
 
 	for key, val := range m {
@@ -49,6 +49,9 @@ func NewFilterByMap(m map[string]interface{}, mtype ModelType) Filter {
 		} else {
 			filter.Set(ftype.Bson(), val)
 		}
+
+		//处理model默认字段
+		filter.TimeCondition(ModelFields.CreateTime, ModelFields.UpdateTime)
 	}
 
 	return filter
