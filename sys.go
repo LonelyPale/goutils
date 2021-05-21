@@ -17,17 +17,22 @@ func Exit(s string) {
 	os.Exit(1)
 }
 
+var pidFileMap = make(map[string]*FileLock)
+
 func LockPIDFile(pidfile string) error {
+	var fileLock *FileLock
 	if FileNotExist(pidfile) {
 		if err := WritePIDFile(pidfile); err != nil {
 			return err
 		}
 
-		if err := NewFileLock(pidfile).Lock(); err != nil {
+		fileLock = NewFileLock(pidfile)
+		if err := fileLock.Lock(); err != nil {
 			return err
 		}
 	} else {
-		if err := NewFileLock(pidfile).Lock(); err != nil {
+		fileLock = NewFileLock(pidfile)
+		if err := fileLock.Lock(); err != nil {
 			return err
 		}
 
@@ -36,15 +41,17 @@ func LockPIDFile(pidfile string) error {
 		}
 	}
 
+	pidFileMap[pidfile] = fileLock
 	return nil
 }
 
 func UnlockPIDFile(pidfile string) error {
-	if FileNotExist(pidfile) {
+	fileLock, ok := pidFileMap[pidfile]
+	if !ok {
 		return errors.Errorf("file does not exist, %s", pidfile)
 	}
 
-	if err := NewFileLock(pidfile).Unlock(); err != nil {
+	if err := fileLock.Unlock(); err != nil {
 		return err
 	}
 
