@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"github.com/mitchellh/go-ps"
+
+	"github.com/LonelyPale/goutils/errors"
 )
 
 // exit app
@@ -32,6 +34,22 @@ func LockPIDFile(pidfile string) error {
 		if err := WritePIDFile(pidfile); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func UnlockPIDFile(pidfile string) error {
+	if FileNotExist(pidfile) {
+		return errors.Errorf("file does not exist, %s", pidfile)
+	}
+
+	if err := NewFileLock(pidfile).Unlock(); err != nil {
+		return err
+	}
+
+	if err := os.Remove(pidfile); err != nil {
+		return err
 	}
 
 	return nil
