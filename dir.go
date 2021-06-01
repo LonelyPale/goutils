@@ -34,8 +34,7 @@ func FileNotExist(path string) bool {
 // 确保完整路径
 func EnsureDir(dir string, mode os.FileMode) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err := os.MkdirAll(dir, mode)
-		if err != nil {
+		if err := os.MkdirAll(dir, mode); err != nil {
 			return fmt.Errorf("could not create directory %v. %v", dir, err)
 		}
 	}
