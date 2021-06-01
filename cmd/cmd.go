@@ -9,7 +9,7 @@ import (
 func Execs(commands []string) error {
 	for _, command := range commands {
 		if err := Exec(command); err != nil {
-			Print(Red, err.Error())
+			return err
 		}
 		println()
 	}
