@@ -50,6 +50,12 @@ func (b *Buffer) String() string {
 	return b.buf.String()
 }
 
+func (b *Buffer) Len() int {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.buf.Len()
+}
+
 func (b *Buffer) Write(p []byte) (n int, err error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -66,16 +72,19 @@ type Options struct {
 	Stdin  io.ReadWriter
 	Stdout io.ReadWriter
 	Stderr io.ReadWriter
+	Echo   bool
+	Passwd string
 }
 
 type Command struct {
-	Cmd *exec.Cmd
-	Ssh *ssh.Session
-	In  io.Writer
-	Out io.Reader
-	Err io.Reader
-	out Buffer
-	err Buffer
+	Cmd  *exec.Cmd
+	Ssh  *ssh.Session
+	In   io.Writer
+	Out  io.Reader
+	Err  io.Reader
+	out  Buffer
+	err  Buffer
+	opts Options
 }
 
 func NewCommand(command string, opts ...Options) (*Command, error) {
@@ -107,13 +116,27 @@ func NewCommand(command string, opts ...Options) (*Command, error) {
 
 	var stdin, stdout, stderr io.ReadWriter
 	if len(opts) > 0 {
+		if opts[0].Stdin == nil {
+			opts[0].Stdin = &Buffer{}
+		}
+		if opts[0].Stdout == nil {
+			opts[0].Stdout = &Buffer{}
+		}
+		if opts[0].Stderr == nil {
+			opts[0].Stderr = &Buffer{}
+		}
+
 		stdin = opts[0].Stdin
 		stdout = opts[0].Stdout
 		stderr = opts[0].Stderr
+		wrapper.opts = opts[0]
 	} else {
-		stdin = &bytes.Buffer{}
-		stdout = &bytes.Buffer{}
-		stderr = &bytes.Buffer{}
+		stdin = &Buffer{}
+		stdout = &Buffer{}
+		stderr = &Buffer{}
+		wrapper.opts = Options{
+			Echo: true,
+		}
 	}
 
 	cmd.Stdin = stdin
@@ -135,6 +158,9 @@ func (c *Command) Run() error {
 }
 
 func (c *Command) Start() error {
+	if c.opts.Echo {
+		Print(Blue, c.Cmd.String()+"\r\n")
+	}
 	return c.Cmd.Start()
 }
 
@@ -154,6 +180,10 @@ func (c *Command) Kill() error {
 	return nil
 }
 
+func (c *Command) Exited() bool {
+	return c.Cmd.ProcessState != nil && c.Cmd.ProcessState.Exited()
+}
+
 func (c *Command) Write(data []byte) (int, error) {
 	return c.In.Write(data)
 }
@@ -168,22 +198,20 @@ func (c *Command) Read(data []byte) (int, error) {
 }
 
 func (c *Command) ReadLine() (string, error) {
-	if _, err := c.out.Copy(c.Out); err != nil {
+	if _, err := c.out.Copy(c.Out); err != nil { //不返回io.EOF
 		return "", err
 	}
-	return c.out.ReadString('\n')
+	return c.out.ReadString('\n') //会返回io.EOF
 }
 
 func (c *Command) ReadAll() (string, error) {
 	for {
 		if _, err := c.out.Copy(c.Out); err != nil {
-			if err == io.EOF {
-				if c.Cmd.ProcessState != nil && c.Cmd.ProcessState.Exited() {
-					return c.out.String(), nil
-				}
-			} else {
-				return c.out.String(), err
-			}
+			return c.out.String(), err
+		}
+
+		if c.Exited() {
+			return c.out.String(), nil
 		}
 	}
 }
@@ -202,13 +230,11 @@ func (c *Command) ErrorLine() (string, error) {
 func (c *Command) ErrorAll() (string, error) {
 	for {
 		if _, err := c.err.Copy(c.Err); err != nil {
-			if err == io.EOF {
-				if c.Cmd.ProcessState != nil && c.Cmd.ProcessState.Exited() {
-					return c.err.String(), nil
-				}
-			} else {
-				return c.err.String(), err
-			}
+			return c.err.String(), err
+		}
+
+		if c.Exited() {
+			return c.err.String(), nil
 		}
 	}
 }
@@ -236,19 +262,14 @@ func (c *Command) CombinedOutput() (string, error) {
 func (c *Command) Print() {
 	for {
 		line, err := c.ReadLine()
-		if err != nil {
-			if err == io.EOF {
-				if c.Cmd.ProcessState != nil && c.Cmd.ProcessState.Exited() {
-					return
-				}
-			} else {
-				Print(Red, err.Error())
-				return
-			}
+		if err != nil && err != io.EOF {
+			Print(Red, err.Error())
+			return
 		}
 
-		if len(line) > 0 {
-			Print(Green, line)
+		Print(Green, line)
+		if c.Exited() && c.out.Len() == 0 {
+			return
 		}
 	}
 }
@@ -256,25 +277,23 @@ func (c *Command) Print() {
 func (c *Command) PrintError() {
 	for {
 		line, err := c.ErrorLine()
-		if err != nil {
-			if err == io.EOF {
-				if c.Cmd.ProcessState != nil && c.Cmd.ProcessState.Exited() {
-					return
-				}
-			} else {
-				Print(Red, err.Error())
-				return
-			}
+		if err != nil && err != io.EOF {
+			Print(Red, err.Error())
+			return
 		}
 
-		if len(line) > 0 {
-			Print(Red, line)
+		Print(Red, line)
+		if c.Exited() && c.err.Len() == 0 {
+			return
 		}
 	}
 }
 
 func Print(c *color.Color, s string) {
-	if _, err := fmt.Print(s); err != nil {
+	if len(s) == 0 {
+		return
+	}
+	if _, err := c.Print(s); err != nil {
 		fmt.Println(err)
 	}
 }
