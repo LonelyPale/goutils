@@ -225,7 +225,11 @@ func (f Filter) Regex(key string, value interface{}) Filter {
 }
 
 func (f Filter) ID(value interface{}) Filter {
-	f[IDBson] = value
+	id, err := types.ObjectIDFrom(value)
+	if err != nil {
+		panic(err)
+	}
+	f[IDBson] = id
 	return f
 }
 
