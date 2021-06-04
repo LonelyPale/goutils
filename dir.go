@@ -3,9 +3,11 @@ package goutils
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // 非空目录
@@ -99,4 +101,20 @@ func WindowsAppData() string {
 		panic("environment variable LocalAppData is undefined")
 	}
 	return v
+}
+
+func GetCurrentPath() string {
+	file, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		panic(err)
+	}
+
+	path, err := filepath.Abs(file)
+	if err != nil {
+		panic(err)
+	}
+
+	index := strings.LastIndex(path, string(os.PathSeparator))
+	ret := path[:index]
+	return ret
 }
