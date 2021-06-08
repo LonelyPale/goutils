@@ -6,7 +6,13 @@ import (
 	"sync"
 )
 
-func Execs(commands []string) error {
+const (
+	And   = "&&" //与
+	Or    = "||" //或
+	Alone = ";"  //单独执行
+)
+
+func Execs(commands []string, control ...string) error {
 	for _, command := range commands {
 		if err := Exec(command); err != nil {
 			return err

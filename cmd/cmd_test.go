@@ -48,8 +48,37 @@ func TestCommand_ReadAll(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	t.Log(str)
+}
+
+func TestCommand(t *testing.T) {
+	//cmdstr := `bash -c 'ping -c88 localhost >/dev/null 2>&1 &'`//正确
+	cmdstr := `bash -c 'ping -c88 localhost' >/dev/null 2>&1 &` //错误
+
+	cmd, err := NewCommand(cmdstr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//异步，非阻塞
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log("pid: ", cmd.Cmd.Process.Pid)
+
+	//同步，阻塞
+	//if err := cmd.Wait(); err != nil {
+	//	t.Fatal(err)
+	//}
+
+	t.Log("ok end.")
+}
+
+func TestExec2(t *testing.T) {
+	cmdstr := `bash -c 'ping -c8888 localhost >/dev/null 2>&1 &'`
+	//cmdstr := `bash -c 'ping -c88 localhost' >/dev/null 2>&1 &`
+	test(t, Exec(cmdstr))
 }
 
 func test(t *testing.T, err error) {
