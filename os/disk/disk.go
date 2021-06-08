@@ -27,6 +27,7 @@ func Free(path string) (uint64, error) {
 		return 0, err
 	}
 
-	//free := info.Total - info.Used
-	return info.Free, nil
+	//info.Free 剩余空间在Ubuntu上不准确，少部分容量
+	free := info.Total - info.Used //在Mac上未处理多分区的情况
+	return free, nil
 }
