@@ -71,6 +71,14 @@ func TestFindProcessByCmd(t *testing.T) {
 	}
 }
 
+func TestCurrentProcess(t *testing.T) {
+	proc, err := CurrentProcess()
+	if err != nil {
+		t.Fatal(err)
+	}
+	printProcess(proc)
+}
+
 func printProcess(proc *process.Process) {
 	name, err := proc.Name()
 	if err != nil {

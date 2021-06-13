@@ -1,10 +1,11 @@
 package process
 
 import (
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/shirou/gopsutil/v3/process"
 	"os"
 	"strings"
+
+	"github.com/LonelyPale/goutils/errors"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 var (
@@ -21,9 +22,6 @@ func FindProcess(i interface{}) (*process.Process, error) {
 		procs, err := FindProcessByName(v)
 		if err != nil {
 			return nil, err
-		}
-		if len(procs) == 0 {
-			return nil, ErrorProcessNotRunning
 		}
 		return procs[0], nil
 	default:
@@ -53,6 +51,10 @@ func FindProcessByName(name string) ([]*process.Process, error) {
 		}
 	}
 
+	if len(res) == 0 {
+		return nil, ErrorProcessNotRunning
+	}
+
 	return res, nil
 }
 
@@ -76,6 +78,10 @@ func FindProcessByCmd(cmd string) ([]*process.Process, error) {
 		if strings.Index(cmdline, cmd) > -1 {
 			res = append(res, proc)
 		}
+	}
+
+	if len(res) == 0 {
+		return nil, ErrorProcessNotRunning
 	}
 
 	return res, nil
