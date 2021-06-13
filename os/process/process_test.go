@@ -39,12 +39,17 @@ func TestPs(t *testing.T) {
 }
 
 func TestFindProcess(t *testing.T) {
-	var pid int = 1
+	var pid int = 10
 	proc, err := FindProcess(pid)
 	if err != nil {
-		t.Fatal(err)
+		if err == ErrorProcessNotRunning {
+			t.Error(err)
+		} else {
+			t.Fatal(err)
+		}
+	} else {
+		printProcess(proc)
 	}
-	printProcess(proc)
 
 	pname := "timed"
 	proc, err = FindProcess(pname)

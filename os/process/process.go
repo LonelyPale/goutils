@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-var ErrNotFoundProcess = errors.New("process not found")
+var (
+	ErrorProcessNotRunning = process.ErrorProcessNotRunning
+)
 
 func FindProcess(i interface{}) (*process.Process, error) {
 	switch v := i.(type) {
@@ -21,7 +23,7 @@ func FindProcess(i interface{}) (*process.Process, error) {
 			return nil, err
 		}
 		if len(procs) == 0 {
-			return nil, ErrNotFoundProcess
+			return nil, ErrorProcessNotRunning
 		}
 		return procs[0], nil
 	default:
