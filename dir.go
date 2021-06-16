@@ -65,8 +65,6 @@ func DefaultDataDir(dirs ...string) string {
 	}
 
 	switch runtime.GOOS {
-	case "darwin":
-		return filepath.Join(home, "Library", "Application Support", dir)
 	case "windows":
 		// We used to put everything in %HOME%\AppData\Roaming, but this caused
 		// problems with non-typical setups. If this fallback location exists and
@@ -77,6 +75,8 @@ func DefaultDataDir(dirs ...string) string {
 			return fallback
 		}
 		return filepath.Join(appdata, dir)
+	case "darwin":
+		return filepath.Join(home, "Library", "Application Support", dir)
 	default:
 		return filepath.Join(home, dir)
 	}

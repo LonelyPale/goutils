@@ -15,3 +15,7 @@ func TestFileNotExist(t *testing.T) {
 func TestGetCurrentPath(t *testing.T) {
 	t.Log(GetCurrentPath())
 }
+
+func TestHomeDir(t *testing.T) {
+	t.Log(HomeDir())
+}
