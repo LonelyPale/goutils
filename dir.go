@@ -2,6 +2,7 @@ package goutils
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -10,15 +11,24 @@ import (
 	"strings"
 )
 
+// 空目录
+func EmptyDir(dir string) bool {
+	dirs, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Println(err)
+		return true
+	}
+	return len(dirs) == 0
+}
+
 // 非空目录
 func NonEmptyDir(dir string) bool {
-	f, err := os.Open(dir)
+	dirs, err := ioutil.ReadDir(dir)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
-	names, _ := f.Readdir(1)
-	_ = f.Close()
-	return len(names) > 0
+	return len(dirs) > 0
 }
 
 // file and folder
