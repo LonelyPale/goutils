@@ -23,6 +23,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
+	github.com/ipfs/go-ipfs-api v0.2.0
 	github.com/json-iterator/go v1.1.9
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mitchellh/go-ps v1.0.0

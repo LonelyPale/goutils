@@ -2,8 +2,11 @@ package aes
 
 import (
 	"encoding/base64"
+	"github.com/LonelyPale/goutils/crypto"
+	"io/ioutil"
 	"log"
 	"testing"
+	"time"
 )
 
 const sessionKey = "tiihtNczf5v6AKRyjwEUhQ=="
@@ -84,4 +87,33 @@ func TestAESCBCEncrypt(t *testing.T) {
 
 	log.Println("encryptedData:", encryptedDataBytes)
 	log.Println("encryptedData+base64:", encrypted)
+}
+
+func TestBigFile(t *testing.T) {
+	t1 := time.Now()
+	bs, err := ioutil.ReadFile("/Users/wyb/backup/software/os/ubuntu-20.04.2-live-server-amd64.iso")
+	if err != nil {
+		t.Fatal(err)
+	}
+	elapsed := time.Since(t1)
+	t.Log(len(bs), elapsed)
+
+	key, err := crypto.GenerateSecretKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t1 = time.Now()
+	bs2, err := Encrypt(bs, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(len(bs2), time.Since(t1))
+
+	t1 = time.Now()
+	ts, err := Decrypt(bs2, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(len(ts), time.Since(t1))
 }

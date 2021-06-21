@@ -4,7 +4,9 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) {
@@ -29,4 +31,24 @@ func Test(t *testing.T) {
 	//结果
 	//e10adc3949ba59abbe56e057f20f883e
 	//e10adc3949ba59abbe56e057f20f883e
+}
+
+func TestBigFile(t *testing.T) {
+	t1 := time.Now()
+	bs, err := ioutil.ReadFile("/Users/wyb/backup/software/os/ubuntu-20.04.2-live-server-amd64.iso")
+	if err != nil {
+		t.Fatal(err)
+	}
+	elapsed := time.Since(t1)
+	t.Log(len(bs), elapsed)
+
+	t1 = time.Now()
+	w := md5.New()
+	_, err = w.Write(bs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	md5str := fmt.Sprintf("%x", w.Sum(nil))
+	fmt.Println(md5str, time.Since(t1))
 }
