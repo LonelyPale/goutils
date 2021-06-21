@@ -73,6 +73,7 @@ type Options struct {
 	Stdout io.ReadWriter
 	Stderr io.ReadWriter
 	Echo   bool
+	Async  bool
 	Passwd string
 }
 

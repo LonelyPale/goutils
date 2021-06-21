@@ -32,6 +32,10 @@ func Exec(command string, opts ...Options) error {
 		return err
 	}
 
+	if len(opts) > 0 && opts[0].Async {
+		return nil
+	}
+
 	wg := sync.WaitGroup{}
 	defer wg.Wait()
 

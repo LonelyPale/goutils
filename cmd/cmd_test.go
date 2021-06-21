@@ -25,6 +25,14 @@ func TestExec(t *testing.T) {
 
 func TestShell(t *testing.T) {
 	test(t, Shell("ls /"))
+
+	//test(t, Shell("ping -c18 localhost >ping.log 2>&1 &"))//单命令会进入后台异步执行，多命令会阻塞后同步执行
+	//test(t, Shell("python3 sleep.py >/dev/null 2>&1 &"))//单命令会进入后台异步执行，多命令会阻塞后同步执行
+
+	//test(t, Shell("cd ~ && ping -c18 localhost >ping.log 2>&1 &"))//单命令会进入后台异步执行，多命令会阻塞后同步执行
+	//test(t, Shell("sleep 0 && python3 sleep.py >/dev/null 2>&1 &"))//单命令会进入后台异步执行，多命令会阻塞后同步执行
+
+	test(t, Shell("cd /Users/wyb/project/github/goutils/cmd && ping -c88 localhost >ping.log 2>&1 &"))
 }
 
 func TestSudo(t *testing.T) {
