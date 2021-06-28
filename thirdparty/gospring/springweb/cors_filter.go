@@ -40,8 +40,21 @@ func (c *corsFilter) Invoke(ctx SpringWeb.WebContext, chain SpringWeb.FilterChai
 		}
 	}
 
+	//fmt.Println()
+	//fmt.Println("***** ***** ***** ***** *****")
+	//for key, val := range c.Request.Header {
+	//	fmt.Println(key, val)
+	//}
+	//fmt.Println("***** ***** ***** ***** *****")
+
+	//过滤 nginx 等服务器转发请求时，也会配置 Access-Control-Allow-Credentials 的情况，
+	//保证最终 Response 的 Headers 中只能有一个 Access-Control-Allow-Credentials 出现，
+	//当 Headers 中有多个 Access-Control-Allow-Credentials 时，浏览器会报错。
+	if ctx.GetHeader("X-Real-Ip") == "" && ctx.GetHeader("X-Forwarded-For") == "" {
+		ctx.Header("Access-Control-Allow-Credentials", "true")
+	}
+
 	ctx.Header("Access-Control-Allow-Origin", origin)
-	ctx.Header("Access-Control-Allow-Credentials", "true")
 	ctx.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type,Access-Control-Allow-Headers,Content-Length,Accept,Authorization,X-Requested-With")
 
