@@ -25,6 +25,13 @@ func (m Map) String(key string) string {
 	return ""
 }
 
+func (m Map) Bool(key string) bool {
+	if val, ok := m[key]; ok {
+		return val.(bool)
+	}
+	return false
+}
+
 func (m Map) Int(key string) int {
 	if val, ok := m[key]; ok {
 		switch v := val.(type) {
