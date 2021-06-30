@@ -39,7 +39,7 @@ func (f Filter) RegexCondition(keys ...string) Filter {
 	for _, key := range keys {
 		val, ok := f[key]
 		if !ok {
-			return f
+			continue
 		}
 
 		if len(val.(string)) > 0 {
