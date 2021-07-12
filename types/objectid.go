@@ -24,8 +24,12 @@ func ObjectIDFrom(i interface{}) (ObjectID, error) {
 	switch v := i.(type) {
 	case ObjectID:
 		return v, nil
+	case *ObjectID:
+		return *v, nil
 	case string:
 		return primitive.ObjectIDFromHex(v)
+	case *string:
+		return primitive.ObjectIDFromHex(*v)
 	default:
 		return NilObjectID, errors.New("error type")
 	}

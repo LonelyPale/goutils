@@ -9,6 +9,7 @@ import (
 func TestObjectIDFrom(t *testing.T) {
 	id := NewObjectID()
 	idstr := id.Hex()
+	t.Log(idstr)
 
 	objid, err := ObjectIDFrom(id)
 	if err != nil {
