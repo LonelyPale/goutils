@@ -46,26 +46,17 @@ func TestEventBus(t *testing.T) {
 }
 
 func TestEventBusFunc(t *testing.T) {
-	err := testBus.SubscribeFunc("type1", func(event Event) {
+	testBus.SubscribeFunc("type1", func(event Event) {
 		printEvent("ch1", event)
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	err = testBus.SubscribeFunc("type2", func(event Event) {
+	testBus.SubscribeFunc("type2", func(event Event) {
 		printEvent("ch2", event)
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	err = testBus.SubscribeFunc("type3", func(event Event) {
+	testBus.SubscribeFunc("type3", func(event Event) {
 		printEvent("ch3", event)
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	go publisTo("type1", "Hi topic 1")
 	go publisTo("type2", "Welcome to topic 2")
