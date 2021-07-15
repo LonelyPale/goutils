@@ -25,10 +25,15 @@ type Bus struct {
 	filter      Filter
 }
 
-func NewBus() *Bus {
+func NewBus(filters ...Filter) *Bus {
+	var filter Filter
+	if len(filters) > 0 && filters[0] != nil {
+		filter = filters[0]
+	}
 	return &Bus{
 		subscribers: map[string]Chans{},
 		pools:       []*ants.PoolWithFunc{},
+		filter:      filter,
 	}
 }
 
