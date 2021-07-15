@@ -22,6 +22,7 @@ type Bus struct {
 	mu          sync.RWMutex //mu锁subscribers
 	pools       []*ants.PoolWithFunc
 	lock        sync.Mutex //lock锁pools
+	filter      Filter
 }
 
 func NewBus() *Bus {
@@ -34,17 +35,38 @@ func NewBus() *Bus {
 // 发布
 func (eb *Bus) Publish(typ string, data interface{}) {
 	eb.mu.RLock()
-	if chans, found := eb.subscribers[typ]; found {
-		// 这样做是因为切片引用相同的数组，即使它们是按值传递的
-		// 因此我们正在使用我们的元素创建一个新切片，从而正确地保持锁定
-		channels := append(Chans{}, chans...)
-		go func(event Event, eventChans Chans) {
-			for _, ch := range eventChans {
-				ch <- event
+	defer eb.mu.RUnlock()
+
+	defer func() {
+		if r := recover(); r != nil {
+			DefaultLogger.Error(r)
+			//debug.PrintStack()
+		}
+	}()
+
+	if eb.filter != nil {
+		for key, chans := range eb.subscribers {
+			if eb.filter(typ, key) {
+				eb.publish(typ, data, append(Chans{}, chans...))
 			}
-		}(Event{Type: typ, Data: data}, channels)
+		}
+	} else {
+		if chans, found := eb.subscribers[typ]; found {
+			// 这样做是因为切片引用相同的数组，即使它们是按值传递的
+			// 因此我们正在使用我们的元素创建一个新切片，从而正确地保持锁定
+			// 当slice容量足够不需要扩容的情况下，订阅已有主题，slice内的数组指针不变，
+			// 已publish出去的[]Chan中的值也会增加，所以在发布前生成新的slice，已保持在publish中值不会变
+			eb.publish(typ, data, append(Chans{}, chans...))
+		}
 	}
-	eb.mu.RUnlock()
+}
+
+func (eb *Bus) publish(typ string, data interface{}, chans Chans) {
+	go func(event Event, eventChans Chans) {
+		for _, ch := range eventChans {
+			ch <- event
+		}
+	}(Event{Type: typ, Data: data}, chans)
 }
 
 // 订阅

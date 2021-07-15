@@ -10,6 +10,7 @@ import (
 )
 
 type Client = mqtt.Client
+type Message = mqtt.Message
 
 func NewClient(config *Config) mqtt.Client {
 	//mqtt.DEBUG = log.New(os.Stdout, "", 0)
