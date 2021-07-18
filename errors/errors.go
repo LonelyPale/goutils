@@ -19,6 +19,19 @@ func UnknownError(r interface{}) error {
 	}
 }
 
+func Error(i interface{}) error {
+	switch e := i.(type) {
+	case error:
+		return e
+	case nil:
+		return nil
+	case string:
+		return errors.New(e)
+	default:
+		return errors.New(fmt.Sprint(i))
+	}
+}
+
 func Errors(errs ...error) error {
 	es := make([]error, 0)
 	for _, e := range errs {

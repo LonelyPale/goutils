@@ -2,14 +2,18 @@ package event
 
 var defaultBus = NewBus()
 
-func Publish(typ string, data interface{}) {
-	defaultBus.Publish(typ, data)
+func Publish(topic string, data interface{}) {
+	defaultBus.Publish(topic, data)
 }
 
-func Subscribe(typ string, ch Chan) {
-	defaultBus.Subscribe(typ, ch)
+func Subscribe(topic string, callback Handler) {
+	defaultBus.Subscribe(topic, callback)
 }
 
-func SubscribeFunc(typ string, fun HandlerFunc) {
-	defaultBus.SubscribeFunc(typ, fun)
+func Unsubscribe(topics ...string) {
+	defaultBus.Unsubscribe(topics...)
+}
+
+func Close() {
+	defaultBus.Close()
 }
