@@ -67,20 +67,23 @@ func (r *router) flowComplete() {
 	}
 }
 
-func (r *router) addRoute(topic string, callback Handler) {
+func (r *router) addRoute(topic string, callback Handler) *Token {
 	r.Lock()
 	defer r.Unlock()
 
 	select {
 	case <-r.quit:
+		return nil
 	default:
 		for e := r.routes.Front(); e != nil; e = e.Next() {
 			if e.Value.(*route).topic == topic {
-				e.Value.(*route).addToken(callback)
-				return
+				return e.Value.(*route).addToken(callback)
 			}
 		}
-		r.routes.PushBack(newRoute(topic, callback, r.delRouteChan))
+
+		rou, token := newRoute(topic, callback, r.delRouteChan)
+		r.routes.PushBack(rou)
+		return token
 	}
 }
 

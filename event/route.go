@@ -15,10 +15,11 @@ type route struct {
 	complete     chan struct{}
 }
 
-func newRoute(topic string, callback Handler, delRouteChan chan<- *route) *route {
+func newRoute(topic string, callback Handler, delRouteChan chan<- *route) (*route, *Token) {
 	delTokenChan := make(chan *Token)
+	token := newToken(callback, delTokenChan)
 	tokens := list.New()
-	tokens.PushBack(newToken(callback, delTokenChan))
+	tokens.PushBack(token)
 	r := &route{
 		topic:        topic,
 		tokens:       tokens,
@@ -29,7 +30,7 @@ func newRoute(topic string, callback Handler, delRouteChan chan<- *route) *route
 	}
 
 	go r.process()
-	return r
+	return r, token
 }
 
 func (r *route) isClose() bool {
@@ -77,14 +78,17 @@ func (r *route) flowComplete() {
 	}
 }
 
-func (r *route) addToken(callback Handler) {
+func (r *route) addToken(callback Handler) *Token {
 	r.Lock()
 	defer r.Unlock()
 
 	select {
 	case <-r.quit:
+		return nil
 	default:
-		r.tokens.PushBack(newToken(callback, r.delTokenChan))
+		token := newToken(callback, r.delTokenChan)
+		r.tokens.PushBack(token)
+		return token
 	}
 }
 

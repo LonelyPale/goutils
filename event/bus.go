@@ -32,8 +32,8 @@ func (b *Bus) Publish(topic string, data interface{}) {
 }
 
 // 订阅
-func (b *Bus) Subscribe(topic string, callback Handler) {
-	b.eventRouter.addRoute(topic, callback)
+func (b *Bus) Subscribe(topic string, callback Handler) *Token {
+	return b.eventRouter.addRoute(topic, callback)
 }
 
 // 退订
