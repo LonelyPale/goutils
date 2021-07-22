@@ -1,6 +1,9 @@
 package goutils
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestFileExist(t *testing.T) {
 	t.Log(FileExist("/tmp"))
@@ -14,6 +17,12 @@ func TestFileNotExist(t *testing.T) {
 
 func TestGetCurrentPath(t *testing.T) {
 	t.Log(GetCurrentPath())
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(pwd)
 }
 
 func TestHomeDir(t *testing.T) {
