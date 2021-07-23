@@ -54,11 +54,20 @@ func EnsureDir(dir string, mode os.FileMode) error {
 }
 
 // helper function to make dir creation independent of root dir
-func Rootify(path, root string) string {
+func Rootify(path string, roots ...string) string {
 	if filepath.IsAbs(path) {
 		return path
 	}
-	return filepath.Join(root, path)
+
+	if len(roots) > 0 && len(roots[0]) > 0 {
+		return filepath.Join(roots[0], path)
+	}
+
+	p, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	return p
 }
 
 // DefaultDataDir is the default data directory
@@ -113,6 +122,8 @@ func WindowsAppData() string {
 	return v
 }
 
+//返回当前可执行文件的路径
+//os.Getwd() 返回当前的 work dir 工作目录
 func GetCurrentPath() string {
 	file, err := exec.LookPath(os.Args[0])
 	if err != nil {
