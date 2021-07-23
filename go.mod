@@ -10,10 +10,10 @@ require (
 	github.com/fatih/color v1.12.0
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-contrib/static v0.0.0-20200916080430-d45d9a37d28e
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
-	github.com/go-playground/validator/v10 v10.3.0
+	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-spring/spring-boot v1.0.5
 	github.com/go-spring/spring-gin v1.0.5
 	github.com/go-spring/spring-logger v1.0.5
@@ -36,7 +36,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/vmihailenco/msgpack/v5 v5.0.0-alpha.2
 	go.mongodb.org/mongo-driver v1.7.0
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
 	google.golang.org/grpc v1.29.1
 )
