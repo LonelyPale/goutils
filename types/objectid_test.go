@@ -35,3 +35,9 @@ func TestObjectIDFrom(t *testing.T) {
 	}
 	assert.Equal(t, id, objid)
 }
+
+func TestNilObjectID(t *testing.T) {
+	t.Log(NilObjectID.Hex())
+	t.Log(NilObjectID)
+	t.Log(len(NilObjectID))
+}

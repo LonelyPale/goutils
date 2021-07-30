@@ -6,15 +6,16 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type Users struct {
-	Name   string `form:"name" json:"name" validate:"required" label:"姓名"`
-	Age    uint8  `form:"age" json:"age" validate:"required,gt=18" label:"年龄"`
-	Passwd string `form:"passwd" json:"passwd" validate:"required,max=20,min=6" label:"密码"`
-	Code   string `form:"code" json:"code" validate:"required,len=6" label:"代码"`
+type User struct {
+	Name    string `form:"name" json:"name" validate:"required" label:"姓名"`
+	Age     uint8  `form:"age" json:"age" validate:"required,gt=18" label:"年龄"`
+	Passwd  string `form:"passwd" json:"passwd" validate:"required,max=20,min=6" label:"密码"`
+	Code    string `form:"code" json:"code" validate:"required,len=6" label:"代码"`
+	Address string `form:"address" json:"address" validate:"omitempty" vCreate:"required" label:"地址"`
 }
 
 func TestValidate(t *testing.T) {
-	users := &Users{
+	users := &User{
 		Name:   "admin",
 		Age:    12,
 		Passwd: "123",
@@ -34,7 +35,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestValidate2(t *testing.T) {
-	users := &Users{
+	users := &User{
 		Name:   "admin",
 		Age:    12,
 		Passwd: "123",
@@ -48,5 +49,26 @@ func TestValidate2(t *testing.T) {
 	}
 
 	err = validate.Validate(users)
+	t.Log(err)
+}
+
+func TestValidateTag(t *testing.T) {
+	validate := NewDefaultValidator()
+	err := validate.SetLanguage(ZH)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	user := User{
+		Name:   "abc",
+		Passwd: "123456",
+		Age:    123,
+		Code:   "qwe123",
+	}
+
+	err = validate.Validate(user)
+	t.Log(err)
+
+	err = validate.Validate(user, "vCreate")
 	t.Log(err)
 }

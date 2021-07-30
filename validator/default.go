@@ -3,10 +3,8 @@ package validator
 import (
 	"reflect"
 
-	"github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-
 	"github.com/LonelyPale/goutils/errors"
+	"github.com/LonelyPale/goutils/ref"
 )
 
 const (
@@ -19,17 +17,22 @@ var _ Validator = new(defaultValidator)
 
 // defaultValidator 默认的参数校验器
 type defaultValidator struct {
-	validator  *validator.Validate //验证器
-	translator ut.Translator       //翻译器
+	validator *validate      //默认，无tag的验证器
+	cache     *validateCache //结构体验证器缓存：非默认tag缓存
+	language  Language
 }
 
 // NewDefaultValidator defaultValidator 的构造函数
 func NewDefaultValidator() *defaultValidator {
-	v := &defaultValidator{validator: validator.New()}
-	for _, validType := range customValidateTypes {
-		v.validator.RegisterCustomTypeFunc(validType.fn, validType.types...)
+	return &defaultValidator{
+		validator: newValidate(),
+		cache:     newValidateCache(),
 	}
-	return v
+}
+
+func (v *defaultValidator) SetLanguage(language Language) error {
+	v.language = language
+	return v.validator.SetLanguage(language)
 }
 
 // Engine 返回原始的参数校验引擎
@@ -38,41 +41,37 @@ func (v *defaultValidator) Engine() interface{} {
 }
 
 func (v *defaultValidator) Var(field interface{}, tag string) error {
-	if v.translator != nil {
-		return Translate(v.validator.Var(field, tag), v.translator)
-	}
 	return v.validator.Var(field, tag)
 }
 
 // Validate 校验参数
 func (v *defaultValidator) Validate(obj interface{}, tags ...string) error {
-	var vobj reflect.Value
-
-	switch reflect.TypeOf(obj).Kind() {
-	case reflect.Ptr:
-		vobj = reflect.ValueOf(obj).Elem()
-	case reflect.Slice:
-		vobj = reflect.ValueOf(obj)
-	default:
-		return v.validate(obj, tags...)
+	if obj == nil {
+		return errors.New("validate object is nil")
 	}
 
-	if vobj.Kind() == reflect.Slice {
+	vobj := ref.PrimitiveValue(reflect.ValueOf(obj))
+	switch vobj.Kind() {
+	case reflect.Struct:
+		return v.validate(vobj, tags...)
+	case reflect.Slice:
 		length := vobj.Len()
 		for i := 0; i < length; i++ {
-			o := vobj.Index(i).Interface()
-			if err := v.validate(o, tags...); err != nil {
-				return err
+			vo := vobj.Index(i)
+			if vo.Kind() == reflect.Struct && vo.CanInterface() {
+				if err := v.validate(vo, tags...); err != nil {
+					return err
+				}
 			}
 		}
-	} else {
-		return v.validate(vobj.Interface(), tags...)
+	default:
+		return errors.Errorf("Validate: unsupported type %s", vobj.Kind().String())
 	}
 
 	return nil
 }
 
-func (v *defaultValidator) validate(obj interface{}, tags ...string) error {
+func (v *defaultValidator) validate(obj reflect.Value, tags ...string) error {
 	if err := v.validateStruct(obj); err != nil {
 		return err
 	}
@@ -87,46 +86,48 @@ func (v *defaultValidator) validate(obj interface{}, tags ...string) error {
 }
 
 //验证带 tag 的 struct
-func (v *defaultValidator) validateStruct(obj interface{}, tags ...string) error {
-	if obj == nil {
-		return errors.New("validate object is nil")
-	}
+func (v *defaultValidator) validateStruct(obj reflect.Value, tags ...string) error {
+	var valid *validate
 
-	//todo: 并发时是否线程安全？
 	if len(tags) > 0 && len(tags[0]) > 0 {
-		v.validator.SetTagName(tags[0])
+		tag := tags[0]
+		typ := obj.Type()
+		key := typ.PkgPath() + "." + typ.Name() + "-" + tag
+
+		var ok bool
+		valid, ok = v.cache.Get(key)
+		if !ok {
+			valid = v.addValidator(obj, tag)
+		}
 	} else {
-		v.validator.SetTagName(DefaultTagName)
+		valid = v.validator
 	}
 
-	if v.translator != nil {
-		return Translate(v.validator.Struct(obj), v.translator)
+	if valid == nil {
+		return errors.New("validator is null")
 	}
 
-	//err := validate.Struct(u)
-	//validationErrors := err.(validator.ValidationErrors)
-	return v.validator.Struct(obj)
+	return valid.Struct(obj.Interface())
 }
 
-func (v *defaultValidator) SetLanguage(language Language) error {
-	var err error
-	switch language {
-	case ZH:
-		v.translator, err = SetLanguageZH(v.validator)
-	default:
-		return errors.New("未找到对应语言的翻译器")
+func (v *defaultValidator) addValidator(obj reflect.Value, tag string) *validate {
+	v.cache.lock.Lock()
+	defer v.cache.lock.Unlock()
+
+	typ := obj.Type()
+	key := typ.PkgPath() + "." + typ.Name() + "-" + tag
+
+	valid, ok := v.cache.Get(key)
+	if ok {
+		return valid
 	}
-	return err
-}
 
-//自定义验证类型
-var customValidateTypes []customValidateType
+	valid = newValidate()
+	valid.SetTagName(tag)
+	if err := valid.SetLanguage(v.language); err != nil {
+		panic(err)
+	}
 
-type customValidateType struct {
-	fn    validator.CustomTypeFunc
-	types []interface{}
-}
-
-func RegisterCustomValidateType(fn validator.CustomTypeFunc, types ...interface{}) {
-	customValidateTypes = append(customValidateTypes, customValidateType{fn, types})
+	v.cache.Set(key, valid)
+	return valid
 }
