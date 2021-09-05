@@ -29,3 +29,18 @@ func Test(t *testing.T) {
 
 	t.Log(user)
 }
+
+func Test2(t *testing.T) {
+	s := "123"
+	bs, err := msgpack.Marshal(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(bs)
+
+	ss := ""
+	if err := msgpack.Unmarshal(bs, &ss); err != nil {
+		t.Fatal(err)
+	}
+	t.Log(ss)
+}
