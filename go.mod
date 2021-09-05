@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/allegro/bigcache v1.2.1
 	github.com/bwmarrin/snowflake v0.3.1-0.20190412223032-c09e69ae5993
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eclipse/paho.mqtt.golang v1.3.2
 	github.com/fatih/color v1.12.0
 	github.com/gin-contrib/sessions v0.0.3
