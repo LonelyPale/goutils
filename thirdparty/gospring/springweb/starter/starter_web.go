@@ -65,10 +65,5 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 		container.AddFilter(springweb.StaticFilter(config.Static))
 	}
 
-	// gin token 中间件
-	if config.Token.Enable {
-		container.AddFilter(springweb.TokenFilter(config.Token))
-	}
-
 	return container
 }
