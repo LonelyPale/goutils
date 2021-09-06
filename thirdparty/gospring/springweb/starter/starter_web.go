@@ -16,6 +16,7 @@ type WebServerConfig struct {
 	Cors    springweb.WebCorsConfig
 	Session springweb.WebSessionConfig
 	Static  springweb.WebStaticConfig
+	Token   springweb.WebTokenConfig
 }
 
 func init() {
@@ -62,6 +63,11 @@ func ginHandler(container *SpringGin.Container, config WebServerConfig) *SpringG
 	// gin static 中间件
 	if config.Static.Enable {
 		container.AddFilter(springweb.StaticFilter(config.Static))
+	}
+
+	// gin token 中间件
+	if config.Token.Enable {
+		container.AddFilter(springweb.TokenFilter(config.Token))
 	}
 
 	return container
