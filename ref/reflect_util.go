@@ -31,6 +31,10 @@ func PrimitiveValue(v reflect.Value) reflect.Value {
 }
 
 func PrimitiveType(t reflect.Type) reflect.Type {
+	if t == nil {
+		return nil
+	}
+
 	for {
 		if k := t.Kind(); k == reflect.Ptr {
 			t = t.Elem()
@@ -42,6 +46,10 @@ func PrimitiveType(t reflect.Type) reflect.Type {
 
 // Indirect 解除 Type 的指针
 func Indirect(t reflect.Type) reflect.Type {
+	if t == nil {
+		return nil
+	}
+
 	if t.Kind() != reflect.Ptr {
 		return t
 	}
