@@ -32,7 +32,7 @@ type Token interface {
 
 type StandardToken struct {
 	jwt.StandardClaims
-	Signature string `json:"-"`
+	Signature string `json:"-" msgpack:",omitempty"`
 }
 
 func (t *StandardToken) ID() string {
@@ -79,7 +79,7 @@ func GenerateToken(claims jwt.Claims, signingKey string) (string, error) {
 	return jwtToken.SignedString([]byte(signingKey))
 }
 
-func ParseToken(tokenStr string, signingKey string, claims jwt.Claims) error {
+func ParseToken(tokenStr string, signingKey string, claims jwt.Claims) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -90,18 +90,18 @@ func ParseToken(tokenStr string, signingKey string, claims jwt.Claims) error {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				// Token is expired
-				return ErrTokenTimeout
+				return nil, ErrTokenTimeout
 			}
 		}
 
-		return err
+		return nil, err
 	}
 
 	if token != nil {
 		if _, ok := token.Claims.(jwt.Claims); ok && token.Valid {
-			return nil
+			return token, nil
 		}
 	}
 
-	return ErrToken
+	return nil, ErrToken
 }

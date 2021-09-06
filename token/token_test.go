@@ -32,7 +32,7 @@ func TestClaims(t *testing.T) {
 
 	//time.Sleep(time.Second * 4)
 	claim2 := new(claims)
-	if err := ParseToken(tk, signkey, claim2); err != nil {
+	if _, err := ParseToken(tk, signkey, claim2); err != nil {
 		t.Fatal(err)
 	}
 	t.Log(claim2)
@@ -64,7 +64,7 @@ func TestToken(t *testing.T) {
 
 	//time.Sleep(time.Second * 4)
 	tkn2 := new(token)
-	if err := ParseToken(tk, opt.SecretKey, tkn2); err != nil {
+	if _, err := ParseToken(tk, opt.SecretKey, tkn2); err != nil {
 		t.Fatal(err)
 	}
 	t.Log(tkn2)
