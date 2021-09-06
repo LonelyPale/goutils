@@ -1,8 +1,6 @@
 package springweb
 
 import (
-	"github.com/go-spring/spring-boot"
-	"github.com/go-spring/spring-core"
 	"github.com/go-spring/spring-gin"
 	"github.com/go-spring/spring-web"
 
@@ -18,10 +16,10 @@ type WebTokenConfig struct {
 	Cache     redis.Cache `autowire:"?"`                                                                //是否启用 redis 缓存
 }
 
-func init() {
-	// 这种方式可以避免使用 export 语法，就像 StringFilter 和 NumberFilter 那样。
-	SpringBoot.RegisterFilter(SpringCore.ObjectBean(new(TokenFilter))).ConditionOnOptionalPropertyValue("web.server.token.enable", true)
-}
+//func init() {
+//	// 这种方式可以避免使用 export 语法，就像 StringFilter 和 NumberFilter 那样。
+//	SpringBoot.RegisterFilter(SpringCore.ObjectBean(new(TokenFilter))).ConditionOnOptionalPropertyValue("web.server.token.enable", true)
+//}
 
 var TokenType token.Token = (*token.StandardToken)(nil)
 
