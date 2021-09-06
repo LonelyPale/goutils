@@ -14,7 +14,7 @@ type claims struct {
 
 const signkey = "abc123"
 
-func TestToken(t *testing.T) {
+func TestClaims(t *testing.T) {
 	now := time.Now()
 	claim := claims{
 		StandardClaims: jwt.StandardClaims{
@@ -36,4 +36,34 @@ func TestToken(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(claim2)
+}
+
+type token struct {
+	StandardToken
+	UserID string `json:"userID"`
+}
+
+func TestToken(t *testing.T) {
+	opt := &Options{
+		SecretKey: signkey,
+		Expire:    3,
+		Cache:     nil,
+	}
+	tkn := &token{
+		StandardToken: New(opt),
+		UserID:        "zxcv",
+	}
+
+	tk, err := GenerateToken(tkn, opt.SecretKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(tk)
+
+	//time.Sleep(time.Second * 4)
+	tkn2 := new(token)
+	if err := ParseToken(tk, opt.SecretKey, tkn2); err != nil {
+		t.Fatal(err)
+	}
+	t.Log(tkn2)
 }
