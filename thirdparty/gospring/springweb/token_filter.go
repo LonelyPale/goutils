@@ -10,6 +10,7 @@ import (
 )
 
 var TokenFilter = defaultTokenFilter
+var TokenType = (*token.StandardToken)(nil)
 
 type WebTokenConfig struct {
 	Enable    bool        `value:"${web.server.static.enable:=true}"`                                   //是否启用 Token
@@ -19,7 +20,7 @@ type WebTokenConfig struct {
 }
 
 func defaultTokenFilter(config WebTokenConfig) SpringWeb.Filter {
-	return SpringGin.Filter(middleware.Token(nil, &token.Options{
+	return SpringGin.Filter(middleware.Token(TokenType, &token.Options{
 		SecretKey: config.SecretKey,
 		Expire:    config.Expire,
 		Cache:     config.Cache,
