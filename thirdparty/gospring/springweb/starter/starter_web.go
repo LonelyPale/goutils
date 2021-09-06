@@ -16,7 +16,6 @@ type WebServerConfig struct {
 	Cors    springweb.WebCorsConfig
 	Session springweb.WebSessionConfig
 	Static  springweb.WebStaticConfig
-	Token   springweb.WebTokenConfig
 }
 
 func init() {
