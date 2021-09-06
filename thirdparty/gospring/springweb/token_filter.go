@@ -23,7 +23,7 @@ func init() {
 	SpringBoot.RegisterFilter(SpringCore.ObjectBean(new(TokenFilter))).ConditionOnOptionalPropertyValue("web.server.token.enable", true)
 }
 
-var TokenType = (*token.StandardToken)(nil)
+var TokenType token.Token = (*token.StandardToken)(nil)
 
 type TokenFilter struct {
 	Config WebTokenConfig
