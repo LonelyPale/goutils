@@ -40,7 +40,8 @@ func TestClaims(t *testing.T) {
 
 type token struct {
 	StandardToken
-	UserID string `json:"userID"`
+	UserID  string `json:"userID"`
+	GroupID string `json:"-"`
 }
 
 func TestToken(t *testing.T) {
@@ -52,6 +53,7 @@ func TestToken(t *testing.T) {
 	tkn := &token{
 		StandardToken: New(opt),
 		UserID:        "zxcv",
+		GroupID:       "abc",
 	}
 
 	tk, err := GenerateToken(tkn, opt.SecretKey)

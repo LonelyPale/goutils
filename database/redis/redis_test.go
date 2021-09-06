@@ -25,11 +25,13 @@ func TestNewRedisDB(t *testing.T) {
 		One string
 		Two string
 		Num int
+		str string
 	}
 	n1 := &name{
 		One: "abc123",
 		Two: "def中国！",
 		Num: 888,
+		str: "xyz",
 	}
 	if err := db.Set("name", n1, time.Minute); err != nil {
 		t.Error(err)

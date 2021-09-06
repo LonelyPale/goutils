@@ -11,6 +11,8 @@ import (
 	"github.com/LonelyPale/goutils/types"
 )
 
+var _ Token = new(StandardToken)
+
 const (
 	CachePrefix = "token:"
 )
@@ -24,10 +26,13 @@ type Token interface {
 	jwt.Claims
 	redis.CacheAble
 	ID() string
+	SetSignature(signature string)
+	GetSignature() string
 }
 
 type StandardToken struct {
 	jwt.StandardClaims
+	Signature string `json:"-"`
 }
 
 func (t *StandardToken) ID() string {
@@ -36,6 +41,14 @@ func (t *StandardToken) ID() string {
 
 func (t *StandardToken) CacheKey() string {
 	return CachePrefix + t.Id
+}
+
+func (t *StandardToken) SetSignature(signature string) {
+	t.Signature = signature
+}
+
+func (t *StandardToken) GetSignature() string {
+	return t.Signature
 }
 
 type Options struct {
@@ -47,7 +60,7 @@ type Options struct {
 func New(opts ...*Options) StandardToken {
 	now := time.Now()
 	token := StandardToken{
-		jwt.StandardClaims{
+		StandardClaims: jwt.StandardClaims{
 			Id:       types.NewObjectID().Hex(),
 			IssuedAt: now.Unix(),
 		},
