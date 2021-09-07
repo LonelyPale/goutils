@@ -12,10 +12,10 @@ import (
 )
 
 type WebTokenConfig struct {
-	Enable    bool        `value:"${web.server.token.enable:=true}"`                                    //是否启用 Token
-	SecretKey string      `value:"${web.server.token.secret_key:=github.com/LonelyPale/goutils/token}"` //签名密钥
-	Expire    int         `value:"${web.server.token.expire:=86400}"`                                   //过期时间, 24小时, 单位: 秒
-	Cache     redis.Cache `autowire:"?"`                                                                //是否启用 redis 缓存
+	Enable    bool      `value:"${web.server.token.enable:=true}"`                                    //是否启用 Token
+	SecretKey string    `value:"${web.server.token.secret_key:=github.com/LonelyPale/goutils/token}"` //签名密钥
+	Expire    int       `value:"${web.server.token.expire:=86400}"`                                   //过期时间, 24小时, 单位: 秒
+	Cache     *redis.DB `autowire:"?"`                                                                //是否启用 redis 缓存
 }
 
 func init() {
