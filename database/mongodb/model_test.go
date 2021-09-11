@@ -76,19 +76,30 @@ func TestModel_Create2(t *testing.T) {
 
 	transaction := NewTransaction(coll.client)
 	err := transaction.Run(nil, func(sctx mongo.SessionContext) error {
+		if err := user.Create(sctx); err != nil {
+			return err
+		}
+		t.Log(user.ID)
+
+		//id, err := coll.InsertOne(sctx, user)
+		//if err != nil {
+		//	return err
+		//}
+		//t.Log(id)
+
 		n, err := coll.Delete(sctx, &map[string]string{})
 		if err != nil {
 			return err
 		}
 		t.Logf("clear record: %v", n)
 
-		startTime := time.Now()
-		if err := user.Create(sctx); err != nil {
-			return err
-		}
-		t.Log("time:", time.Since(startTime))
-		t.Log(user.ID)
-		t.Log(user)
+		//startTime := time.Now()
+		//if err := user.Create(sctx); err != nil {
+		//	return err
+		//}
+		//t.Log("time:", time.Since(startTime))
+		//t.Log(user.ID)
+		//t.Log(user)
 
 		return nil
 	})

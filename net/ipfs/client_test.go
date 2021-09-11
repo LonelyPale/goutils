@@ -2,15 +2,16 @@ package ipfs
 
 import (
 	"bytes"
-	"github.com/LonelyPale/goutils/crypto"
 	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/LonelyPale/goutils/crypto"
 )
 
 var (
-	client = NewClient()
+	client = NewClient("localhost:15001")
 )
 
 func TestNewClient(t *testing.T) {
@@ -29,18 +30,21 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
+	//QmeV1kwh3333bsnT6YRfdCRrSgUPngKmAhhTa4RrqYPbKT
 	res, err := client.Add(strings.NewReader("hello world!\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(res)
 
+	//QmXcQrx1CPanVhXGgBvQwPr9qCTmknDueQqeNyaMKsRr9r
 	res1, err := client.Add(strings.NewReader("/Users/wyb/project/github/goutils/net/ipfs/client.go\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(res1)
 
+	//QmeSqn7sfnEKkLqcPNVxbsNvbxup5tFGNf1FkHeNoF6scD
 	hash, err := client.Add(bytes.NewBufferString("你好，中国！"))
 	if err != nil {
 		t.Fatal(err)
@@ -69,13 +73,13 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hash, err := client.Encrypt([]byte("你好，中国！"), key)
+	hash, err := client.AddEncrypt([]byte("你好，中国！"), key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(hash)
 
-	bs, err := client.Decrypt(hash, key)
+	bs, err := client.CatDecrypt(hash, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,14 +101,14 @@ func TestBigFile(t *testing.T) {
 	}
 
 	t1 = time.Now()
-	hash, err := client.Encrypt(bs, key)
+	hash, err := client.AddEncrypt(bs, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(hash, time.Since(t1))
 
 	t1 = time.Now()
-	bs2, err := client.Decrypt(hash, key)
+	bs2, err := client.CatDecrypt(hash, key)
 	if err != nil {
 		t.Fatal(err)
 	}
