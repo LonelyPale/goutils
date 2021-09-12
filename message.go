@@ -1,8 +1,8 @@
 package goutils
 
 import (
-	"github.com/LonelyPale/goutils/errors/ecode"
-	"github.com/LonelyPale/goutils/validator"
+	"github.com/lonelypale/goutils/errors/ecode"
+	"github.com/lonelypale/goutils/validator"
 )
 
 type Message struct {

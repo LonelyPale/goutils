@@ -5,7 +5,7 @@ package types
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 type ObjectID = primitive.ObjectID

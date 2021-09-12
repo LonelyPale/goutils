@@ -9,6 +9,6 @@ func TestModelRegister(t *testing.T) {
 		t.Log(k)
 	}
 
-	model := MakeInstance("github.com/LonelyPale/goutils/database/mongodb.Model")
+	model := MakeInstance("github.com/lonelypale/goutils/database/mongodb.Model")
 	t.Log(model)
 }

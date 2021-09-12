@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 const DefaultWebSocketKey = "WebSocket"

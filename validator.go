@@ -1,7 +1,7 @@
 package goutils
 
 import (
-	"github.com/LonelyPale/goutils/validator"
+	"github.com/lonelypale/goutils/validator"
 )
 
 //validation

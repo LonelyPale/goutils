@@ -3,8 +3,8 @@ package event
 import (
 	"sync"
 
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 type Token struct {

@@ -1,8 +1,8 @@
 package crypto
 
 import (
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/crypto/sha512"
+	"github.com/lonelypale/goutils"
+	"github.com/lonelypale/goutils/crypto/sha512"
 )
 
 const (

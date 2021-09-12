@@ -4,7 +4,7 @@ import (
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-logger"
 
-	"github.com/LonelyPale/goutils/net/websocket"
+	"github.com/lonelypale/goutils/net/websocket"
 )
 
 // go-spring spring-boot 启动器

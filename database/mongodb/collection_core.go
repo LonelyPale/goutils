@@ -7,9 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 // mongodb验证规则: Insert在collection_core中验证，Save在collection中验证，Update在model中验证

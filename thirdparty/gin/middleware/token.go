@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/ref"
-	"github.com/LonelyPale/goutils/token"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/ref"
+	"github.com/lonelypale/goutils/token"
 )
 
 const (

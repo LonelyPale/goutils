@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 	"github.com/shirou/gopsutil/v3/process"
 )
 

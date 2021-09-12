@@ -1,7 +1,7 @@
 package disk
 
 import (
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 

@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"testing"
 
-	goimage "github.com/LonelyPale/goutils/image"
+	goimage "github.com/lonelypale/goutils/image"
 )
 
 func TestGenerateTextImage(t *testing.T) {

@@ -3,8 +3,8 @@ package validator
 import (
 	"testing"
 
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils"
+	"github.com/lonelypale/goutils/types"
 )
 
 type testObjectID struct {

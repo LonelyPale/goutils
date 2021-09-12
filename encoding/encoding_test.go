@@ -3,8 +3,8 @@ package encoding
 import (
 	"testing"
 
-	"github.com/LonelyPale/goutils/encoding/gob"
-	"github.com/LonelyPale/goutils/encoding/msgpack"
+	"github.com/lonelypale/goutils/encoding/gob"
+	"github.com/lonelypale/goutils/encoding/msgpack"
 )
 
 type userStruct struct {

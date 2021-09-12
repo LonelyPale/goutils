@@ -5,8 +5,8 @@ package mongodb
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 // Query and Projection Operators

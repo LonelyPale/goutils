@@ -3,8 +3,8 @@ package validator
 import (
 	"reflect"
 
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/ref"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/ref"
 )
 
 const (

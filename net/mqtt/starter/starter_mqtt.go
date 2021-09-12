@@ -5,7 +5,7 @@ import (
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-logger"
 
-	mqttClient "github.com/LonelyPale/goutils/net/mqtt"
+	mqttClient "github.com/lonelypale/goutils/net/mqtt"
 )
 
 // go-spring spring-boot 启动器

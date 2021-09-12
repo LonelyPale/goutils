@@ -13,7 +13,7 @@ import (
 	"github.com/kballard/go-shellquote"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/LonelyPale/goutils/validator"
+	"github.com/lonelypale/goutils/validator"
 )
 
 // 用来判断 type T 是否实现了接口 I, 用作类型断言, 如果 T 没有实现接口 I, 则编译错误.

@@ -3,7 +3,7 @@ package session
 import (
 	"sync"
 
-	"github.com/LonelyPale/goutils/random/uuid"
+	"github.com/lonelypale/goutils/random/uuid"
 )
 
 type Session interface {

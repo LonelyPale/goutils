@@ -6,14 +6,14 @@ import (
 	"github.com/go-spring/spring-gin"
 	"github.com/go-spring/spring-web"
 
-	"github.com/LonelyPale/goutils/database/redis"
-	"github.com/LonelyPale/goutils/thirdparty/gin/middleware"
-	"github.com/LonelyPale/goutils/token"
+	"github.com/lonelypale/goutils/database/redis"
+	"github.com/lonelypale/goutils/thirdparty/gin/middleware"
+	"github.com/lonelypale/goutils/token"
 )
 
 type WebTokenConfig struct {
 	Enable    bool      `value:"${web.server.token.enable:=true}"`                                    //是否启用 Token
-	SecretKey string    `value:"${web.server.token.secret_key:=github.com/LonelyPale/goutils/token}"` //签名密钥
+	SecretKey string    `value:"${web.server.token.secret_key:=github.com/lonelypale/goutils/token}"` //签名密钥
 	Expire    int       `value:"${web.server.token.expire:=86400}"`                                   //过期时间, 24小时, 单位: 秒
 	Cache     *redis.DB `autowire:"?"`                                                                //是否启用 redis 缓存
 }

@@ -1,6 +1,6 @@
 package pagination
 
-import "github.com/LonelyPale/goutils/types"
+import "github.com/lonelypale/goutils/types"
 
 type Pagination struct {
 	Current  int         `json:"current" validate:"min=1"`  //当前页数, 默认值 1

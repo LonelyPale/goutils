@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 type validate struct {

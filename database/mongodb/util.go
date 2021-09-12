@@ -4,7 +4,7 @@ import (
 	"github.com/go-spring/spring-boot"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/LonelyPale/goutils/database/mongodb/config"
+	"github.com/lonelypale/goutils/database/mongodb/config"
 )
 
 const (

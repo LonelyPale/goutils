@@ -6,8 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils/pagination"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/pagination"
+	"github.com/lonelypale/goutils/types"
 )
 
 func TestCollection_FindOrInsert(t *testing.T) {

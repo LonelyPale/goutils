@@ -7,8 +7,8 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/LonelyPale/goutils/cache"
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/cache"
+	"github.com/lonelypale/goutils/errors"
 )
 
 type Store interface {

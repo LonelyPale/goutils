@@ -8,7 +8,7 @@ import (
 
 	"github.com/mitchellh/go-ps"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 // exit app

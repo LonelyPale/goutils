@@ -1,6 +1,6 @@
 package mongodb
 
-import "github.com/LonelyPale/goutils"
+import "github.com/lonelypale/goutils"
 
 func (f Filter) TimeCondition(keys ...string) Filter {
 	for _, key := range keys {

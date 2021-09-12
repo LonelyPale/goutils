@@ -7,8 +7,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils"
+	"github.com/lonelypale/goutils/types"
 )
 
 type User struct {

@@ -3,8 +3,8 @@ package websocket
 import (
 	"fmt"
 
-	"github.com/LonelyPale/goutils/encoding/json"
-	"github.com/LonelyPale/goutils/errors/ecode"
+	"github.com/lonelypale/goutils/encoding/json"
+	"github.com/lonelypale/goutils/errors/ecode"
 )
 
 type Message struct {

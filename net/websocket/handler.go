@@ -5,9 +5,9 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/LonelyPale/goutils/encoding/json"
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/validator"
+	"github.com/lonelypale/goutils/encoding/json"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/validator"
 )
 
 func validBindFn(fnType reflect.Type) bool {

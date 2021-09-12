@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	DefaultKey = "github.com/LonelyPale/goutils/session"
+	DefaultKey = "github.com/lonelypale/goutils/session"
 )
 
 func Sessions(store Store) gin.HandlerFunc {

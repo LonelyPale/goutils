@@ -6,7 +6,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/vmihailenco/msgpack/v5"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 // Nil reply Redis returns when key does not exist.

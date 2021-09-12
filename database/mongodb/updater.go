@@ -3,7 +3,7 @@ package mongodb
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 // Field Update Operators

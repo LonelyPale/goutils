@@ -3,8 +3,8 @@ package mongodb
 import (
 	"context"
 
-	"github.com/LonelyPale/goutils/types"
-	"github.com/LonelyPale/goutils/validator"
+	"github.com/lonelypale/goutils/types"
+	"github.com/lonelypale/goutils/validator"
 )
 
 /*

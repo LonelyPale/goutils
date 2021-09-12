@@ -10,8 +10,8 @@ import (
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 
-	"github.com/LonelyPale/goutils/errors"
-	goimage "github.com/LonelyPale/goutils/image"
+	"github.com/lonelypale/goutils/errors"
+	goimage "github.com/lonelypale/goutils/image"
 )
 
 //文本：内容及坐标

@@ -9,8 +9,8 @@ import (
 	"encoding/asn1"
 	"encoding/pem"
 
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 type Type uint

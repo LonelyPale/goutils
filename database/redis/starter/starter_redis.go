@@ -4,7 +4,7 @@ import (
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-logger"
 
-	"github.com/LonelyPale/goutils/database/redis"
+	"github.com/lonelypale/goutils/database/redis"
 )
 
 // go-spring spring-boot 启动器

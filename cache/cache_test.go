@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/types"
 )
 
 type user struct {

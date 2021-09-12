@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/types"
 )
 
 type CollectionOptions = options.CollectionOptions

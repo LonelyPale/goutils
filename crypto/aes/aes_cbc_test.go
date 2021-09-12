@@ -2,7 +2,7 @@ package aes
 
 import (
 	"encoding/base64"
-	"github.com/LonelyPale/goutils/crypto"
+	"github.com/lonelypale/goutils/crypto"
 	"io/ioutil"
 	"log"
 	"testing"

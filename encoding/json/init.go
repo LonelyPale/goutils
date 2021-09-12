@@ -2,7 +2,7 @@
 
 package json
 
-import "github.com/LonelyPale/goutils/encoding/json/codec"
+import "github.com/lonelypale/goutils/encoding/json/codec"
 
 // register jsoniter custom plugins
 func init() {

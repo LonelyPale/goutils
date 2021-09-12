@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LonelyPale/goutils/crypto"
+	"github.com/lonelypale/goutils/crypto"
 )
 
 var (

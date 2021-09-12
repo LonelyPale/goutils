@@ -7,7 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/LonelyPale/goutils/database/mongodb/config"
+	"github.com/lonelypale/goutils/database/mongodb/config"
 )
 
 type ClientOptions struct {

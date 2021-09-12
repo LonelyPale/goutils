@@ -1,8 +1,8 @@
 package mongodb
 
 import (
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 func (coll *Collection) DeleteByID(i interface{}) (int64, error) {

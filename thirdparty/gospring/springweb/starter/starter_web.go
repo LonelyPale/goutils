@@ -7,8 +7,8 @@ import (
 	"github.com/go-spring/spring-web"
 	"github.com/go-spring/starter-web"
 
-	"github.com/LonelyPale/goutils"
-	"github.com/LonelyPale/goutils/thirdparty/gospring/springweb"
+	"github.com/lonelypale/goutils"
+	"github.com/lonelypale/goutils/thirdparty/gospring/springweb"
 )
 
 type WebServerConfig struct {

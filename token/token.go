@@ -6,9 +6,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/LonelyPale/goutils/database/redis"
-	"github.com/LonelyPale/goutils/errors"
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/database/redis"
+	"github.com/lonelypale/goutils/errors"
+	"github.com/lonelypale/goutils/types"
 )
 
 var _ Token = new(StandardToken)

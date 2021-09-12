@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"math/big"
 
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/types"
 )
 
 const (

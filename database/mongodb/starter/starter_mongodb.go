@@ -4,8 +4,8 @@ import (
 	"github.com/go-spring/spring-boot"
 	"github.com/go-spring/spring-logger"
 
-	"github.com/LonelyPale/goutils/database/mongodb"
-	"github.com/LonelyPale/goutils/database/mongodb/config"
+	"github.com/lonelypale/goutils/database/mongodb"
+	"github.com/lonelypale/goutils/database/mongodb/config"
 )
 
 // go-spring spring-boot 启动器

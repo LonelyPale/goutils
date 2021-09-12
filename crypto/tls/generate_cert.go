@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LonelyPale/goutils"
+	"github.com/lonelypale/goutils"
 )
 
 func publicKey(priv interface{}) interface{} {

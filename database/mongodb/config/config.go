@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/LonelyPale/goutils/config"
+	"github.com/lonelypale/goutils/config"
 )
 
 const (

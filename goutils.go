@@ -13,7 +13,7 @@ import (
 
 	"github.com/vmihailenco/msgpack/v5"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 //深拷贝

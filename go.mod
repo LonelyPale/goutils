@@ -1,4 +1,4 @@
-module github.com/LonelyPale/goutils
+module github.com/lonelypale/goutils
 
 go 1.13
 

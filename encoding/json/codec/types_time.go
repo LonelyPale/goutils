@@ -8,7 +8,7 @@ import (
 
 	"github.com/json-iterator/go"
 
-	"github.com/LonelyPale/goutils/types"
+	"github.com/lonelypale/goutils/types"
 )
 
 // RFC3339 = "2006-01-02T15:04:05Z07:00"

@@ -3,7 +3,7 @@ package mongodb
 import (
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/LonelyPale/goutils/errors"
+	"github.com/lonelypale/goutils/errors"
 )
 
 var ErrNoDocuments = mongo.ErrNoDocuments

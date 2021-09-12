@@ -6,7 +6,7 @@ import (
 
 	shell "github.com/ipfs/go-ipfs-api"
 
-	"github.com/LonelyPale/goutils/crypto/aes"
+	"github.com/lonelypale/goutils/crypto/aes"
 )
 
 type Client struct {

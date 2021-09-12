@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	SecretKey   = "github.com/LonelyPale/goutils"
+	SecretKey   = "github.com/lonelypale/goutils"
 	SessionName = "s"
 )
 
