@@ -13,9 +13,9 @@ type Client struct {
 	*shell.Shell
 }
 
-func NewClient(baseURLs ...string) *Client {
-	if len(baseURLs) > 0 && len(baseURLs[0]) > 0 {
-		return &Client{shell.NewShell(baseURLs[0])}
+func NewClient(urls ...string) *Client {
+	if len(urls) > 0 && len(urls[0]) > 0 {
+		return &Client{shell.NewShell(urls[0])}
 	} else {
 		return &Client{shell.NewLocalShell()}
 	}
