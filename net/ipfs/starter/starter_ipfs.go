@@ -10,7 +10,7 @@ import (
 // go-spring spring-boot 启动器
 func init() {
 	SpringBoot.
-		RegisterNameBeanFn("mqtt-client", func(cfg ipfs.Config) (*ipfs.Client, error) {
+		RegisterNameBeanFn("ipfs-client", func(cfg ipfs.Config) (*ipfs.Client, error) {
 			client := ipfs.NewClient(cfg.URI)
 			SpringLogger.Info("IPFS client connected successfully.")
 			return client, nil
