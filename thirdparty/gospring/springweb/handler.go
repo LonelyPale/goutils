@@ -160,7 +160,7 @@ func defaultWebInvoke(webCtx SpringWeb.WebContext, fn func(SpringWeb.WebContext)
 
 	switch len(out) {
 	case 0:
-		result = goutils.NewSuccessMessage()
+		return
 	case 1:
 		switch v := out[0].(type) {
 		case goutils.Message:
