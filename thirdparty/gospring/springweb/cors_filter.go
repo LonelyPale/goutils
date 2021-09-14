@@ -57,7 +57,7 @@ func (c *corsFilter) Invoke(ctx SpringWeb.WebContext, chain SpringWeb.FilterChai
 	ctx.Header("Access-Control-Allow-Origin", origin)
 	ctx.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	ctx.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers,Accept,Authorization,X-Requested-With")
-	ctx.Header("Access-Control-Expose-Headers", "Accept,Authorization,X-Requested-With")
+	ctx.Header("Access-Control-Expose-Headers", "Access-Control-Allow-Headers,Accept,Authorization,X-Requested-With")
 
 	//放行所有OPTIONS方法
 	if method == "OPTIONS" {
