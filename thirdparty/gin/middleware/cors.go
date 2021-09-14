@@ -46,7 +46,8 @@ func Cors(origins ...string) gin.HandlerFunc {
 
 		c.Writer.Header().Add("Access-Control-Allow-Origin", origin)
 		c.Writer.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Writer.Header().Add("Access-Control-Allow-Headers", "Content-Type,Access-Control-Allow-Headers,Content-Length,Accept,Authorization,X-Requested-With")
+		c.Writer.Header().Add("Access-Control-Allow-Headers", "Accept,Authorization,X-Requested-With")
+		c.Writer.Header().Add("Access-Control-Expose-Headers", "Accept,Authorization,X-Requested-With")
 
 		//放行所有OPTIONS方法
 		if method == "OPTIONS" {
