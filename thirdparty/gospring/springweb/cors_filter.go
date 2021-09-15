@@ -54,7 +54,8 @@ func (c *corsFilter) Invoke(ctx SpringWeb.WebContext, chain SpringWeb.FilterChai
 		ctx.Header("Access-Control-Allow-Credentials", "true")
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", origin)
+	//ctx.Header("Access-Control-Allow-Origin", origin)
+	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	ctx.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers,Content-Type,Content-Length,Accept,Authorization,X-Requested-With")
 	ctx.Header("Access-Control-Expose-Headers", "Accept,Authorization,X-Requested-With")
