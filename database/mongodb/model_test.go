@@ -34,11 +34,8 @@ type Sub struct {
 	//TestTime types.Time `bson:"-"`
 }
 
-func init() {
-	RegisterModel((*User)(nil), "test")
-}
-
 func TestModel_Create(t *testing.T) {
+	RegisterModel((*User)(nil), "test")
 	coll := client.Database("test").Collection("test")
 
 	user := &User{
@@ -67,6 +64,7 @@ func TestModel_Create(t *testing.T) {
 }
 
 func TestModel_Create2(t *testing.T) {
+	RegisterModel((*User)(nil), "test")
 	coll := client.Database("test").Collection("test")
 
 	user := &User{
@@ -109,6 +107,7 @@ func TestModel_Create2(t *testing.T) {
 }
 
 func TestModel_Update(t *testing.T) {
+	RegisterModel((*User)(nil), "test")
 	coll := client.Database("test").Collection("test")
 
 	id, err := types.ObjectIDFromHex("6058376fd7889c8703058df4")
@@ -150,6 +149,7 @@ func TestModel_Find(t *testing.T) {
 	//}
 	//t.Log(b)
 
+	RegisterModel((*User)(nil), "test")
 	coll := client.Database("test").Collection("test")
 
 	id, err := types.ObjectIDFromHex("6058481014eee1d530389413")

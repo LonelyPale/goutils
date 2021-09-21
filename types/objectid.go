@@ -8,6 +8,8 @@ import (
 	"github.com/lonelypale/goutils/errors"
 )
 
+const ObjectIDPkgPathName = "go.mongodb.org/mongo-driver/bson/primitive.ObjectID"
+
 type ObjectID = primitive.ObjectID
 
 var NilObjectID = primitive.NilObjectID

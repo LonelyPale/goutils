@@ -42,6 +42,7 @@ type ModelType interface {
 	Field(jsonTagName string) FieldType
 	Kind() reflect.Kind
 	Type() reflect.Type
+	String() string
 }
 
 type modelType struct {
@@ -109,6 +110,11 @@ func (mt *modelType) Type() reflect.Type {
 	return mt.typ
 }
 
+func (mt *modelType) String() string {
+	typed := mt.Type()
+	return typed.PkgPath() + "." + typed.Name()
+}
+
 type FieldType interface {
 	Field() string
 	Bson() string
@@ -116,6 +122,7 @@ type FieldType interface {
 	ValidateTag() ValidateTag
 	Kind() reflect.Kind
 	Type() reflect.Type
+	String() string
 }
 
 type fieldType struct {
@@ -163,6 +170,11 @@ func (ft *fieldType) Kind() reflect.Kind {
 
 func (ft *fieldType) Type() reflect.Type {
 	return ft.typ
+}
+
+func (ft *fieldType) String() string {
+	typed := ft.Type()
+	return typed.PkgPath() + "." + typed.Name()
 }
 
 type ValidateTag interface {

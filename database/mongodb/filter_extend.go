@@ -2,6 +2,7 @@ package mongodb
 
 import "github.com/lonelypale/goutils"
 
+// todo
 func (f Filter) TimeCondition(keys ...string) Filter {
 	for _, key := range keys {
 		val, ok := f[key]

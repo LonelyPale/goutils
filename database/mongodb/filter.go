@@ -47,13 +47,16 @@ func NewFilterFromMap(m map[string]interface{}, mtype ModelType) Filter {
 		if key == IDJson {
 			filter.ID(val)
 		} else {
-			filter.Set(ftype.Bson(), val)
+			if ftype.String() == types.ObjectIDPkgPathName {
+				filter.ObjectID(ftype.Bson(), val)
+			} else {
+				filter.Set(ftype.Bson(), val)
+			}
 		}
-
-		//处理model默认字段
-		filter.TimeCondition(ModelFields.CreateTime, ModelFields.UpdateTime)
 	}
 
+	//处理model默认字段
+	filter.TimeCondition(ModelFields.CreateTime, ModelFields.UpdateTime)
 	return filter
 }
 
@@ -230,6 +233,15 @@ func (f Filter) ID(value interface{}) Filter {
 		panic(err)
 	}
 	f[IDBson] = id
+	return f
+}
+
+func (f Filter) ObjectID(key string, value interface{}) Filter {
+	id, err := types.ObjectIDFrom(value)
+	if err != nil {
+		panic(err)
+	}
+	f[key] = id
 	return f
 }
 
