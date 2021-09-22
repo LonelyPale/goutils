@@ -21,16 +21,22 @@ func Token(tkn token.Token, opt *token.Options) gin.HandlerFunc {
 	tokenType := ref.PrimitiveType(reflect.TypeOf(tkn))
 
 	return func(c *gin.Context) {
+		var strToken string
+
 		authHeader := c.Request.Header.Get("Authorization")
 		if authHeader == "" {
-			errorHandler(c, http.StatusUnauthorized, errors.New("no Authorization"))
-			return
-		}
-
-		parts := strings.SplitN(authHeader, " ", 2)
-		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			errorHandler(c, http.StatusUnauthorized, errors.New("no Bearer"))
-			return
+			strToken = c.Query("token")
+			if strToken == "" {
+				errorHandler(c, http.StatusUnauthorized, errors.New("no Authorization"))
+				return
+			}
+		} else {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if !(len(parts) == 2 && parts[0] == "Bearer") {
+				errorHandler(c, http.StatusUnauthorized, errors.New("no Bearer"))
+				return
+			}
+			strToken = parts[1]
 		}
 
 		reqToken, ok := reflect.New(tokenType).Interface().(token.Token)
@@ -39,7 +45,7 @@ func Token(tkn token.Token, opt *token.Options) gin.HandlerFunc {
 			return
 		}
 
-		jwtToken, err := token.ParseToken(parts[1], opt.SecretKey, reqToken)
+		jwtToken, err := token.ParseToken(strToken, opt.SecretKey, reqToken)
 		if err != nil {
 			errorHandler(c, http.StatusUnauthorized, err)
 			return
