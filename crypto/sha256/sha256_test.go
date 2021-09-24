@@ -50,6 +50,40 @@ func TestBase64(t *testing.T) {
 	t.Log(hashed)
 }
 
+func TestHashReader(t *testing.T) {
+	go func() {
+		for {
+			traceMemStats(t)
+			time.Sleep(3 * time.Second)
+		}
+	}()
+
+	go func() {
+		startTime := time.Now()
+		file, err := os.Open("/Users/wyb/backup/software/os/ubuntu-20.04.2-live-server-amd64.iso")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		t.Log("Open duration:", time.Since(startTime))
+
+		hash, err := HashReader(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log("sha256:", hash.Hex(), "duration:", time.Since(startTime))
+
+		//复原文件指针位置
+		ret, err := file.Seek(0, io.SeekStart)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log("Seek:", ret, "duration:", time.Since(startTime))
+	}()
+
+	select {}
+}
+
 func TestFile1(t *testing.T) {
 	go func() {
 		for {
