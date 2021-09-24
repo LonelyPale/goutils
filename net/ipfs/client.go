@@ -2,10 +2,12 @@ package ipfs
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 
 	shell "github.com/ipfs/go-ipfs-api"
 
+	"github.com/lonelypale/goutils/crypto/aead"
 	"github.com/lonelypale/goutils/crypto/aes"
 )
 
@@ -21,8 +23,26 @@ func NewClient(urls ...string) *Client {
 	}
 }
 
+func (c *Client) AddEncrypt(src io.Reader, cfg aead.Config) (string, error) {
+	encrypted, err := aead.EncryptReader(src, cfg)
+	if err != nil {
+		return "", err
+	}
+
+	return c.Add(encrypted)
+}
+
+func (c *Client) CatDecrypt(hash string, cfg aead.Config) (io.Reader, error) {
+	reader, err := c.Cat(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return aead.DecryptReader(reader, cfg)
+}
+
 // 用 aes256 cbc 加密后存储到 ipfs 上，返回 hash
-func (c *Client) AddEncrypt(plain []byte, key []byte) (string, error) {
+func (c *Client) AddEncryptBuffer(plain []byte, key []byte) (string, error) {
 	bs, err := aes.Encrypt(plain, key)
 	if err != nil {
 		return "", err
@@ -32,7 +52,7 @@ func (c *Client) AddEncrypt(plain []byte, key []byte) (string, error) {
 }
 
 // 根据 hash，从 ipfs 上取出后用 aes256 cbc 解密
-func (c *Client) CatDecrypt(hash string, key []byte) ([]byte, error) {
+func (c *Client) CatDecryptBuffer(hash string, key []byte) ([]byte, error) {
 	reader, err := c.Cat(hash)
 	if err != nil {
 		return nil, err

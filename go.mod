@@ -29,6 +29,7 @@ require (
 	github.com/ipfs/go-ipfs-api v0.2.0
 	github.com/json-iterator/go v1.1.9
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+	github.com/minio/sio v0.3.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/panjf2000/ants/v2 v2.4.3

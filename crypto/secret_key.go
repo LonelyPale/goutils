@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultSecretKeyLength = 32 // 32byte = 256bit
+	DefaultSecretKeyLength = 32 // 32byte = 256bit = 64hex_string
 	DefaultSaltLength      = 32
 )
 

@@ -1,9 +1,21 @@
 package crypto
 
 import (
+	"crypto/rand"
 	"testing"
 	"time"
 )
+
+func Test(t *testing.T) {
+	iv := make([]byte, 12)
+	for i := 0; i < 100; i++ {
+		_, err := rand.Read(iv)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(iv)
+	}
+}
 
 func TestGenerateSecretKey(t *testing.T) {
 	for i := 0; i < 10; i++ {
