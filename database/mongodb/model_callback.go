@@ -33,6 +33,18 @@ func (Model) BeforeInsert(ctx context.Context, documents []interface{}, opts int
 			vnow := reflect.ValueOf(now)
 			vCreateTime.Set(vnow)
 		}
+
+		// 设置更新时间
+		vUpdateTime := vDoc.FieldByName(UpdateTimeField)
+		if vUpdateTime.CanSet() && vUpdateTime.Type().String() == "time.Time" { //默认时间格式
+			now := time.Now()
+			vnow := reflect.ValueOf(now)
+			vUpdateTime.Set(vnow)
+		} else if vUpdateTime.CanSet() && vUpdateTime.Type().String() == "types.Time" { //自定义时间格式
+			now := types.Now()
+			vnow := reflect.ValueOf(now)
+			vUpdateTime.Set(vnow)
+		}
 	}
 
 	return nil

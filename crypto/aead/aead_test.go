@@ -2,6 +2,7 @@ package aead
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -79,4 +80,17 @@ func TestAEAD(t *testing.T) {
 	t.Log("Copy duration:", time.Since(startTime), num)
 
 	time.Sleep(time.Second * 10)
+}
+
+func TestDeriveSecretKey(t *testing.T) {
+	keyStr := "67a1b2010bf968076bb5f5fd01d150b5fe544aba54199df0e80576048a86e1e9"
+	secret := []byte{1, 2, 3}
+	salt := []byte{3, 2, 1}
+	key, err := deriveSecretKey(secret, salt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hexStr := hex.EncodeToString(key)
+	t.Log(hexStr, hexStr == keyStr)
 }

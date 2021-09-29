@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	keySize = 32
+	KeySize = 32
 )
 
 type Config struct {
@@ -35,7 +35,7 @@ func DecryptReader(src io.Reader, cfg Config) (io.Reader, error) {
 
 func deriveSecretKey(secret, salt []byte) ([]byte, error) {
 	// derive an encryption key from the master key and the nonce
-	var key [keySize]byte
+	var key [KeySize]byte
 	kdf := hkdf.New(sha256.New, secret, salt, nil)
 	if _, err := io.ReadFull(kdf, key[:]); err != nil {
 		return nil, err

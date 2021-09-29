@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/lonelypale/goutils/crypto"
+	"github.com/lonelypale/goutils/crypto/aead"
+	"github.com/lonelypale/goutils/random"
 )
 
 var (
@@ -67,19 +69,19 @@ func TestCat(t *testing.T) {
 	t.Log(string(body))
 }
 
-func TestEncryptDecrypt(t *testing.T) {
+func TestEncryptDecryptBuffer(t *testing.T) {
 	key, err := crypto.GenerateSecretKey()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := client.AddEncrypt([]byte("你好，中国！"), key)
+	hash, err := client.AddEncryptBuffer([]byte("你好，中国！"), key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(hash)
 
-	bs, err := client.CatDecrypt(hash, key)
+	bs, err := client.CatDecryptBuffer(hash, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,14 +103,14 @@ func TestBigFile(t *testing.T) {
 	}
 
 	t1 = time.Now()
-	hash, err := client.AddEncrypt(bs, key)
+	hash, err := client.AddEncryptBuffer(bs, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(hash, time.Since(t1))
 
 	t1 = time.Now()
-	bs2, err := client.CatDecrypt(hash, key)
+	bs2, err := client.CatDecryptBuffer(hash, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,4 +121,38 @@ func TestBigFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(time.Since(t1))
+}
+
+func TestEncryptDecrypt(t *testing.T) {
+	secret, err := random.Random(aead.KeySize)
+	if err != nil {
+		t.Fatal(err)
+	}
+	salt, err := random.Random(aead.KeySize)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg := aead.Config{
+		Secret: secret,
+		Salt:   salt,
+	}
+
+	content := "你好，中国！"
+	hash, err := client.AddEncrypt(bytes.NewBufferString(content), cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(hash)
+
+	reader, err := client.CatDecrypt(hash, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bs, err := ioutil.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(string(bs))
 }
