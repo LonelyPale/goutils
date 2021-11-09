@@ -33,9 +33,17 @@ func TestEventBus(t *testing.T) {
 		printEvent(event)
 	})
 
+	testBus.Subscribe("type3", func(event Event) {
+		fmt.Println("==>", event.Type)
+	})
+
 	go publisTo("type1", "Hi topic 1")
 	go publisTo("type2", "Welcome to topic 2")
 	go publisTo("type3", "3333")
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(3 * time.Second)
+
+	fmt.Println("event close: 1")
+	testBus.Close()
+	fmt.Println("event close: 2")
 }

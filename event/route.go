@@ -48,10 +48,10 @@ func (r *route) close() {
 	default:
 		close(r.quit)
 		r.RLock()
+		defer r.RUnlock()
 		for e := r.tokens.Front(); e != nil; e = e.Next() {
 			e.Value.(*Token).Close()
 		}
-		r.RUnlock()
 	}
 }
 
@@ -79,13 +79,12 @@ func (r *route) flowComplete() {
 }
 
 func (r *route) addToken(callback Handler) *Token {
-	r.Lock()
-	defer r.Unlock()
-
 	select {
 	case <-r.quit:
 		return nil
 	default:
+		r.Lock()
+		defer r.Unlock()
 		token := newToken(callback, r.delTokenChan)
 		r.tokens.PushBack(token)
 		return token
@@ -120,9 +119,9 @@ func (r *route) publish(event *Event) {
 	case <-r.quit:
 	default:
 		r.RLock()
+		defer r.RUnlock()
 		for e := r.tokens.Front(); e != nil; e = e.Next() {
 			e.Value.(*Token).publish(event)
 		}
-		r.RUnlock()
 	}
 }

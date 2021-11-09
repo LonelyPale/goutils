@@ -38,10 +38,10 @@ func (r *router) close() {
 	default:
 		close(r.quit)
 		r.RLock()
+		defer r.RUnlock()
 		for e := r.routes.Front(); e != nil; e = e.Next() {
 			e.Value.(*route).close()
 		}
-		r.RUnlock()
 	}
 }
 
@@ -68,13 +68,12 @@ func (r *router) flowComplete() {
 }
 
 func (r *router) addRoute(topic string, callback Handler) *Token {
-	r.Lock()
-	defer r.Unlock()
-
 	select {
 	case <-r.quit:
 		return nil
 	default:
+		r.Lock()
+		defer r.Unlock()
 		for e := r.routes.Front(); e != nil; e = e.Next() {
 			if e.Value.(*route).topic == topic {
 				return e.Value.(*route).addToken(callback)
@@ -115,6 +114,7 @@ func (r *router) publish(event *Event) {
 	case <-r.quit:
 	default:
 		r.RLock()
+		defer r.RUnlock()
 		if r.filter != nil {
 			for e := r.routes.Front(); e != nil; e = e.Next() {
 				if r.filter(event.Type, e.Value.(*route).topic) {
@@ -125,11 +125,9 @@ func (r *router) publish(event *Event) {
 			for e := r.routes.Front(); e != nil; e = e.Next() {
 				if e.Value.(*route).topic == event.Type {
 					e.Value.(*route).publish(event)
-					return
 				}
 			}
 		}
-		r.RUnlock()
 	}
 }
 
@@ -138,6 +136,7 @@ func (r *router) unsubscribe(topics ...string) {
 	case <-r.quit:
 	default:
 		r.RLock()
+		defer r.RUnlock()
 		for _, topic := range topics {
 			for e := r.routes.Front(); e != nil; e = e.Next() {
 				if e.Value.(*route).topic == topic {
@@ -146,6 +145,5 @@ func (r *router) unsubscribe(topics ...string) {
 				}
 			}
 		}
-		r.RUnlock()
 	}
 }
