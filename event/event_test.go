@@ -34,7 +34,7 @@ func TestEventBus(t *testing.T) {
 	})
 
 	testBus.Subscribe("type3", func(event Event) {
-		fmt.Println("==>", event.Type)
+		panic("err: test")
 	})
 
 	go publisTo("type1", "Hi topic 1")

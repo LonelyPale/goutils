@@ -3,7 +3,6 @@ package event
 import (
 	"sync"
 
-	"github.com/lonelypale/goutils/errors"
 	"github.com/lonelypale/goutils/types"
 )
 
@@ -64,12 +63,14 @@ func (t *Token) flowComplete() {
 	}
 }
 
+//todo: 待完善
 func (t *Token) Error() error {
 	t.errMu.RLock()
 	defer t.errMu.RUnlock()
 	return t.err
 }
 
+//todo: 待完善
 func (t *Token) setError(e error) {
 	t.errMu.Lock()
 	defer t.errMu.Unlock()
@@ -80,15 +81,18 @@ func (t *Token) setError(e error) {
 //处理事件
 func (t *Token) process() {
 	defer t.flowComplete()
-	defer func() {
-		if r := recover(); r != nil {
-			t.setError(errors.Error(r))
-			//debug.PrintStack()
-		}
-	}()
 
 	for event := range t.eventChan {
-		t.callback(*event)
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					DefaultLogger.Error(r)
+					//t.setError(errors.Error(r))
+					//debug.PrintStack()
+				}
+			}()
+			t.callback(*event)
+		}()
 	}
 }
 
