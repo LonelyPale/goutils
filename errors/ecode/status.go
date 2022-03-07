@@ -19,16 +19,16 @@ func StatusText(code int) string {
 	return statusText[code]
 }
 
-// Codes ecode error interface which has a code & message.
+// ErrorCode Codes ecode error interface which has a code & message.
 type ErrorCode interface {
-	// sometimes Error return Code in string form
+	// Error sometimes Error return Code in string form
 	// NOTE: don't use Error in monitor report even it also work for now
 	Error() string
 	// Code get error code.
 	Code() int
 	// Message get code message.
 	Message() string
-	//Detail get error detail,it may be nil.
+	// Details Detail get error detail,it may be nil.
 	Details() []interface{}
 }
 
