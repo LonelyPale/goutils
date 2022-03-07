@@ -14,7 +14,13 @@ func Cors(origins ...string) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		method := c.Request.Method
+		// debug
+		//fmt.Println()
+		//fmt.Println("***** ***** ***** ***** *****")
+		//for key, val := range c.Request.Header {
+		//	fmt.Println(key, val)
+		//}
+		//fmt.Println("***** ***** ***** ***** *****")
 
 		if len(origin) == 0 {
 			referer := c.GetHeader("Referer")
@@ -30,12 +36,10 @@ func Cors(origins ...string) gin.HandlerFunc {
 			}
 		}
 
-		//fmt.Println()
-		//fmt.Println("***** ***** ***** ***** *****")
-		//for key, val := range c.Request.Header {
-		//	fmt.Println(key, val)
-		//}
-		//fmt.Println("***** ***** ***** ***** *****")
+		c.Writer.Header().Add("Access-Control-Allow-Origin", origin)
+		c.Writer.Header().Add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+		c.Writer.Header().Add("Access-Control-Allow-Headers", "Content-Type,Accept,Authorization,X-Requested-With")
+		c.Writer.Header().Add("Access-Control-Expose-Headers", "Accept,Authorization,X-Requested-With")
 
 		//过滤 nginx 等服务器转发请求时，也会配置 Access-Control-Allow-Credentials 的情况，
 		//保证最终 Response 的 Headers 中只能有一个 Access-Control-Allow-Credentials 出现，
@@ -44,15 +48,9 @@ func Cors(origins ...string) gin.HandlerFunc {
 			c.Writer.Header().Add("Access-Control-Allow-Credentials", "true")
 		}
 
-		c.Writer.Header().Add("Access-Control-Allow-Origin", origin)
-		c.Writer.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Writer.Header().Add("Access-Control-Allow-Headers", "Content-Type,Accept,Authorization,X-Requested-With")
-		c.Writer.Header().Add("Access-Control-Expose-Headers", "Accept,Authorization,X-Requested-With")
-
 		//放行所有OPTIONS方法
-		if method == "OPTIONS" {
-			c.Status(http.StatusOK)
-			c.Abort()
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusOK)
 			return
 		}
 
