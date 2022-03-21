@@ -32,8 +32,26 @@ func validBindFn(fnType reflect.Type) bool {
 	return true
 }
 
-// BIND 转换成 BIND 形式的 Web 处理接口
-func BIND(fn interface{}, requestHandlers []Handler, responseHandlers []Handler) gin.HandlerFunc {
+func Bind(fn interface{}) gin.HandlerFunc {
+	return NewBindHandler(fn).Invoke
+}
+
+func BindHandler(fn interface{}, requestFilters []Filter, responseFilters []Filter) gin.HandlerFunc {
+	return NewBindHandler(fn).AddRequestFilter(requestFilters...).AddResponseFilter(responseFilters...).Invoke
+}
+
+// bindHandler BIND 形式的 Web 处理接口
+type bindHandler struct {
+	fn              interface{}
+	fnType          reflect.Type
+	fnValue         reflect.Value
+	bindParam       []Param
+	requestFilters  []Filter
+	responseFilters []Filter
+}
+
+// NewBindHandler 转换成 NewBindHandler 形式的 Web 处理接口
+func NewBindHandler(fn interface{}) *bindHandler {
 	if fnType := reflect.TypeOf(fn); validBindFn(fnType) {
 		bindParam := make([]Param, fnType.NumIn())
 		for n := 0; n < fnType.NumIn(); n++ {
@@ -41,27 +59,33 @@ func BIND(fn interface{}, requestHandlers []Handler, responseHandlers []Handler)
 		}
 
 		binder := &bindHandler{
-			fn:               fn,
-			fnType:           fnType,
-			fnValue:          reflect.ValueOf(fn),
-			bindParam:        bindParam,
-			requestHandlers:  requestHandlers,
-			responseHandlers: responseHandlers,
+			fn:              fn,
+			fnType:          fnType,
+			fnValue:         reflect.ValueOf(fn),
+			bindParam:       bindParam,
+			requestFilters:  make([]Filter, 0),
+			responseFilters: make([]Filter, 0),
 		}
-		return binder.Invoke
+		return binder
 	}
 
 	panic(errors.New("fn should be func(*gin.Context、*struct{`json`}、*struct{`form`}、*struct{`uri`}、*struct{`query`}、*struct{`header`}、*struct})anything"))
 }
 
-// bindHandler BIND 形式的 Web 处理接口
-type bindHandler struct {
-	fn               interface{}
-	fnType           reflect.Type
-	fnValue          reflect.Value
-	bindParam        []Param
-	requestHandlers  []Handler
-	responseHandlers []Handler
+func (b *bindHandler) AddRequestFilter(requestFilters ...Filter) *bindHandler {
+	if b.requestFilters == nil {
+		b.requestFilters = make([]Filter, 0)
+	}
+	b.requestFilters = append(b.requestFilters, requestFilters...)
+	return b
+}
+
+func (b *bindHandler) AddResponseFilter(responseFilters ...Filter) *bindHandler {
+	if b.responseFilters == nil {
+		b.responseFilters = make([]Filter, 0)
+	}
+	b.responseFilters = append(b.responseFilters, responseFilters...)
+	return b
 }
 
 func (b *bindHandler) Invoke(ctx *gin.Context) {
@@ -124,13 +148,13 @@ func (b *bindHandler) call(ctx *gin.Context) []interface{} {
 
 	//处理 RequestHandler 回调
 	params := make([]interface{}, len(in))
-	if len(b.requestHandlers) > 0 {
+	if len(b.requestFilters) > 0 {
 		for i, v := range in {
 			params[i] = v.Interface()
 		}
 	}
 
-	for _, reqHander := range b.requestHandlers {
+	for _, reqHander := range b.requestFilters {
 		if reqHander == nil {
 			continue
 		}
@@ -141,7 +165,7 @@ func (b *bindHandler) call(ctx *gin.Context) []interface{} {
 		}
 	}
 
-	if len(b.requestHandlers) > 0 {
+	if len(b.requestFilters) > 0 {
 		for i, p := range params {
 			in[i] = reflect.ValueOf(p)
 		}
@@ -178,7 +202,7 @@ func defaultWebInvoke(ctx *gin.Context, bind *bindHandler, fn func(*gin.Context)
 	out := fn(ctx)
 
 	//处理 ResponseHandler 回调
-	for _, respHandler := range bind.responseHandlers {
+	for _, respHandler := range bind.responseFilters {
 		if respHandler == nil {
 			continue
 		}

@@ -30,6 +30,13 @@ func NewServer(opts ServerOptions) *Server {
 	engine := gin.Default()
 	engine.Use(middleware.Cors())
 
+	if opts.Addr == "" {
+		if opts.TLS {
+			opts.Addr = "0.0.0.0:443"
+		} else {
+			opts.Addr = "0.0.0.0:80"
+		}
+	}
 	return &Server{opts: opts, engine: engine}
 }
 

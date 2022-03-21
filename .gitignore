@@ -26,3 +26,6 @@
 
 ### goutils ###
 mongodb.conf.test.toml
+
+# test data
+testdata

@@ -1,35 +1,37 @@
 package http
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
-var _ Handler = new(HandlerFunc)
+var _ Filter = new(FilterFunc)
 
-type Handler interface {
-	Invoke(ctx *gin.Context, objs []interface{}) ([]interface{}, error)
+type Filter interface {
+	Invoke(ctx *gin.Context, args []interface{}) ([]interface{}, error)
 }
 
-type HandlerFunc func(ctx *gin.Context, objs []interface{}) ([]interface{}, error)
+type FilterFunc func(ctx *gin.Context, args []interface{}) ([]interface{}, error)
 
-func (f HandlerFunc) Invoke(ctx *gin.Context, objs []interface{}) ([]interface{}, error) {
-	return f(ctx, objs)
+func (f FilterFunc) Invoke(ctx *gin.Context, args []interface{}) ([]interface{}, error) {
+	return f(ctx, args)
 }
 
-type handler struct {
-	requestHandlers  []Handler
-	responseHandlers []Handler
+type Handler struct {
+	requestFilters  []Filter
+	responseFilters []Filter
 }
 
-func NewHandler(requestHandlers []Handler, responseHandlers []Handler) *handler {
-	return &handler{
-		requestHandlers:  requestHandlers,
-		responseHandlers: responseHandlers,
+func NewHandler(requestFilters []Filter, responseFilters []Filter) *Handler {
+	return &Handler{
+		requestFilters:  append([]Filter{}, requestFilters...),
+		responseFilters: append([]Filter{}, responseFilters...),
 	}
 }
 
-func (h *handler) BIND(fn interface{}, requestHandlers []Handler, responseHandlers []Handler) gin.HandlerFunc {
-	req := append([]Handler{}, h.requestHandlers...)
-	req = append(req, requestHandlers...)
-	resp := append([]Handler{}, h.requestHandlers...)
-	resp = append(resp, responseHandlers...)
-	return BIND(fn, req, resp)
+func (h *Handler) BindHandler(fn interface{}) *bindHandler {
+	return NewBindHandler(fn).AddRequestFilter(h.requestFilters...).AddResponseFilter(h.responseFilters...)
+}
+
+func (h *Handler) Bind(fn interface{}) gin.HandlerFunc {
+	return NewBindHandler(fn).AddRequestFilter(h.requestFilters...).AddResponseFilter(h.responseFilters...).Invoke
 }
