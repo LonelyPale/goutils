@@ -4,17 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ Filter = new(FilterFunc)
-
-type Filter interface {
-	Invoke(ctx *gin.Context, args []interface{}) ([]interface{}, error)
-}
-
-type FilterFunc func(ctx *gin.Context, args []interface{}) ([]interface{}, error)
-
-func (f FilterFunc) Invoke(ctx *gin.Context, args []interface{}) ([]interface{}, error) {
-	return f(ctx, args)
-}
+type Filter func(ctx *gin.Context, args []interface{}) ([]interface{}, error)
 
 type Handler struct {
 	requestFilters  []Filter

@@ -7,7 +7,7 @@ import (
 )
 
 // ginContextType *gin.Context 的反射类型
-var ginContextType = reflect.TypeOf((*gin.Context)(nil)).Elem()
+var ginContextType = reflect.TypeOf((*gin.Context)(nil))
 
 type ParamType uint
 

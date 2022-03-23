@@ -14,7 +14,7 @@ func NewRouter(requestFilters []Filter, responseFilters []Filter) *Router {
 
 func (r *Router) Setup(engine *gin.Engine) {
 	g := engine.Group("/")
-	g.Any("ping", r.handler.Bind(ping))
+	g.GET("ping", r.handler.Bind(ping))
 }
 
 func ping(_ *gin.Context) (string, error) {

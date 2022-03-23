@@ -159,7 +159,7 @@ func (b *bindHandler) call(ctx *gin.Context) []interface{} {
 			continue
 		}
 		var err error
-		params, err = reqHander.Invoke(ctx, params)
+		params, err = reqHander(ctx, params)
 		if err != nil {
 			log.Error(err)
 		}
@@ -207,7 +207,7 @@ func defaultWebInvoke(ctx *gin.Context, bind *bindHandler, fn func(*gin.Context)
 			continue
 		}
 		var err error
-		out, err = respHandler.Invoke(ctx, out)
+		out, err = respHandler(ctx, out)
 		if err != nil {
 			log.Error(err)
 		}
