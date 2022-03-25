@@ -6,7 +6,7 @@ import (
 	"github.com/lonelypale/goutils/errors"
 )
 
-//去掉指针的包装，以获得原始类型的值
+// Primitive 去掉指针的包装，以获得原始类型的值
 func Primitive(i interface{}) interface{} {
 	if i == nil {
 		return nil
