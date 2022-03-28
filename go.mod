@@ -29,6 +29,8 @@ require (
 	github.com/ipfs/go-ipfs-api v0.2.0
 	github.com/json-iterator/go v1.1.9
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/minio/sio v0.3.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
