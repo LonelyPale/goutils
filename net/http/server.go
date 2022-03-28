@@ -17,23 +17,22 @@ type SetupRouter interface {
 	Setup(engine *gin.Engine)
 }
 
-type ServerOptions struct {
-	// in the form "host:port". If empty, ":http" (port 80) or ":https" (port 443) is used.
-	Debug    bool
-	Addr     string
-	TLS      bool
-	CertFile string
-	KeyFile  string
+type ServerConfig struct {
+	Debug    bool   `toml:"debug"`
+	Addr     string `toml:"addr"` // in the form "host:port". If empty, ":http" (port 80) or ":https" (port 443) is used.
+	TLS      bool   `toml:"tls"`
+	CertFile string `toml:"cert_file"`
+	KeyFile  string `toml:"key_file"`
 }
 
 type Server struct {
-	opts       ServerOptions
+	config     *ServerConfig
 	httpServer *http.Server
 	ginEngine  *gin.Engine
 }
 
-func NewServer(opts ServerOptions) *Server {
-	if opts.Debug {
+func NewServer(conf *ServerConfig) *Server {
+	if conf.Debug {
 		gin.SetMode(gin.DebugMode) // 调试模式
 	} else {
 		gin.SetMode(gin.ReleaseMode) // 发布模式
@@ -45,19 +44,19 @@ func NewServer(opts ServerOptions) *Server {
 	engine := gin.Default()
 	engine.Use(middleware.Cors())
 
-	if opts.Addr == "" {
-		if opts.TLS {
-			opts.Addr = "0.0.0.0:443"
+	if conf.Addr == "" {
+		if conf.TLS {
+			conf.Addr = "0.0.0.0:443"
 		} else {
-			opts.Addr = "0.0.0.0:80"
+			conf.Addr = "0.0.0.0:80"
 		}
 	}
 
 	return &Server{
-		opts:      opts,
+		config:    conf,
 		ginEngine: engine,
 		httpServer: &http.Server{
-			Addr:         opts.Addr,
+			Addr:         conf.Addr,
 			Handler:      engine,
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
@@ -68,15 +67,15 @@ func NewServer(opts ServerOptions) *Server {
 
 // Start 启动 Web 容器，阻塞
 func (s *Server) Start() {
-	log.Infof("http server started on %s", s.opts.Addr)
+	log.Infof("http server started on %s", s.config.Addr)
 
 	var err error
-	if s.opts.TLS {
-		err = s.httpServer.ListenAndServeTLS(s.opts.CertFile, s.opts.KeyFile) // http package
-		//err = s.ginEngine.RunTLS(s.opts.Addr, s.opts.CertFile, s.opts.KeyFile) // gin package
+	if s.config.TLS {
+		err = s.httpServer.ListenAndServeTLS(s.config.CertFile, s.config.KeyFile) // http package
+		//err = s.ginEngine.RunTLS(s.config.Addr, s.config.CertFile, s.config.KeyFile) // gin package
 	} else {
 		err = s.httpServer.ListenAndServe() // http package
-		//err = s.ginEngine.Run(s.opts.Addr) // gin package
+		//err = s.ginEngine.Run(s.config.Addr) // gin package
 	}
 
 	if err != nil && err != http.ErrServerClosed {
@@ -86,7 +85,7 @@ func (s *Server) Start() {
 
 // Stop 停止 Web 容器，阻塞
 func (s *Server) Stop() {
-	log.Infof("http server stopped on %s", s.opts.Addr)
+	log.Infof("http server stopped on %s", s.config.Addr)
 
 	if err := s.httpServer.Shutdown(context.TODO()); err != nil {
 		log.WithField("err", err).Error("failed to http server[Stop]")

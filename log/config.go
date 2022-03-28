@@ -14,7 +14,7 @@ type Config struct {
 	MaxAge     string `toml:"max_age"`
 }
 
-var defaultConfig = Config{
+var defaultConfig = &Config{
 	LogPath:    "logs",
 	LogLevel:   "debug",
 	RotateTime: "24h",  //每天一个文件

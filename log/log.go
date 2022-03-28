@@ -13,7 +13,7 @@ import (
 )
 
 // InitLogFile init logrus with hook
-func InitLogFile(module string, cfg Config) error {
+func InitLogFile(module string, cfg *Config) error {
 	rotateTime, maxAge, err := cfg.Durations()
 	if err != nil {
 		return err
