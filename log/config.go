@@ -52,3 +52,11 @@ func (c *Config) Level() (logrus.Level, error) {
 
 	return logrus.ParseLevel(c.LogLevel)
 }
+
+func (c *Config) Path() string {
+	if c.LogPath == "" {
+		c.LogPath = defaultConfig.LogPath
+	}
+
+	return c.LogPath
+}

@@ -19,11 +19,12 @@ func InitLogFile(module string, cfg *Config) error {
 		return err
 	}
 
-	if err := clearLockFiles(cfg.LogPath); err != nil {
+	logPath := cfg.Path()
+	if err := clearLockFiles(logPath); err != nil {
 		return err
 	}
 
-	logrus.AddHook(rotatelog.NewRotateHook(cfg.LogPath, module, rotateTime, maxAge))
+	logrus.AddHook(rotatelog.NewRotateHook(logPath, module, rotateTime, maxAge))
 	logrus.SetOutput(ioutil.Discard) //控制台不输出
 
 	logLevel, err := cfg.Level()
@@ -32,7 +33,7 @@ func InitLogFile(module string, cfg *Config) error {
 	}
 
 	logrus.SetLevel(logLevel)
-	fmt.Printf("all logs are output in the %s directory, log level:%s\n", cfg.LogPath, cfg.LogLevel)
+	fmt.Printf("all logs are output in the %s directory, log level:%s\n", logPath, cfg.LogLevel)
 	return nil
 }
 
