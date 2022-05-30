@@ -3,6 +3,7 @@ package mongodb
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"reflect"
 	"strings"
 	"time"
@@ -328,12 +329,14 @@ func (coll *Collection) CreateUniqueIndex(keys ...string) ([]string, error) {
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 
 	// 复合索引
-	keysDoc := D{}
+	keysDoc := bson.D{}
 	for _, key := range keys {
 		if strings.HasPrefix(key, "-") { //降序
-			keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), int32(-1))
+			//keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), int32(-1))
+			keysDoc = append(keysDoc, bson.E{Key: strings.TrimLeft(key, "-"), Value: int32(-1)})
 		} else { //升序
-			keysDoc = keysDoc.Append(key, int32(1))
+			//keysDoc = keysDoc.Append(key, int32(1))
+			keysDoc = append(keysDoc, bson.E{Key: key, Value: int32(1)})
 		}
 	}
 
