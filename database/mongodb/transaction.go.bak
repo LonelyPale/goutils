@@ -4,6 +4,7 @@ package mongodb
 
 import (
 	"context"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -33,42 +34,6 @@ func (t *Transaction) Rollback() error {
 
 // 自动执行事务，简化使用过程。
 func (t *Transaction) Run(ctx context.Context, fn func(sctx mongo.SessionContext) error) error {
-	if ctx == nil {
-		var cancel context.CancelFunc
-		ctx, cancel = t.client.GetContext()
-		defer cancel()
-	}
-
-	opts := options.Session().SetDefaultReadPreference(readpref.Primary())
-	session, err := t.client.StartSession(opts)
-	if err != nil {
-		return err
-	}
-
-	t.session = session
-	defer session.EndSession(ctx)
-
-	_, err = session.WithTransaction(ctx, func(sessionContext mongo.SessionContext) (i interface{}, e error) {
-		t.sessionContext = sessionContext
-
-		defer func() {
-			if r := recover(); r != nil || e != nil {
-				e = errors.Errors(e, errors.UnknownError(r))
-				//debug.PrintStack()
-			}
-		}()
-
-		if e = fn(sessionContext); e != nil {
-			return nil, e
-		}
-
-		return nil, nil
-	})
-
-	return err
-}
-
-func (t *Transaction) RunV1(ctx context.Context, fn func(sctx mongo.SessionContext) error) error {
 	if ctx == nil {
 		var cancel context.CancelFunc
 		ctx, cancel = t.client.GetContext()
