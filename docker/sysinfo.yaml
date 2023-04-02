@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+
+  sysinfo:
+    image: sysinfo:latest
+    container_name: sysinfo
+    restart: on-failure
+    command: [ ]
+    network_mode: host

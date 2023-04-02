@@ -21,6 +21,15 @@ git tag -a v0.0.7 -m "goutils-v0.0.7"
 git push origin --tags
 ```
 
+## Docker
+
+```shell
+docker build -t sysinfo:latest -f goutils/docker/sysinfo.Dockerfile .
+docker-compose -p sysinfo -f goutils/docker/sysinfo.yaml up -d
+curl localhost:9999/sys-info
+
+```
+
 ## License
 
 This project is under MIT License. See the [LICENSE](LICENSE) file for the full license text.
