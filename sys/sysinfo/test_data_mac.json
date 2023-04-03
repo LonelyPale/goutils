@@ -1,0 +1,152 @@
+{
+  "code": 0,
+  "msg": "OK",
+  "data": {
+    "cpu": {
+      "used_percent": 18.546365914596844
+    },
+    "mem": {
+      "total": 8589934592,
+      "available": 2221084672,
+      "used": 6368849920,
+      "free": 315863040,
+      "used_percent": 74.1431713104248
+    },
+    "disk": {
+      "total": 1253535516672,
+      "free": 1206198769664,
+      "used": 47336747008,
+      "used_percent": 96.22374106051068,
+      "partitions": [
+        {
+          "device": "/dev/disk1s5s1",
+          "mountpoint": "/",
+          "fstype": "apfs",
+          "opts": [
+            "ro",
+            "journaled",
+            "multilabel"
+          ],
+          "path": "/",
+          "total": 250685575168,
+          "free": 9456447488,
+          "used": 241229127680,
+          "used_percent": 96.22776560571438
+        },
+        {
+          "device": "devfs",
+          "mountpoint": "/dev",
+          "fstype": "devfs",
+          "opts": [
+            "rw",
+            "nobrowse",
+            "multilabel"
+          ],
+          "path": "/dev",
+          "total": 202752,
+          "free": 0,
+          "used": 202752,
+          "used_percent": 100
+        },
+        {
+          "device": "/dev/disk1s4",
+          "mountpoint": "/System/Volumes/VM",
+          "fstype": "apfs",
+          "opts": [
+            "rw",
+            "noexec",
+            "nobrowse",
+            "journaled",
+            "multilabel",
+            "noatime"
+          ],
+          "path": "/System/Volumes/VM",
+          "total": 250685575168,
+          "free": 9456447488,
+          "used": 241229127680,
+          "used_percent": 96.22776560571438
+        },
+        {
+          "device": "/dev/disk1s2",
+          "mountpoint": "/System/Volumes/Preboot",
+          "fstype": "apfs",
+          "opts": [
+            "rw",
+            "nobrowse",
+            "journaled",
+            "multilabel"
+          ],
+          "path": "/System/Volumes/Preboot",
+          "total": 250685575168,
+          "free": 9456447488,
+          "used": 241229127680,
+          "used_percent": 96.22776560571438
+        },
+        {
+          "device": "/dev/disk1s6",
+          "mountpoint": "/System/Volumes/Update",
+          "fstype": "apfs",
+          "opts": [
+            "rw",
+            "nobrowse",
+            "journaled",
+            "multilabel"
+          ],
+          "path": "/System/Volumes/Update",
+          "total": 250685575168,
+          "free": 9456447488,
+          "used": 241229127680,
+          "used_percent": 96.22776560571438
+        },
+        {
+          "device": "/dev/disk1s1",
+          "mountpoint": "/System/Volumes/Data",
+          "fstype": "apfs",
+          "opts": [
+            "rw",
+            "nobrowse",
+            "journaled",
+            "multilabel"
+          ],
+          "path": "/System/Volumes/Data",
+          "total": 250685575168,
+          "free": 9456447488,
+          "used": 241229127680,
+          "used_percent": 96.22776560571438
+        },
+        {
+          "device": "map auto_home",
+          "mountpoint": "/System/Volumes/Data/home",
+          "fstype": "autofs",
+          "opts": [
+            "rw",
+            "nobrowse",
+            "automounted",
+            "multilabel"
+          ],
+          "path": "/System/Volumes/Data/home",
+          "total": 0,
+          "free": 0,
+          "used": 0,
+          "used_percent": 0
+        },
+        {
+          "device": "/dev/disk2s1",
+          "mountpoint": "/Volumes/ClashX",
+          "fstype": "hfs",
+          "opts": [
+            "ro",
+            "nosuid",
+            "multilabel",
+            "nodev"
+          ],
+          "path": "/Volumes/ClashX",
+          "total": 107438080,
+          "free": 54509568,
+          "used": 52928512,
+          "used_percent": 49.26420129622569
+        }
+      ]
+    }
+  }
+}
