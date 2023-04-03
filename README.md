@@ -34,6 +34,7 @@ curl localhost:9999/sys-info
 docker exec -it sysinfo sh
 docker stop sysinfo && docker rm sysinfo
 docker rmi sysinfo:latest
+docker builder prune
 
 ```
 

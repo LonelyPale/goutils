@@ -8,8 +8,8 @@ services:
     restart: on-failure
     command: [ ]
     volumes:
-      - /proc:/proc:ro
-      - /sys:/sys:ro
-      - /dev:/dev:ro
-      - /etc:/etc:ro
+      - /proc:/proc
+      - /sys:/sys
+      - /dev:/dev
+      - /etc:/etc
     network_mode: host
