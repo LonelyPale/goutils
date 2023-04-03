@@ -1,0 +1,38 @@
+{
+  "code": 0,
+  "msg": "OK",
+  "data": {
+    "cpu": {
+      "used_percent": 1.095461547317065
+    },
+    "mem": {
+      "total": 134986018816,
+      "available": 131514605568,
+      "used": 2190946304,
+      "free": 1544495104,
+      "used_percent": 1.623091282502737
+    },
+    "disk": {
+      "total": 234622398464,
+      "free": 53150269440,
+      "used": 169479409664,
+      "used_percent": 23.87384721296355,
+      "partitions": [
+        {
+          "device": "/dev/sdi2",
+          "mountpoint": "/",
+          "fstype": "ext4",
+          "opts": [
+            "rw",
+            "relatime"
+          ],
+          "path": "/",
+          "total": 234622398464,
+          "free": 169479409664,
+          "used": 53150269440,
+          "used_percent": 23.87384721296355
+        }
+      ]
+    }
+  }
+}

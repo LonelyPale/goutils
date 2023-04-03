@@ -1,0 +1,14 @@
+[Unit]
+Description=sysinfo Http Server Service
+
+[Service]
+Type=simple
+User=nobody
+Restart=on-failure
+RestartSec=5s
+ExecStart=/usr/local/bin/sysinfod
+ExecReload=/usr/local/bin/sysinfod
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=sysinfo Http Server Service # 服务描述
+
+[Service]
+Type=simple # 不论进程是否启动成功，systemctl start 都执行成功
+User=nobody
+Restart=on-failure # on-failure 表示仅在服务进程异常退出时重启
+RestartSec=5s # 设置在重启服务前暂停多长时间
+ExecStart=/usr/local/bin/sysinfod # 根据自己的路径调整
+ExecReload=/usr/local/bin/sysinfod # 这里也调整路径
+LimitNOFILE=1048576 # 最大打开文件数
+
+[Install]
+WantedBy=multi-user.target

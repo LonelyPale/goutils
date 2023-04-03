@@ -3,80 +3,76 @@
   "msg": "OK",
   "data": {
     "cpu": {
-      "used_percent": 0.0938087272561685
+      "used_percent": 0.0156225589897075
     },
     "mem": {
-      "total": 134986018816,
-      "available": 131512422400,
-      "used": 2193125376,
-      "free": 1623666688,
-      "used_percent": 1.6247055770934753
+      "total": 66927198208,
+      "available": 56834850816,
+      "used": 3298885632,
+      "free": 60351053824,
+      "used_percent": 4.929065791380573
     },
     "disk": {
-      "total": 938489593856,
-      "free": 212565458944,
-      "used": 677953257472,
-      "used_percent": 23.869847429989495,
+      "total": 4334269288448,
+      "free": 47865901056,
+      "used": 4066124414976,
+      "used_percent": 1.1634908538668443,
       "partitions": [
         {
-          "device": "/dev/sdi2",
-          "mountpoint": "/data",
+          "device": "/dev/dm-0",
+          "mountpoint": "/",
           "fstype": "ext4",
           "opts": [
             "rw",
-            "relatime",
-            "bind"
+            "relatime"
           ],
-          "path": "/data",
-          "total": 234622398464,
-          "free": 169488314368,
-          "used": 53141364736,
-          "used_percent": 23.869847429989495
+          "path": "/",
+          "total": 52576092160,
+          "free": 35535601664,
+          "used": 14339358720,
+          "used_percent": 28.750616761592656
         },
         {
-          "device": "/dev/sdi2",
-          "mountpoint": "/etc/resolv.conf",
+          "device": "/dev/sda2",
+          "mountpoint": "/boot",
           "fstype": "ext4",
           "opts": [
             "rw",
-            "relatime",
-            "bind"
+            "relatime"
           ],
-          "path": "/etc/resolv.conf",
-          "total": 234622398464,
-          "free": 169488314368,
-          "used": 53141364736,
-          "used_percent": 23.869847429989495
+          "path": "/boot",
+          "total": 1023303680,
+          "free": 821657600,
+          "used": 131182592,
+          "used_percent": 13.767533433350385
         },
         {
-          "device": "/dev/sdi2",
-          "mountpoint": "/etc/hostname",
-          "fstype": "ext4",
+          "device": "/dev/sda1",
+          "mountpoint": "/boot/efi",
+          "fstype": "vfat",
           "opts": [
             "rw",
-            "relatime",
-            "bind"
+            "relatime"
           ],
-          "path": "/etc/hostname",
-          "total": 234622398464,
-          "free": 169488314368,
-          "used": 53141364736,
-          "used_percent": 23.869847429989495
+          "path": "/boot/efi",
+          "total": 209489920,
+          "free": 203505664,
+          "used": 5984256,
+          "used_percent": 2.8565842213315085
         },
         {
-          "device": "/dev/sdi2",
-          "mountpoint": "/etc/hosts",
+          "device": "/dev/dm-2",
+          "mountpoint": "/home",
           "fstype": "ext4",
           "opts": [
             "rw",
-            "relatime",
-            "bind"
+            "relatime"
           ],
-          "path": "/etc/hosts",
-          "total": 234622398464,
-          "free": 169488314368,
-          "used": 53141364736,
-          "used_percent": 23.869847429989495
+          "path": "/home",
+          "total": 4280460402688,
+          "free": 4029563650048,
+          "used": 33389375488,
+          "used_percent": 0.8218006774418749
         }
       ]
     }
