@@ -42,6 +42,9 @@ systemctl daemon-reload
 systemctl start sysinfo
 systemctl status sysinfo
 
+systemctl is-enabled sysinfo
+systemctl enable sysinfo
+
 #失败时查看系统日志
 tail -f /var/log/messages
 
