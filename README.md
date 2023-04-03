@@ -22,12 +22,26 @@ git push origin --tags
 ```
 
 ## Docker
-
 ```shell
-docker build -t sysinfo:latest -f goutils/docker/sysinfo.Dockerfile .
-docker-compose -p sysinfo -f goutils/docker/sysinfo.yaml up -d
+docker build -t sysinfo:latest -f docker/sysinfo.Dockerfile . \
+  --network=host \
+  --build-arg "HTTP_PROXY=http://127.0.0.1:7890" \
+  --build-arg "HTTPS_PROXY=http://127.0.0.1:7890"
+
+docker-compose -p sysinfo -f docker/sysinfo.yaml up -d
 curl localhost:9999/sys-info
 
+docker exec -it sysinfo sh
+docker stop sysinfo && docker rm sysinfo
+docker rmi sysinfo:latest
+
+```
+
+## Go Test
+
+```shell
+go test -v sys/sysinfo/sysinfo_test.go -test.run Test
+go test -v -test.run Test
 ```
 
 ## License

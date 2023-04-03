@@ -1,0 +1,84 @@
+{
+  "code": 0,
+  "msg": "OK",
+  "data": {
+    "cpu": {
+      "used_percent": 0.0938087272561685
+    },
+    "mem": {
+      "total": 134986018816,
+      "available": 131512422400,
+      "used": 2193125376,
+      "free": 1623666688,
+      "used_percent": 1.6247055770934753
+    },
+    "disk": {
+      "total": 938489593856,
+      "free": 212565458944,
+      "used": 677953257472,
+      "used_percent": 23.869847429989495,
+      "partitions": [
+        {
+          "device": "/dev/sdi2",
+          "mountpoint": "/data",
+          "fstype": "ext4",
+          "opts": [
+            "rw",
+            "relatime",
+            "bind"
+          ],
+          "path": "/data",
+          "total": 234622398464,
+          "free": 169488314368,
+          "used": 53141364736,
+          "used_percent": 23.869847429989495
+        },
+        {
+          "device": "/dev/sdi2",
+          "mountpoint": "/etc/resolv.conf",
+          "fstype": "ext4",
+          "opts": [
+            "rw",
+            "relatime",
+            "bind"
+          ],
+          "path": "/etc/resolv.conf",
+          "total": 234622398464,
+          "free": 169488314368,
+          "used": 53141364736,
+          "used_percent": 23.869847429989495
+        },
+        {
+          "device": "/dev/sdi2",
+          "mountpoint": "/etc/hostname",
+          "fstype": "ext4",
+          "opts": [
+            "rw",
+            "relatime",
+            "bind"
+          ],
+          "path": "/etc/hostname",
+          "total": 234622398464,
+          "free": 169488314368,
+          "used": 53141364736,
+          "used_percent": 23.869847429989495
+        },
+        {
+          "device": "/dev/sdi2",
+          "mountpoint": "/etc/hosts",
+          "fstype": "ext4",
+          "opts": [
+            "rw",
+            "relatime",
+            "bind"
+          ],
+          "path": "/etc/hosts",
+          "total": 234622398464,
+          "free": 169488314368,
+          "used": 53141364736,
+          "used_percent": 23.869847429989495
+        }
+      ]
+    }
+  }
+}
