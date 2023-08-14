@@ -36,7 +36,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/panjf2000/ants/v2 v2.7.1
+	github.com/panjf2000/ants/v2 v2.8.1
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v3 v3.23.3
 	github.com/sirupsen/logrus v1.8.1
