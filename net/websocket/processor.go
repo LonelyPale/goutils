@@ -13,6 +13,7 @@ import (
 var DefaultLogger Logger = log.New()
 
 type Logger interface {
+	Info(args ...interface{})
 	Error(args ...interface{})
 }
 
@@ -113,11 +114,23 @@ func defaultProcessMessage(i interface{}, conn *Conn, hub Hub) {
 		}
 
 		handler.Invoke(conn, msg)
-
-		//case websocket.BinaryMessage:
-		//case websocket.CloseMessage:
-		//case websocket.PingMessage:
-		//case websocket.PongMessage:
-		//default:
+	case websocket.BinaryMessage:
+		if len(ws.Data) > 1024 {
+			DefaultLogger.Error("WebSocket.BinaryMessage:", string(ws.Data[:1024]))
+		} else {
+			DefaultLogger.Error("WebSocket.BinaryMessage:", string(ws.Data))
+		}
+	case websocket.CloseMessage:
+		DefaultLogger.Error("WebSocket.CloseMessage:", string(ws.Data))
+	case websocket.PingMessage:
+		DefaultLogger.Error("WebSocket.PingMessage:", string(ws.Data))
+	case websocket.PongMessage:
+		DefaultLogger.Error("WebSocket.PongMessage:", string(ws.Data))
+	default:
+		if len(ws.Data) > 1024 {
+			DefaultLogger.Error("WebSocket: invalid message type:", ws.Type, string(ws.Data[:1024]))
+		} else {
+			DefaultLogger.Error("WebSocket: invalid message type:", ws.Type, string(ws.Data))
+		}
 	}
 }

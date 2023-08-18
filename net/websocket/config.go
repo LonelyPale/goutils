@@ -19,8 +19,8 @@ func DefaultConfig() *Config {
 	return &Config{
 		Enable:            true,
 		Origin:            true,
-		ReadDeadline:      0,
-		WriteDeadline:     0,
+		ReadDeadline:      10,
+		WriteDeadline:     10,
 		ReadBufferSize:    20480,
 		WriteBufferSize:   20480,
 		MaxMessageSize:    65535,

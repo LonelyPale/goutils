@@ -23,6 +23,22 @@ func TestWebSocket(t *testing.T) {
 	engine.Handle(http.MethodGet, "/ws1", container1.OpenConnGin)
 	engine.Handle(http.MethodGet, "/ws2", container2.OpenConnGin)
 
+	//go func() {
+	//	for {
+	//		time.Sleep(time.Second * 3)
+	//		msg := &Message{
+	//			Type: "test.push",
+	//			SN:   0,
+	//			Code: 0,
+	//			Msg:  "ok",
+	//			Data: fmt.Sprintf("你好，杭州。%s", time.Now().Format(time.DateTime)),
+	//		}
+	//		if err := container1.Send("test.push", msg); err != nil {
+	//			t.Error(err)
+	//		}
+	//	}
+	//}()
+
 	if err := engine.Run(); err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +59,7 @@ func testContainer2() *Container {
 	return container
 }
 
-func testOtherHandler(conn *Conn, message *Message, num *string) {
+func testOtherHandler(conn *Conn, message *Message, num string) {
 	log.Println("test.other:", conn, message, num)
 
 	sendWSMessage(conn)

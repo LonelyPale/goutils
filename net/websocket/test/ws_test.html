@@ -5,7 +5,8 @@
     //let ws = new WebSocket("ws://localhost:8080/v1/api/wsping", ["token#" + token, "topics#" + topics]);
 
     function ws1() {
-        let ws = new WebSocket("ws://localhost:8080/ws1", ["sid#123.&", "token#abc"]);
+        // let ws = new WebSocket("ws://localhost:8080/ws1", ["sid#123.&", "token#abc"]);
+        let ws = new WebSocket("ws://localhost:8080/ws1", "test.push");
 
         //连接打开时触发
         ws.onopen = function (evt) {
@@ -35,6 +36,12 @@
         //连接打开时触发
         ws.onopen = function (evt) {
             console.log("ws2:", "Connection open ...");
+
+            let msg1 = {
+                type: 'test.other',
+                data: '888',
+            }
+            ws.send(JSON.stringify(msg1));
 
             let msg2 = {
                 type: 'test.struct',

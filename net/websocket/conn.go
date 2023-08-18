@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -12,18 +13,26 @@ import (
 
 const DefaultWebSocketKey = "WebSocket"
 
+const (
+	writeWait  = 10 * time.Second    // Time allowed to write a message to the peer.
+	pongWait   = 60 * time.Second    // Time allowed to read the next pong message from the peer.
+	pingPeriod = (pongWait * 9) / 10 // Send pings to peer with this period. Must be less than pongWait.
+)
+
 var (
 	ErrConnClosed = errors.New("websocket connection closed")
 )
 
 type Conn struct {
-	config    *Config         //配置
-	conn      *websocket.Conn //WS连接
-	in        chan *WSMessage //待读管道
-	out       chan *WSMessage //待写管道
-	quit      chan struct{}   //退出信号
-	quitMu    sync.RWMutex    //退出信号锁
-	processor Processor       //消息处理器
+	config       *Config         //配置
+	conn         *websocket.Conn //WS连接
+	in           chan *WSMessage //待读管道
+	out          chan *WSMessage //待写管道
+	quit         chan struct{}   //退出信号
+	quitMu       sync.RWMutex    //退出信号锁
+	processor    Processor       //消息处理器
+	protocol     string          //子协议
+	pingErrCount int             //心跳错误统计
 }
 
 func NewConn(config *Config) *Conn {
@@ -35,7 +44,7 @@ func NewConn(config *Config) *Conn {
 	}
 }
 
-func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, processor Processor) error {
+func (c *Conn) Open(w http.ResponseWriter, r *http.Request, processor Processor) error {
 	var upGrader = websocket.Upgrader{
 		ReadBufferSize:  c.config.ReadBufferSize,   //读缓冲区
 		WriteBufferSize: c.config.WriteBufferSize,  //写缓冲区
@@ -57,14 +66,20 @@ func (c *Conn) Open(w http.ResponseWriter, r *http.Request, h http.Header, proce
 	//header := http.Header{"Sec-WebSocket-Protocol": []string{"topics#" + topicsStr}}
 	//wsConn, err := upGrader.Upgrade(ctx.Writer, ctx.Request, header)
 
-	wsConn, err := upGrader.Upgrade(w, r, h)
+	wsConn, err := upGrader.Upgrade(w, r, nil)
 	if err != nil {
 		return err
 	}
 
+	defaultPingHandler := wsConn.PingHandler()
+	wsConn.SetPingHandler(func(appData string) error {
+		return defaultPingHandler("pong")
+	})
+
 	c.conn = wsConn
 	c.conn.SetReadLimit(c.config.MaxMessageSize)
 	c.processor = processor
+	c.protocol = r.Header.Get("Sec-Websocket-Protocol")
 
 	go c.ReadLoop()
 	go c.WriteLoop()
@@ -145,6 +160,7 @@ func (c *Conn) read() (msg *WSMessage, err error) {
 	}
 }
 
+// WriteLoop
 // 1、当conn关闭后，out管道中还有没处理完的消息(需要业务端自己处理没有发送的消息)；
 // 2、当msg已发送到client后，需要callback回写数据库的情况(特殊情况业务端自己处理)；
 func (c *Conn) WriteLoop() {
@@ -217,5 +233,27 @@ func (c *Conn) Write(msg *WSMessage) error {
 		return ErrConnClosed
 	case c.out <- msg:
 		return nil
+	}
+}
+
+func (c *Conn) ping() {
+	defer c.processor.OnClose()
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-c.quit:
+			return
+		case <-ticker.C:
+			if err := c.conn.WriteControl(websocket.PingMessage, []byte("ping"), time.Now().Add(writeWait)); err != nil {
+				DefaultLogger.Error(fmt.Errorf("websocket ping error: %w", err))
+				c.pingErrCount++
+				if c.pingErrCount >= 3 {
+					return
+				}
+				break
+			}
+			c.pingErrCount = 0
+		}
 	}
 }
