@@ -80,8 +80,9 @@ func (Model) BeforeUpdate(ctx context.Context, filter interface{}, updater inter
 	}
 
 	set, ok := up[SetKey]
-	if !ok {
-		return errors.New("not valid Updater[$set]")
+	if !ok || set == nil {
+		set = Updater{}
+		up[SetKey] = set
 	}
 
 	if _, ok := set.(Updater); ok {
