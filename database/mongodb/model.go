@@ -27,7 +27,7 @@ type Service interface {
 */
 // todo: doc可优化为接口类型,如上例
 type Model struct {
-	ID         types.ObjectID `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,len=12" vCreate:"isdefault" vUpdate:"required" vDelete:"required" vFind:"required" label:"编号"`
+	ID         types.ObjectID `bson:"_id,omitempty" json:"id,omitempty" validate:"omitempty,len=12" vCreate:"isdefault|required" vUpdate:"required" vDelete:"required" vFind:"required" label:"编号"`
 	CreateTime types.Time     `bson:"createTime,omitempty" json:"createTime,omitempty" validate:"omitempty" label:"创建时间"`
 	UpdateTime types.Time     `bson:"updateTime,omitempty" json:"updateTime,omitempty" validate:"omitempty" label:"更新时间"`
 
@@ -39,13 +39,13 @@ func NewModel(doc interface{}, coll *Collection) Model {
 	return Model{doc: doc, coll: coll}
 }
 
-//初始化文档和集合
+// 初始化文档和集合
 func (m *Model) Init(doc interface{}, coll *Collection) {
 	m.doc = doc
 	m.coll = coll
 }
 
-//是否已初始化
+// 是否已初始化
 func (m Model) IsInited() bool {
 	return m.doc != nil && m.coll != nil
 }
