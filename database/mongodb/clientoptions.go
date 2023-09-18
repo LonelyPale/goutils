@@ -27,11 +27,11 @@ type ClientOptions struct {
 func NewClientOptions(uri string) *ClientOptions {
 	clientOptions := &ClientOptions{
 		URI:                uri,
-		Timeout:            10 * time.Second,
+		Timeout:            60 * time.Second,
 		EnableTransaction:  false,
 		DefaultDBName:      "test",
-		MaxPoolSize:        10,
-		MinPoolSize:        3,
+		MaxPoolSize:        50,
+		MinPoolSize:        10,
 		mongoClientOptions: options.Client(),
 	}
 	clientOptions.Apply()
