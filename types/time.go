@@ -12,6 +12,7 @@ import (
 var (
 	UseLocalTimeZone  = true                  //是否使用本地时区
 	DefaultTimeFormat = "2006-01-02 15:04:05" //默认时间格式化字符串
+	LocalTimeZone, _  = time.LoadLocation("Asia/Shanghai")
 )
 
 // Time extension time
@@ -43,7 +44,8 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	var err error
 	switch UseLocalTimeZone {
 	case true:
-		now, err = time.ParseInLocation(`"`+DefaultTimeFormat+`"`, string(data), time.Local)
+		//now, err = time.ParseInLocation(`"`+DefaultTimeFormat+`"`, string(data), time.Local)
+		now, err = time.ParseInLocation(`"`+DefaultTimeFormat+`"`, string(data), LocalTimeZone)
 	case false:
 		now, err = time.Parse(`"`+DefaultTimeFormat+`"`, string(data))
 	}
