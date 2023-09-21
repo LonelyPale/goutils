@@ -27,7 +27,7 @@ const (
 	ResultKey      = "Result"
 )
 
-const DefaultTimeout = 10 * time.Second
+const DefaultTimeout = 60 * time.Second
 
 func TimeoutContext(ts ...time.Duration) (context.Context, context.CancelFunc) {
 	if len(ts) > 0 {
