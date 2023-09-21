@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func TestTime(t *testing.T) {
+	fmt.Println("Local:", time.Local.String())
+
 	testTimeJson(t)
 	testTimeBson(t)
 	//testTimeBsonMarshal(t) //有错误，未支持
