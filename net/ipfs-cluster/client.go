@@ -19,6 +19,7 @@ type Config struct {
 
 type Client struct {
 	client.Client
+	Cfg *Config
 }
 
 func NewClient(conf *Config) (*Client, error) {
@@ -34,7 +35,10 @@ func NewClient(conf *Config) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{cli}, nil
+	return &Client{
+		Client: cli,
+		Cfg:    conf,
+	}, nil
 }
 
 func (c *Client) Pin(cid string) (api.Pin, error) {
