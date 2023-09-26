@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	ID            string `value:"${ipfs-cluster.id:=}"`
 	Host          string `value:"${ipfs-cluster.host:=localhost}"`
 	Port          string `value:"${ipfs-cluster.port:=9094}"`
 	ProxyAddrHost string `value:"${ipfs-cluster.proxy_addr_host:=localhost}"`
