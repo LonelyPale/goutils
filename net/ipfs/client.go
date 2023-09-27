@@ -13,13 +13,20 @@ import (
 
 type Client struct {
 	*shell.Shell
+	Cfg *Config
 }
 
-func NewClient(urls ...string) *Client {
-	if len(urls) > 0 && len(urls[0]) > 0 {
-		return &Client{shell.NewShell(urls[0])}
+func NewClient(cfg *Config) *Client {
+	if cfg != nil && cfg.URI != "" {
+		return &Client{
+			Shell: shell.NewShell(cfg.URI),
+			Cfg:   cfg,
+		}
 	} else {
-		return &Client{shell.NewLocalShell()}
+		return &Client{
+			Shell: shell.NewLocalShell(),
+			Cfg:   cfg,
+		}
 	}
 }
 
