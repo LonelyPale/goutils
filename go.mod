@@ -48,7 +48,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	go.mongodb.org/mongo-driver v1.11.3
 	golang.org/x/crypto v0.9.0
-	golang.org/x/image v0.6.0 // indirect
+	golang.org/x/image v0.10.0 // indirect
 	google.golang.org/grpc v1.45.0
 )
 
