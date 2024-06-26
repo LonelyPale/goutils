@@ -47,8 +47,8 @@ require (
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	go.mongodb.org/mongo-driver v1.11.3
-	golang.org/x/crypto v0.17.0
-	golang.org/x/image v0.6.0 // indirect
+	golang.org/x/crypto v0.23.0
+	golang.org/x/image v0.18.0 // indirect
 	google.golang.org/grpc v1.45.0
 )
 
